@@ -1,0 +1,46 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>V10 지도+유튜브</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:#111;color:#eee;font-family:sans-serif;overflow:hidden}
+#wrap{display:flex;height:100vh}.pane{display:flex;flex-direction:column;min-width:0;height:100%}
+#L{flex:0 0 50%}#R{flex:1}#bar{width:18px;background:#333;cursor:col-resize;touch-action:none}
+.tb{display:flex;gap:8px;padding:8px;background:#1c1c1c;flex-wrap:wrap}
+input{flex:1;min-width:120px;font-size:22px;padding:12px;border-radius:10px;border:0}
+button{font-size:20px;padding:12px 18px;border-radius:10px;border:0;background:#3a6df0;color:#fff}
+button.g{background:#444}#map{flex:1}#yt{flex:1;position:relative;background:#000}
+#yt iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+#res{position:absolute;inset:0;overflow:auto;background:#181818;display:none;padding:8px}
+.it{display:flex;gap:10px;padding:8px;border-bottom:1px solid #333;font-size:20px;align-items:center}.it img{width:200px;border-radius:8px}
+#pl{position:absolute;z-index:999;top:120px;left:8px;right:8px;background:#222;max-height:50%;overflow:auto}
+#pl div{padding:14px;font-size:19px;border-bottom:1px solid #333}
+</style></head><body><div id="wrap">
+<div class="pane" id="L"><div class="tb"><input id="q" placeholder="장소 검색 (예: 강남역)"><button onclick="sp()">검색</button><button class="g" onclick="me()">📍내 위치</button></div>
+<div class="tb"><button class="g" onclick="ratio(50)">50:50</button><button class="g" onclick="ratio(60)">60:40</button><button class="g" onclick="ratio(40)">40:60</button></div>
+<div id="pl" hidden></div><div id="map"></div></div>
+<div id="bar"></div>
+<div class="pane" id="R"><div class="tb"><input id="v" placeholder="유튜브 링크/ID 또는 검색어"><button onclick="go()">재생/검색</button></div>
+<div id="yt"><div id="res"></div></div></div></div>
+<script>
+const S=localStorage,API=['https://api.piped.private.coffee','https://pipedapi.kavin.rocks','https://pipedapi.adminforge.de'];
+let st=JSON.parse(S.v10||'{}');const sv=()=>S.v10=JSON.stringify(st);
+const map=L.map('map').setView(st.c||[37.5665,126.978],st.z||14);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(map);
+let mk=null;function pin(a,b,t){if(mk)map.removeLayer(mk);mk=L.marker([a,b]).addTo(map).bindPopup(t||'').openPopup();map.setView([a,b],16)}
+map.on('moveend',()=>{const c=map.getCenter();st.c=[c.lat,c.lng];st.z=map.getZoom();sv()});
+q.onkeydown=e=>{if(e.key=='Enter')sp()};v.onkeydown=e=>{if(e.key=='Enter')go()};
+async function sp(){const s=q.value.trim();if(!s)return;const r=await (await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=8&accept-language=ko&countrycodes=kr&q='+encodeURIComponent(s))).json();
+pl.innerHTML='';if(!r.length){pl.innerHTML='<div>결과 없음</div>'}r.forEach(x=>{const d=document.createElement('div');d.textContent=x.display_name;d.onclick=()=>{pin(+x.lat,+x.lon,x.display_name);pl.hidden=true};pl.appendChild(d)});pl.hidden=false}
+function me(){navigator.geolocation.getCurrentPosition(p=>pin(p.coords.latitude,p.coords.longitude,'내 위치'),e=>alert('위치 권한 실패: '+e.message),{enableHighAccuracy:true})}
+function vid(s){s=s.trim();if(/^[\w-]{11}$/.test(s))return s;const m=s.match(/(?:v=|youtu\.be\/|shorts\/|live\/|embed\/)([\w-]{11})/);return m&&m[1]}
+function play(id){res.style.display='none';yt.querySelectorAll('iframe').forEach(f=>f.remove());const f=document.createElement('iframe');f.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';f.allowFullscreen=true;
+f.src='https://www.youtube-nocookie.com/embed/'+id+'?autoplay=1&playsinline=1&rel=0';yt.appendChild(f);st.v=id;sv()}
+async function go(){const s=v.value;const id=vid(s);if(id)return play(id);if(!s.trim())return;res.style.display='block';res.innerHTML='<div class="it">검색 중…</div>';
+for(const a of API){try{const j=await (await fetch(a+'/search?filter=videos&q='+encodeURIComponent(s))).json();if(!j.items)continue;res.innerHTML='';
+j.items.filter(x=>x.url).forEach(x=>{const d=document.createElement('div');d.className='it';d.innerHTML='<img src="'+x.thumbnail+'"><span></span>';d.lastChild.textContent=x.title;d.onclick=()=>play(x.url.split('v=')[1]);res.appendChild(d)});return}catch(e){}}
+res.innerHTML='<div class="it">검색 실패 — 유튜브 링크를 붙여넣어 주세요</div>'}
+function ratio(p){Lp.style.flex='0 0 '+p+'%';st.r=p;sv();setTimeout(()=>map.invalidateSize(),50)}const Lp=document.getElementById('L');if(st.r)ratio(st.r);
+let dr=false;bar.onpointerdown=e=>{dr=true;bar.setPointerCapture(e.pointerId)};bar.onpointermove=e=>{if(dr)ratio(Math.min(85,Math.max(15,e.clientX/innerWidth*100)))};bar.onpointerup=()=>dr=false;
+if(st.v)play(st.v);
+</script></body></html>
