@@ -1,7 +1,6 @@
 <!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>V10 지도+유튜브</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=pjnsybl1fs&submodules=geocoder"></script>
 <style>
 *{box-sizing:border-box}html,body{margin:0;height:100%;background:#111;color:#eee;font-family:sans-serif;overflow:hidden}
 #wrap{display:flex;height:100vh}.pane{display:flex;flex-direction:column;min-width:0;height:100%}
@@ -14,25 +13,49 @@ button.g{background:#444}#map{flex:1}#yt{flex:1;position:relative;background:#00
 #res{position:absolute;inset:0;overflow:auto;background:#181818;display:none;padding:8px}
 .it{display:flex;gap:10px;padding:8px;border-bottom:1px solid #333;font-size:20px;align-items:center}.it img{width:200px;border-radius:8px}
 #pl{position:absolute;z-index:999;top:120px;left:8px;right:8px;background:#222;max-height:50%;overflow:auto}
+.info{padding:8px 12px;font-size:20px;background:#0b3;color:#fff}.info.e{background:#a33}
 #pl div{padding:14px;font-size:19px;border-bottom:1px solid #333}
 </style></head><body><div id="wrap">
-<div class="pane" id="L"><div class="tb"><input id="q" placeholder="장소 검색 (예: 강남역)"><button onclick="sp()">검색</button><button class="g" onclick="me()">📍내 위치</button></div>
-<div class="tb"><button class="g" onclick="ratio(50)">50:50</button><button class="g" onclick="ratio(60)">60:40</button><button class="g" onclick="ratio(40)">40:60</button></div>
-<div id="pl" hidden></div><div id="map"></div></div>
+<div class="pane" id="L"><div class="tb"><input id="from" placeholder="출발지 (비우면 내 위치)"><button class="g" onclick="me()">📍</button></div>
+<div class="tb"><input id="q" placeholder="도착지 (장소/주소)"><button onclick="route()">길찾기</button><button class="g" onclick="sp()">검색</button></div>
+<div class="tb"><button class="g" onclick="ratio(50)">50:50</button><button class="g" onclick="ratio(60)">60:40</button><button class="g" onclick="ratio(40)">40:60</button><button class="g" onclick="setP()">⚙️</button></div>
+<div id="info" class="info" hidden></div><div id="pl" hidden></div><div id="map"></div></div>
 <div id="bar"></div>
 <div class="pane" id="R"><div class="tb"><input id="v" placeholder="유튜브 링크/ID 또는 검색어"><button onclick="go()">재생/검색</button></div>
 <div id="yt"><div id="res"></div></div></div></div>
 <script>
 const S=localStorage,API=['https://api.piped.private.coffee','https://pipedapi.kavin.rocks','https://pipedapi.adminforge.de'];
 let st=JSON.parse(S.v10||'{}');const sv=()=>S.v10=JSON.stringify(st);
-const map=L.map('map').setView(st.c||[37.5665,126.978],st.z||14);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(map);
-let mk=null;function pin(a,b,t){if(mk)map.removeLayer(mk);mk=L.marker([a,b]).addTo(map).bindPopup(t||'').openPopup();map.setView([a,b],16)}
-map.on('moveend',()=>{const c=map.getCenter();st.c=[c.lat,c.lng];st.z=map.getZoom();sv()});
-q.onkeydown=e=>{if(e.key=='Enter')sp()};v.onkeydown=e=>{if(e.key=='Enter')go()};
-async function sp(){const s=q.value.trim();if(!s)return;const r=await (await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=8&accept-language=ko&countrycodes=kr&q='+encodeURIComponent(s))).json();
-pl.innerHTML='';if(!r.length){pl.innerHTML='<div>결과 없음</div>'}r.forEach(x=>{const d=document.createElement('div');d.textContent=x.display_name;d.onclick=()=>{pin(+x.lat,+x.lon,x.display_name);pl.hidden=true};pl.appendChild(d)});pl.hidden=false}
-function me(){navigator.geolocation.getCurrentPosition(p=>pin(p.coords.latitude,p.coords.longitude,'내 위치'),e=>alert('위치 권한 실패: '+e.message),{enableHighAccuracy:true})}
+const PROXY=()=>(S.v10proxy||'').replace(/\/$/,'');function setP(){const p=prompt('길찾기 프록시 URL (Cloudflare Worker)',S.v10proxy||'');if(p!==null)S.v10proxy=p.trim()}
+const N=naver.maps;const map=new N.Map('map',{center:new N.LatLng(...(st.c||[37.5665,126.978])),zoom:st.z||15,zoomControl:true,zoomControlOptions:{position:N.Position.RIGHT_CENTER}});
+N.Event.addListener(map,'idle',()=>{const c=map.getCenter();st.c=[c.lat(),c.lng()];st.z=map.getZoom();sv()});
+let mk=null,mk2=null,line=null,here=null;
+function pin(a,b,t){if(mk)mk.setMap(null);mk=new N.Marker({position:new N.LatLng(a,b),map,title:t||''});map.setCenter(new N.LatLng(a,b));map.setZoom(16)}
+function msg(t,e){info.hidden=!t;info.textContent=t||'';info.className='info'+(e?' e':'')}
+q.onkeydown=e=>{if(e.key=='Enter')route()};v.onkeydown=e=>{if(e.key=='Enter')go()};
+function myPos(){return new Promise((ok,no)=>navigator.geolocation.getCurrentPosition(p=>{here=[p.coords.latitude,p.coords.longitude];ok(here)},e=>no(new Error('위치 권한 실패: '+e.message)),{enableHighAccuracy:true,timeout:15000}))}
+async function me(){try{const[a,b]=await myPos();pin(a,b,'내 위치');from.value=''}catch(e){msg(e.message,1)}}
+// 장소 찾기: 프록시 지오코딩(주소) → 네이버 JS 지오코더(주소) → Nominatim(장소명)
+async function find(s){
+ if(PROXY()){try{const j=await (await fetch(PROXY()+'/geocode?query='+encodeURIComponent(s)+(here?'&coordinate='+here[1]+','+here[0]:''))).json();
+  if(j.addresses&&j.addresses.length)return j.addresses.map(x=>({n:x.roadAddress||x.jibunAddress,lat:+x.y,lng:+x.x}))}catch(e){}}
+ try{const r=await new Promise(ok=>N.Service.geocode({query:s},(st2,res)=>ok(st2===N.Service.Status.OK?res.v2.addresses:[])));if(r.length)return r.map(x=>({n:x.roadAddress||x.jibunAddress,lat:+x.y,lng:+x.x}))}catch(e){}
+ const r=await (await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=8&accept-language=ko&countrycodes=kr&q='+encodeURIComponent(s))).json();
+ return r.map(x=>({n:x.display_name,lat:+x.lat,lng:+x.lon}))}
+function pick(list){return new Promise(ok=>{if(list.length==1)return ok(list[0]);pl.innerHTML='';list.forEach(x=>{const d=document.createElement('div');d.textContent=x.n;d.onclick=()=>{pl.hidden=true;ok(x)};pl.appendChild(d)});pl.hidden=false})}
+async function sp(){const s=q.value.trim();if(!s)return;const l=await find(s);if(!l.length)return msg('결과 없음',1);const x=await pick(l);pin(x.lat,x.lng,x.n);msg('')}
+async function route(){try{const s=q.value.trim();if(!s)return msg('도착지를 입력하세요',1);
+ let A;if(from.value.trim()){const l=await find(from.value.trim());if(!l.length)return msg('출발지 결과 없음',1);const x=await pick(l);A=[x.lat,x.lng]}else{msg('내 위치 확인 중…');A=await myPos()}
+ const l=await find(s);if(!l.length)return msg('도착지 결과 없음',1);const B=await pick(l);
+ if(!PROXY()){pin(B.lat,B.lng,B.n);return msg('길찾기 프록시 미설정(⚙️) — 도착지만 표시',1)}
+ msg('경로 검색 중…');const j=await (await fetch(PROXY()+'/driving?start='+A[1]+','+A[0]+'&goal='+B.lng+','+B.lat+'&option=traoptimal')).json();
+ if(j.code!==0)return msg('길찾기 실패: '+j.message,1);const R=j.route.traoptimal[0],sm=R.summary;
+ if(line)line.setMap(null);if(mk)mk.setMap(null);if(mk2)mk2.setMap(null);
+ const path=R.path.map(p=>new N.LatLng(p[1],p[0]));line=new N.Polyline({map,path,strokeColor:'#03c75a',strokeWeight:8,strokeOpacity:.9});
+ mk=new N.Marker({map,position:path[0]});mk2=new N.Marker({map,position:path[path.length-1]});
+ const b=new N.LatLngBounds();path.forEach(p=>b.extend(p));map.fitBounds(b,{top:40,right:40,bottom:40,left:40});
+ const m=Math.round(sm.duration/60000);msg('🚗 '+(sm.distance/1000).toFixed(1)+'km · '+(m>=60?Math.floor(m/60)+'시간 ':'')+m%60+'분 · 통행료 '+(sm.tollFare||0).toLocaleString()+'원 · 택시비 약 '+(sm.taxiFare||0).toLocaleString()+'원');
+}catch(e){msg('오류: '+e.message,1)}}
 function vid(s){s=s.trim();if(/^[\w-]{11}$/.test(s))return s;const m=s.match(/(?:v=|youtu\.be\/|shorts\/|live\/|embed\/)([\w-]{11})/);return m&&m[1]}
 function play(id){res.style.display='none';yt.querySelectorAll('iframe').forEach(f=>f.remove());const f=document.createElement('iframe');f.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';f.allowFullscreen=true;
 f.src='https://www.youtube-nocookie.com/embed/'+id+'?autoplay=1&playsinline=1&rel=0';yt.appendChild(f);st.v=id;sv()}
@@ -40,7 +63,7 @@ async function go(){const s=v.value;const id=vid(s);if(id)return play(id);if(!s.
 for(const a of API){try{const j=await (await fetch(a+'/search?filter=videos&q='+encodeURIComponent(s))).json();if(!j.items)continue;res.innerHTML='';
 j.items.filter(x=>x.url).forEach(x=>{const d=document.createElement('div');d.className='it';d.innerHTML='<img src="'+x.thumbnail+'"><span></span>';d.lastChild.textContent=x.title;d.onclick=()=>play(x.url.split('v=')[1]);res.appendChild(d)});return}catch(e){}}
 res.innerHTML='<div class="it">검색 실패 — 유튜브 링크를 붙여넣어 주세요</div>'}
-function ratio(p){Lp.style.flex='0 0 '+p+'%';st.r=p;sv();setTimeout(()=>map.invalidateSize(),50)}const Lp=document.getElementById('L');if(st.r)ratio(st.r);
+function ratio(p){Lp.style.flex='0 0 '+p+'%';st.r=p;sv();setTimeout(()=>N.Event.trigger(map,'resize'),50)}const Lp=document.getElementById('L');if(st.r)ratio(st.r);
 let dr=false;bar.onpointerdown=e=>{dr=true;bar.setPointerCapture(e.pointerId)};bar.onpointermove=e=>{if(dr)ratio(Math.min(85,Math.max(15,e.clientX/innerWidth*100)))};bar.onpointerup=()=>dr=false;
 if(st.v)play(st.v);
 </script></body></html>
