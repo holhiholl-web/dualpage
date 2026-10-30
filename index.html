@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>V10 지도+유튜브</title>
 <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=pjnsybl1fs&submodules=geocoder"></script>
 <style>
@@ -21,7 +21,9 @@ body.hide .tb,body.hide #info,body.hide #pl{display:none!important}
 #nav b{font-size:24px}#nav .r{display:flex;gap:6px;align-items:center;justify-content:space-between}#nav button{padding:8px 12px;font-size:18px}
 #navbtn{display:none;position:absolute;z-index:997;top:10px;left:10px;font-size:26px;padding:16px 30px;background:#03c75a;font-weight:bold;box-shadow:0 2px 10px #000}
 #map{position:relative}#mapw{flex:1;position:relative}#mapw #map{position:absolute;inset:0}
-</style></head><body><button id="tg" onclick="tgl()">▲</button><div id="wrap">
+#ver{position:fixed;z-index:1001;left:4px;bottom:4px;font-size:13px;color:#ccc;background:rgba(0,0,0,.6);padding:2px 6px;border-radius:6px;pointer-events:none}
+.info button{margin-left:10px;padding:10px 18px;font-size:22px;font-weight:bold;background:#fff;color:#0a7a35;border-radius:10px}
+</style></head><body><div id="ver">v12</div><button id="tg" onclick="tgl()">▲</button><div id="wrap">
 <div class="pane" id="L"><div class="tb"><input id="from" placeholder="출발지 (비우면 내 위치)"><button class="g" onclick="me()">📍</button></div>
 <div class="tb"><input id="q" placeholder="도착지 (장소/주소)"><button onclick="route()">길찾기</button><button class="g" onclick="sp()">검색</button></div>
 <div class="tb"><button class="g" onclick="ratio(50)">50:50</button><button class="g" onclick="ratio(60)">60:40</button><button class="g" onclick="ratio(40)">40:60</button><button class="g" onclick="setP()">⚙️</button></div>
@@ -62,8 +64,8 @@ async function drawRoute(A,B,nav){if(!nav)msg('경로 검색 중…');const j=aw
  if(line)line.setMap(null);if(mk)mk.setMap(null);if(mk2)mk2.setMap(null);
  const path=R.path.map(p=>new N.LatLng(p[1],p[0]));line=new N.Polyline({map,path,strokeColor:'#03c75a',strokeWeight:8,strokeOpacity:.9});
  mk=new N.Marker({map,position:path[0]});mk2=new N.Marker({map,position:path[path.length-1]});
- if(!nav){const b=new N.LatLngBounds();path.forEach(p=>b.extend(p));map.fitBounds(b,{top:40,right:40,bottom:40,left:40});navbtn.style.display='block'}
- const m=Math.round(sm.duration/60000);(nav?()=>{}:msg)('🚗 '+(sm.distance/1000).toFixed(1)+'km · '+(m>=60?Math.floor(m/60)+'시간 ':'')+m%60+'분 · 통행료 '+(sm.tollFare||0).toLocaleString()+'원 · 택시비 약 '+(sm.taxiFare||0).toLocaleString()+'원'+(DEST?' → '+DEST.n.split(',')[0]:''));}
+ if(!nav){const b=new N.LatLngBounds();path.forEach(p=>b.extend(p));map.fitBounds(b,{top:40,right:40,bottom:40,left:40});}
+ const m=Math.round(sm.duration/60000);(nav?()=>{}:msg)('🚗 '+(sm.distance/1000).toFixed(1)+'km · '+(m>=60?Math.floor(m/60)+'시간 ':'')+m%60+'분 · 통행료 '+(sm.tollFare||0).toLocaleString()+'원 · 택시비 약 '+(sm.taxiFare||0).toLocaleString()+'원'+(DEST?' → '+DEST.n.split(',')[0]:''));if(!nav){const nb=document.createElement('button');nb.textContent='▶ 안내 시작';nb.onclick=startNav;info.appendChild(nb);info.hidden=false}}
 function say(t){if(!SND||!window.speechSynthesis)return;const u=new SpeechSynthesisUtterance(t);u.lang='ko-KR';speechSynthesis.cancel();speechSynthesis.speak(u)}
 function tSnd(){SND=!SND;snd.textContent=SND?'🔊':'🔇';st.snd=SND;sv()}
 function fmt(m){return m>=1000?(m/1000).toFixed(1)+'km':Math.round(m/10)*10+'m'}
@@ -71,7 +73,7 @@ function startNav(){if(!RT)return;SND=st.snd!==false;snd.textContent=SND?'🔊':
  if(!mk3)mk3=new N.Marker({map,position:map.getCenter(),icon:{content:'<div style="width:22px;height:22px;border-radius:50%;background:#2a7fff;border:4px solid #fff;box-shadow:0 0 6px #000"></div>',anchor:new N.Point(15,15)}});
  WID=navigator.geolocation.watchPosition(onPos,e=>nI.textContent='위치 오류: '+e.message,{enableHighAccuracy:true,maximumAge:1000,timeout:20000})}
 let mk3=null;
-function stopNav(silent){if(WID!=null)navigator.geolocation.clearWatch(WID);WID=null;nav.style.display='none';if(mk3){mk3.setMap(null);mk3=null}if(RT)navbtn.style.display='block';if(!silent)say('안내를 종료합니다')}
+function stopNav(silent){if(WID!=null)navigator.geolocation.clearWatch(WID);WID=null;nav.style.display='none';if(mk3){mk3.setMap(null);mk3=null}if(RT)info.hidden=false;if(!silent)say('안내를 종료합니다')}
 function near(lat,lng){let bi=0,bd=1e9;const P=RT.path;for(let i=0;i<P.length;i++){const d=km(lat,lng,P[i][1],P[i][0]);if(d<bd){bd=d;bi=i}}return[bi,bd]}
 function along(i,j){let d=0;const P=RT.path;for(let k=i;k<j&&k<P.length-1;k++)d+=km(P[k][1],P[k][0],P[k+1][1],P[k+1][0]);return d}
 async function onPos(p){if(!RT||rer)return;const lat=p.coords.latitude,lng=p.coords.longitude;here=[lat,lng];const ll=new N.LatLng(lat,lng);mk3.setPosition(ll);map.setCenter(ll);
