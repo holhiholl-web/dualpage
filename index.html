@@ -17,11 +17,15 @@ button.g{background:#444}#map{flex:1}#yt{flex:1;position:relative;background:#00
 #pl div{padding:14px;font-size:19px;border-bottom:1px solid #333}
 #tg{position:fixed;z-index:1000;top:6px;left:50%;transform:translateX(-50%);width:52px;height:44px;padding:0;font-size:24px;border-radius:0 0 12px 12px;background:rgba(40,40,40,.85)}
 body.hide .tb,body.hide #info,body.hide #pl{display:none!important}
+#nav{position:absolute;z-index:998;left:6px;right:6px;top:6px;background:rgba(10,60,30,.92);color:#fff;border-radius:12px;padding:8px 10px;display:none;font-size:20px}
+#nav b{font-size:24px}#nav .r{display:flex;gap:6px;align-items:center;justify-content:space-between}#nav button{padding:8px 12px;font-size:18px}
+#navbtn{display:none;position:absolute;z-index:997;bottom:16px;left:50%;transform:translateX(-50%);font-size:24px;padding:14px 28px;background:#03c75a}
+#map{position:relative}#mapw{flex:1;position:relative}#mapw #map{position:absolute;inset:0}
 </style></head><body><button id="tg" onclick="tgl()">▲</button><div id="wrap">
 <div class="pane" id="L"><div class="tb"><input id="from" placeholder="출발지 (비우면 내 위치)"><button class="g" onclick="me()">📍</button></div>
 <div class="tb"><input id="q" placeholder="도착지 (장소/주소)"><button onclick="route()">길찾기</button><button class="g" onclick="sp()">검색</button></div>
 <div class="tb"><button class="g" onclick="ratio(50)">50:50</button><button class="g" onclick="ratio(60)">60:40</button><button class="g" onclick="ratio(40)">40:60</button><button class="g" onclick="setP()">⚙️</button></div>
-<div id="info" class="info" hidden></div><div id="pl" hidden></div><div id="map"></div></div>
+<div id="info" class="info" hidden></div><div id="pl" hidden></div><div id="mapw"><div id="map"></div><div id="nav"><div class="r"><b id="nI">-</b><span id="nD"></span></div><div class="r"><span id="nR"></span><span><button class="g" id="snd" onclick="tSnd()">🔊</button> <button style="background:#c33" onclick="stopNav()">안내 종료</button></span></div></div><button id="navbtn" onclick="startNav()">▶ 안내 시작</button></div></div>
 <div id="bar"></div>
 <div class="pane" id="R"><div class="tb"><input id="v" placeholder="유튜브 링크/ID 또는 검색어"><button onclick="go()">재생/검색</button></div>
 <div id="yt"><div id="res"></div></div></div></div>
@@ -44,20 +48,43 @@ async function find(s){
  try{const r=await new Promise(ok=>N.Service.geocode({query:s},(st2,res)=>ok(st2===N.Service.Status.OK?res.v2.addresses:[])));if(r.length)return r.map(x=>({n:x.roadAddress||x.jibunAddress,lat:+x.y,lng:+x.x}))}catch(e){}
  const r=await (await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=8&accept-language=ko&countrycodes=kr&q='+encodeURIComponent(s))).json();
  return r.map(x=>({n:x.display_name,lat:+x.lat,lng:+x.lon}))}
-function pick(list){return new Promise(ok=>{if(list.length==1)return ok(list[0]);pl.innerHTML='';list.forEach(x=>{const d=document.createElement('div');d.textContent=x.n;d.onclick=()=>{pl.hidden=true;ok(x)};pl.appendChild(d)});pl.hidden=false})}
+function km(a,b,c,d){const R=6371e3,t=Math.PI/180,x=Math.sin((c-a)*t/2)**2+Math.cos(a*t)*Math.cos(c*t)*Math.sin((d-b)*t/2)**2;return 2*R*Math.asin(Math.sqrt(x))}
+function pick(list){return new Promise(ok=>{pl.innerHTML='<div style="background:#333">후보를 선택하세요 ✕</div>';pl.firstChild.onclick=()=>{pl.hidden=true;msg('취소됨')};list.forEach(x=>{const d=document.createElement('div');d.textContent=x.n+(here?'  ('+(km(here[0],here[1],x.lat,x.lng)/1000).toFixed(1)+'km)':'');d.onclick=()=>{pl.hidden=true;ok(x)};pl.appendChild(d)});pl.hidden=false})}
 async function sp(){const s=q.value.trim();if(!s)return;const l=await find(s);if(!l.length)return msg('결과 없음',1);const x=await pick(l);pin(x.lat,x.lng,x.n);msg('')}
 async function route(){try{const s=q.value.trim();if(!s)return msg('도착지를 입력하세요',1);
  let A;if(from.value.trim()){const l=await find(from.value.trim());if(!l.length)return msg('출발지 결과 없음',1);const x=await pick(l);A=[x.lat,x.lng]}else{msg('내 위치 확인 중…');A=await myPos()}
- const l=await find(s);if(!l.length)return msg('도착지 결과 없음',1);const B=await pick(l);
+ if(!from.value.trim()&&!here)A=A;const l=await find(s);if(!l.length)return msg('도착지 결과 없음',1);const B=await pick(l);DEST=B;
  if(!PROXY()){pin(B.lat,B.lng,B.n);return msg('길찾기 프록시 미설정(⚙️) — 도착지만 표시',1)}
- msg('경로 검색 중…');const j=await (await fetch(PROXY()+'/driving?start='+A[1]+','+A[0]+'&goal='+B.lng+','+B.lat+'&option=traoptimal')).json();
- if(j.code!==0)return msg('길찾기 실패: '+j.message,1);const R=j.route.traoptimal[0],sm=R.summary;
+await drawRoute(A,B);}catch(e){msg('오류: '+e.message,1)}}
+let DEST=null,RT=null,WID=null,SND=true,off=0,gi=0,spoken={},rer=false;
+async function drawRoute(A,B,nav){if(!nav)msg('경로 검색 중…');const j=await (await fetch(PROXY()+'/driving?start='+A[1]+','+A[0]+'&goal='+B.lng+','+B.lat+'&option=traoptimal')).json();
+ if(j.code!==0)return msg('길찾기 실패: '+j.message,1);const R=j.route.traoptimal[0],sm=R.summary;RT={path:R.path,guide:R.guide||[],dur:sm.duration,dist:sm.distance};gi=0;spoken={};
  if(line)line.setMap(null);if(mk)mk.setMap(null);if(mk2)mk2.setMap(null);
  const path=R.path.map(p=>new N.LatLng(p[1],p[0]));line=new N.Polyline({map,path,strokeColor:'#03c75a',strokeWeight:8,strokeOpacity:.9});
  mk=new N.Marker({map,position:path[0]});mk2=new N.Marker({map,position:path[path.length-1]});
- const b=new N.LatLngBounds();path.forEach(p=>b.extend(p));map.fitBounds(b,{top:40,right:40,bottom:40,left:40});
- const m=Math.round(sm.duration/60000);msg('🚗 '+(sm.distance/1000).toFixed(1)+'km · '+(m>=60?Math.floor(m/60)+'시간 ':'')+m%60+'분 · 통행료 '+(sm.tollFare||0).toLocaleString()+'원 · 택시비 약 '+(sm.taxiFare||0).toLocaleString()+'원');
-}catch(e){msg('오류: '+e.message,1)}}
+ if(!nav){const b=new N.LatLngBounds();path.forEach(p=>b.extend(p));map.fitBounds(b,{top:40,right:40,bottom:40,left:40});navbtn.style.display='block'}
+ const m=Math.round(sm.duration/60000);(nav?()=>{}:msg)('🚗 '+(sm.distance/1000).toFixed(1)+'km · '+(m>=60?Math.floor(m/60)+'시간 ':'')+m%60+'분 · 통행료 '+(sm.tollFare||0).toLocaleString()+'원 · 택시비 약 '+(sm.taxiFare||0).toLocaleString()+'원'+(DEST?' → '+DEST.n.split(',')[0]:''));}
+function say(t){if(!SND||!window.speechSynthesis)return;const u=new SpeechSynthesisUtterance(t);u.lang='ko-KR';speechSynthesis.cancel();speechSynthesis.speak(u)}
+function tSnd(){SND=!SND;snd.textContent=SND?'🔊':'🔇';st.snd=SND;sv()}
+function fmt(m){return m>=1000?(m/1000).toFixed(1)+'km':Math.round(m/10)*10+'m'}
+function startNav(){if(!RT)return;SND=st.snd!==false;snd.textContent=SND?'🔊':'🔇';navbtn.style.display='none';nav.style.display='block';info.hidden=true;map.setZoom(17);say('경로 안내를 시작합니다');
+ if(!mk3)mk3=new N.Marker({map,position:map.getCenter(),icon:{content:'<div style="width:22px;height:22px;border-radius:50%;background:#2a7fff;border:4px solid #fff;box-shadow:0 0 6px #000"></div>',anchor:new N.Point(15,15)}});
+ WID=navigator.geolocation.watchPosition(onPos,e=>nI.textContent='위치 오류: '+e.message,{enableHighAccuracy:true,maximumAge:1000,timeout:20000})}
+let mk3=null;
+function stopNav(silent){if(WID!=null)navigator.geolocation.clearWatch(WID);WID=null;nav.style.display='none';if(mk3){mk3.setMap(null);mk3=null}if(RT)navbtn.style.display='block';if(!silent)say('안내를 종료합니다')}
+function near(lat,lng){let bi=0,bd=1e9;const P=RT.path;for(let i=0;i<P.length;i++){const d=km(lat,lng,P[i][1],P[i][0]);if(d<bd){bd=d;bi=i}}return[bi,bd]}
+function along(i,j){let d=0;const P=RT.path;for(let k=i;k<j&&k<P.length-1;k++)d+=km(P[k][1],P[k][0],P[k+1][1],P[k+1][0]);return d}
+async function onPos(p){if(!RT||rer)return;const lat=p.coords.latitude,lng=p.coords.longitude;here=[lat,lng];const ll=new N.LatLng(lat,lng);mk3.setPosition(ll);map.setCenter(ll);
+ const[i,d]=near(lat,lng);
+ if(d>50&&(p.coords.accuracy||0)<60){if(++off>=3){off=0;rer=true;nI.textContent='경로 재탐색 중…';say('경로를 재탐색합니다');try{await drawRoute(here,DEST,1)}catch(e){}rer=false}return}off=0;
+ const P=RT.path,last=P[P.length-1];const rem=along(i,P.length-1);
+ if(km(lat,lng,last[1],last[0])<30||rem<25){nI.textContent='🏁 목적지 도착';nD.textContent='';nR.textContent='';say('목적지에 도착했습니다. 안내를 종료합니다');stopNav(1);navbtn.style.display='none';return}
+ while(gi<RT.guide.length&&RT.guide[gi].pointIndex<=i)gi++;const g=RT.guide[gi];
+ const remT=Math.round(RT.dur*(rem/RT.dist)/60000);nR.textContent='남은 '+fmt(rem)+' · '+remT+'분';
+ if(g){const dg=along(i,g.pointIndex);nI.textContent=g.instructions;nD.textContent=fmt(dg);
+  if(dg<300&&dg>=100&&!spoken[gi+'a']){spoken[gi+'a']=1;say(fmt(dg)+' 앞에서 '+g.instructions)}
+  if(dg<60&&!spoken[gi+'b']){spoken[gi+'b']=1;say('잠시 후 '+g.instructions)}}
+ else{nI.textContent='목적지까지 직진';nD.textContent=fmt(rem)}}
 function vid(s){s=s.trim();if(/^[\w-]{11}$/.test(s))return s;const m=s.match(/(?:v=|youtu\.be\/|shorts\/|live\/|embed\/)([\w-]{11})/);return m&&m[1]}
 function play(id){res.style.display='none';yt.querySelectorAll('iframe').forEach(f=>f.remove());const f=document.createElement('iframe');f.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';f.allowFullscreen=true;
 f.src='https://www.youtube-nocookie.com/embed/'+id+'?autoplay=1&playsinline=1&rel=0';yt.appendChild(f);st.v=id;sv()}
