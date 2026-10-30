@@ -28,7 +28,7 @@ body.hide .tb,body.hide #info,body.hide #pl{display:none!important}
 <script>
 const S=localStorage,API=['https://api.piped.private.coffee','https://pipedapi.kavin.rocks','https://pipedapi.adminforge.de'];
 let st=JSON.parse(S.v10||'{}');const sv=()=>S.v10=JSON.stringify(st);
-const DEF_PROXY='';const PROXY=()=>(S.v10proxy||DEF_PROXY).replace(/\/$/,'');function setP(){const p=prompt('길찾기 프록시 URL (Cloudflare Worker)',S.v10proxy||'');if(p!==null)S.v10proxy=p.trim()}
+const DEF_PROXY='https://dualpage-naver.holhiholl.workers.dev';const PROXY=()=>(S.v10proxy||DEF_PROXY).replace(/\/$/,'');function setP(){const p=prompt('길찾기 프록시 URL (Cloudflare Worker)',S.v10proxy||'');if(p!==null)S.v10proxy=p.trim()}
 const N=naver.maps;const map=new N.Map('map',{center:new N.LatLng(...(st.c||[37.5665,126.978])),zoom:st.z||15,zoomControl:true,zoomControlOptions:{position:N.Position.RIGHT_CENTER}});
 N.Event.addListener(map,'idle',()=>{const c=map.getCenter();st.c=[c.lat(),c.lng()];st.z=map.getZoom();sv()});
 let mk=null,mk2=null,line=null,here=null;
