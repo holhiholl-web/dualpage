@@ -17,15 +17,15 @@ button.g{background:#444}#map{flex:1}#yt{flex:1;position:relative;background:#00
 #pl div{padding:14px;font-size:19px;border-bottom:1px solid #333}
 #tg{position:fixed;z-index:1000;top:6px;left:50%;transform:translateX(-50%);width:52px;height:44px;padding:0;font-size:24px;border-radius:0 0 12px 12px;background:rgba(40,40,40,.85)}
 body.hide .tb,body.hide #info,body.hide #pl{display:none!important}
-#nav{position:absolute;z-index:998;left:6px;right:6px;top:6px;background:rgba(10,60,30,.92);color:#fff;border-radius:12px;padding:8px 10px;display:none;font-size:20px}
+#nav{position:absolute;z-index:998;left:6px;right:70px;top:6px;background:rgba(10,60,30,.92);color:#fff;border-radius:12px;padding:8px 10px;display:none;font-size:20px}
 #nav b{font-size:24px}#nav .r{display:flex;gap:6px;align-items:center;justify-content:space-between}#nav button{padding:8px 12px;font-size:18px}
-#navbtn{display:none;position:absolute;z-index:997;bottom:16px;left:50%;transform:translateX(-50%);font-size:24px;padding:14px 28px;background:#03c75a}
+#navbtn{display:none;position:absolute;z-index:997;top:10px;left:10px;font-size:26px;padding:16px 30px;background:#03c75a;font-weight:bold;box-shadow:0 2px 10px #000}
 #map{position:relative}#mapw{flex:1;position:relative}#mapw #map{position:absolute;inset:0}
 </style></head><body><button id="tg" onclick="tgl()">▲</button><div id="wrap">
 <div class="pane" id="L"><div class="tb"><input id="from" placeholder="출발지 (비우면 내 위치)"><button class="g" onclick="me()">📍</button></div>
 <div class="tb"><input id="q" placeholder="도착지 (장소/주소)"><button onclick="route()">길찾기</button><button class="g" onclick="sp()">검색</button></div>
 <div class="tb"><button class="g" onclick="ratio(50)">50:50</button><button class="g" onclick="ratio(60)">60:40</button><button class="g" onclick="ratio(40)">40:60</button><button class="g" onclick="setP()">⚙️</button></div>
-<div id="info" class="info" hidden></div><div id="pl" hidden></div><div id="mapw"><div id="map"></div><div id="nav"><div class="r"><b id="nI">-</b><span id="nD"></span></div><div class="r"><span id="nR"></span><span><button class="g" id="snd" onclick="tSnd()">🔊</button> <button style="background:#c33" onclick="stopNav()">안내 종료</button></span></div></div><button id="navbtn" onclick="startNav()">▶ 안내 시작</button></div></div>
+<div id="info" class="info" hidden></div><div id="pl" hidden></div><div id="mapw"><div id="map"></div><div id="nav"><div class="r"><b id="nI">-</b><span id="nD"></span></div><div class="r"><span><button style="background:#c33;font-size:20px;padding:10px 16px" onclick="stopNav()">■ 안내 종료</button> <button class="g" id="snd" onclick="tSnd()">🔊</button></span><span id="nR"></span></div></div><button id="navbtn" onclick="startNav()">▶ 안내 시작</button></div></div>
 <div id="bar"></div>
 <div class="pane" id="R"><div class="tb"><input id="v" placeholder="유튜브 링크/ID 또는 검색어"><button onclick="go()">재생/검색</button></div>
 <div id="yt"><div id="res"></div></div></div></div>
