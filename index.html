@@ -15,7 +15,9 @@ button.g{background:#444}#map{flex:1}#yt{flex:1;position:relative;background:#00
 #pl{position:absolute;z-index:999;top:120px;left:8px;right:8px;background:#222;max-height:50%;overflow:auto}
 .info{padding:8px 12px;font-size:20px;background:#0b3;color:#fff}.info.e{background:#a33}
 #pl div{padding:14px;font-size:19px;border-bottom:1px solid #333}
-</style></head><body><div id="wrap">
+#tg{position:fixed;z-index:1000;top:6px;left:50%;transform:translateX(-50%);width:52px;height:44px;padding:0;font-size:24px;border-radius:0 0 12px 12px;background:rgba(40,40,40,.85)}
+body.hide .tb,body.hide #info,body.hide #pl{display:none!important}
+</style></head><body><button id="tg" onclick="tgl()">▲</button><div id="wrap">
 <div class="pane" id="L"><div class="tb"><input id="from" placeholder="출발지 (비우면 내 위치)"><button class="g" onclick="me()">📍</button></div>
 <div class="tb"><input id="q" placeholder="도착지 (장소/주소)"><button onclick="route()">길찾기</button><button class="g" onclick="sp()">검색</button></div>
 <div class="tb"><button class="g" onclick="ratio(50)">50:50</button><button class="g" onclick="ratio(60)">60:40</button><button class="g" onclick="ratio(40)">40:60</button><button class="g" onclick="setP()">⚙️</button></div>
@@ -26,7 +28,7 @@ button.g{background:#444}#map{flex:1}#yt{flex:1;position:relative;background:#00
 <script>
 const S=localStorage,API=['https://api.piped.private.coffee','https://pipedapi.kavin.rocks','https://pipedapi.adminforge.de'];
 let st=JSON.parse(S.v10||'{}');const sv=()=>S.v10=JSON.stringify(st);
-const PROXY=()=>(S.v10proxy||'').replace(/\/$/,'');function setP(){const p=prompt('길찾기 프록시 URL (Cloudflare Worker)',S.v10proxy||'');if(p!==null)S.v10proxy=p.trim()}
+const DEF_PROXY='';const PROXY=()=>(S.v10proxy||DEF_PROXY).replace(/\/$/,'');function setP(){const p=prompt('길찾기 프록시 URL (Cloudflare Worker)',S.v10proxy||'');if(p!==null)S.v10proxy=p.trim()}
 const N=naver.maps;const map=new N.Map('map',{center:new N.LatLng(...(st.c||[37.5665,126.978])),zoom:st.z||15,zoomControl:true,zoomControlOptions:{position:N.Position.RIGHT_CENTER}});
 N.Event.addListener(map,'idle',()=>{const c=map.getCenter();st.c=[c.lat(),c.lng()];st.z=map.getZoom();sv()});
 let mk=null,mk2=null,line=null,here=null;
@@ -65,5 +67,6 @@ j.items.filter(x=>x.url).forEach(x=>{const d=document.createElement('div');d.cla
 res.innerHTML='<div class="it">검색 실패 — 유튜브 링크를 붙여넣어 주세요</div>'}
 function ratio(p){Lp.style.flex='0 0 '+p+'%';st.r=p;sv();setTimeout(()=>N.Event.trigger(map,'resize'),50)}const Lp=document.getElementById('L');if(st.r)ratio(st.r);
 let dr=false;bar.onpointerdown=e=>{dr=true;bar.setPointerCapture(e.pointerId)};bar.onpointermove=e=>{if(dr)ratio(Math.min(85,Math.max(15,e.clientX/innerWidth*100)))};bar.onpointerup=()=>dr=false;
+function tgl(x){const h=x===undefined?!document.body.classList.contains('hide'):x;document.body.classList.toggle('hide',h);tg.textContent=h?'☰':'▲';st.h=h;sv();setTimeout(()=>N.Event.trigger(map,'resize'),50)}tgl(!!st.h);
 if(st.v)play(st.v);
 </script></body></html>
