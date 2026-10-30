@@ -20,10 +20,10 @@ body.hide .tb,body.hide #info,body.hide #pl{display:none!important}
 #nav{position:absolute;z-index:998;left:6px;right:6px;top:6px;background:rgba(10,60,30,.92);color:#fff;border-radius:12px;padding:8px 10px;display:none;font-size:20px}
 #nav b{font-size:24px}#nav .r{display:flex;gap:6px;align-items:center;justify-content:space-between}#nav button{padding:8px 12px;font-size:18px}
 #navbtn{display:none;position:absolute;z-index:997;top:10px;left:10px;font-size:26px;padding:16px 30px;background:#03c75a;font-weight:bold;box-shadow:0 2px 10px #000}
-#mapw{flex:1;position:relative;display:flex;flex-direction:column;min-height:0}#mapw #map{flex:1;min-height:150px;width:100%}
+#mapw{flex:1;position:relative;min-height:150px;overflow:hidden}#mapw #map{position:absolute;left:0;top:0;width:100%;height:100%}
 #ver{position:fixed;z-index:1001;left:4px;bottom:4px;font-size:13px;color:#ccc;background:rgba(0,0,0,.6);padding:2px 6px;border-radius:6px;pointer-events:none}
 .info button{margin-left:10px;padding:10px 18px;font-size:22px;font-weight:bold;background:#fff;color:#0a7a35;border-radius:10px}
-</style></head><body><div id="ver">v13</div><button id="tg" onclick="tgl()">▲</button><div id="wrap">
+</style></head><body><div id="ver">v14</div><button id="tg" onclick="tgl()">▲</button><div id="wrap">
 <div class="pane" id="L"><div class="tb"><input id="from" placeholder="출발지 (비우면 내 위치)"><button class="g" onclick="me()">📍</button></div>
 <div class="tb"><input id="q" placeholder="도착지 (장소/주소)"><button onclick="route()">길찾기</button><button class="g" onclick="sp()">검색</button></div>
 <div class="tb"><button class="g" onclick="ratio(50)">50:50</button><button class="g" onclick="ratio(60)">60:40</button><button class="g" onclick="ratio(40)">40:60</button><button class="g" onclick="setP()">⚙️</button></div>
@@ -36,8 +36,9 @@ const S=localStorage,API=['https://api.piped.private.coffee','https://pipedapi.k
 let st=JSON.parse(S.v10||'{}');const sv=()=>S.v10=JSON.stringify(st);
 const DEF_PROXY='https://dualpage-naver.holhiholl.workers.dev';const PROXY=()=>(S.v10proxy||DEF_PROXY).replace(/\/$/,'');function setP(){const p=prompt('길찾기 프록시 URL (Cloudflare Worker)',S.v10proxy||'');if(p!==null)S.v10proxy=p.trim()}
 const N=naver.maps;const map=new N.Map('map',{center:new N.LatLng(...(st.c||[37.5665,126.978])),zoom:st.z||15,zoomControl:true,zoomControlOptions:{position:N.Position.RIGHT_CENTER}});
-function fit(){const e=document.getElementById('map');if(e.clientWidth&&e.clientHeight)map.setSize(new N.Size(e.clientWidth,e.clientHeight))}
-if(window.ResizeObserver)new ResizeObserver(fit).observe(document.getElementById('map'));addEventListener('resize',fit);
+function fit0(){const w=document.getElementById('mapw'),e=document.getElementById('map');const W=w.clientWidth,H=w.clientHeight;if(!W||!H)return;e.style.width=W+'px';e.style.height=H+'px';map.setSize(new N.Size(W,H));if(map.refresh)map.refresh(true)}
+function fit(){fit0();requestAnimationFrame(fit0);setTimeout(fit0,300)}
+if(window.ResizeObserver)new ResizeObserver(fit).observe(document.getElementById('mapw'));addEventListener('resize',fit);addEventListener('orientationchange',fit);if(window.visualViewport)visualViewport.addEventListener('resize',fit);addEventListener('load',fit);
 N.Event.addListener(map,'idle',()=>{const c=map.getCenter();st.c=[c.lat(),c.lng()];st.z=map.getZoom();sv()});
 let mk=null,mk2=null,line=null,here=null;
 function pin(a,b,t){if(mk)mk.setMap(null);mk=new N.Marker({position:new N.LatLng(a,b),map,title:t||''});map.setCenter(new N.LatLng(a,b));map.setZoom(16)}
@@ -60,14 +61,14 @@ async function route(){try{const s=q.value.trim();if(!s)return msg('도착지를
  if(!from.value.trim()&&!here)A=A;const l=await find(s);if(!l.length)return msg('도착지 결과 없음',1);const B=await pick(l);DEST=B;
  if(!PROXY()){pin(B.lat,B.lng,B.n);return msg('길찾기 프록시 미설정(⚙️) — 도착지만 표시',1)}
 await drawRoute(A,B);}catch(e){msg('오류: '+e.message,1)}}
-let ORG='',DEST=null,RT=null,WID=null,SND=true,off=0,gi=0,spoken={},rer=false;
+window.RTdbg=()=>RT;let ORG='',DEST=null,RT=null,WID=null,SND=true,off=0,gi=0,spoken={},rer=false;
 async function drawRoute(A,B,nav){if(!nav)msg('경로 검색 중…');const j=await (await fetch(PROXY()+'/driving?start='+A[1]+','+A[0]+'&goal='+B.lng+','+B.lat+'&option=traoptimal')).json();
  if(j.code!==0)return msg('길찾기 실패: '+j.message,1);const R=j.route.traoptimal[0],sm=R.summary;RT={path:R.path,guide:R.guide||[],dur:sm.duration,dist:sm.distance};gi=0;spoken={};
  if(line)line.setMap(null);if(mk)mk.setMap(null);if(mk2)mk2.setMap(null);
  const path=R.path.map(p=>new N.LatLng(p[1],p[0]));line=new N.Polyline({map,path,strokeColor:'#03c75a',strokeWeight:8,strokeOpacity:.9});
  mk=new N.Marker({map,position:path[0]});mk2=new N.Marker({map,position:path[path.length-1]});
  if(!nav){const b=new N.LatLngBounds();path.forEach(p=>b.extend(p));map.fitBounds(b,{top:40,right:40,bottom:40,left:40});}
- const m=Math.round(sm.duration/60000);(nav?()=>{}:msg)('🚗 '+(sm.distance/1000).toFixed(1)+'km · '+(m>=60?Math.floor(m/60)+'시간 ':'')+m%60+'분 · 통행료 '+(sm.tollFare||0).toLocaleString()+'원 · 택시비 약 '+(sm.taxiFare||0).toLocaleString()+'원'+(DEST?' · '+(ORG||'내 위치')+' → '+DEST.n.split(',')[0]:''));if(!nav){const nb=document.createElement('button');nb.textContent='▶ 안내 시작';nb.onclick=startNav;info.appendChild(nb);info.hidden=false}}
+ const m=Math.round(sm.duration/60000);(nav?()=>{}:msg)('🚗 총 '+(sm.distance/1000).toFixed(1)+'km · '+(m>=60?Math.floor(m/60)+'시간 ':'')+m%60+'분 · 통행료 '+(sm.tollFare||0).toLocaleString()+'원 · 택시비 약 '+(sm.taxiFare||0).toLocaleString()+'원'+(DEST?' · '+(ORG||'내 위치')+' → '+DEST.n.split(',')[0]:''));if(!nav){const nb=document.createElement('button');nb.textContent='▶ 안내 시작';nb.onclick=startNav;info.appendChild(nb);info.hidden=false}}
 function say(t){if(!SND||!window.speechSynthesis)return;const u=new SpeechSynthesisUtterance(t);u.lang='ko-KR';speechSynthesis.cancel();speechSynthesis.speak(u)}
 function tSnd(){SND=!SND;snd.textContent=SND?'🔊':'🔇';st.snd=SND;sv()}
 function fmt(m){return m>=1000?(m/1000).toFixed(1)+'km':Math.round(m/10)*10+'m'}
@@ -81,10 +82,10 @@ function along(i,j){let d=0;const P=RT.path;for(let k=i;k<j&&k<P.length-1;k++)d+
 async function onPos(p){if(!RT||rer)return;const lat=p.coords.latitude,lng=p.coords.longitude;if(!isFinite(lat)||!isFinite(lng))return;here=[lat,lng];const ll=new N.LatLng(lat,lng);mk3.setPosition(ll);map.setCenter(ll);
  const[i,d]=near(lat,lng);
  if(d>50&&(p.coords.accuracy||0)<60){if(++off>=3){off=0;rer=true;nI.textContent='경로 재탐색 중…';say('경로를 재탐색합니다');try{await drawRoute(here,DEST,1)}catch(e){}rer=false}return}off=0;
- const P=RT.path,last=P[P.length-1];const rem=along(i,P.length-1);
+ const P=RT.path,last=P[P.length-1];const rem=Math.min(RT.dist,along(i,P.length-1));
  if(km(lat,lng,last[1],last[0])<30||rem<25){nI.textContent='🏁 목적지 도착';nD.textContent='';nR.textContent='';say('목적지에 도착했습니다. 안내를 종료합니다');stopNav(1);navbtn.style.display='none';return}
  while(gi<RT.guide.length&&RT.guide[gi].pointIndex<=i)gi++;const g=RT.guide[gi];
- const remT=Math.round(RT.dur*(rem/RT.dist)/60000);nR.textContent='남은 '+fmt(rem)+' · '+remT+'분';
+ const remT=Math.round(RT.dur*(rem/RT.dist)/60000);console.log('nav',i,P.length,rem,RT.dist);nR.textContent='남은 '+fmt(rem)+' · '+remT+'분';
  if(g){const dg=along(i,g.pointIndex);nI.textContent=g.instructions;nD.textContent=fmt(dg);
   if(dg<300&&dg>=100&&!spoken[gi+'a']){spoken[gi+'a']=1;say(fmt(dg)+' 앞에서 '+g.instructions)}
   if(dg<60&&!spoken[gi+'b']){spoken[gi+'b']=1;say('잠시 후 '+g.instructions)}}
