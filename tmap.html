@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>T2 T맵+유튜브</title>
+<title>T3 T맵+유튜브</title>
 <script src="https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=iSBCMHTI7D2DqUdLdiY5U2aS4XZZEIgl5ATPkc9g"></script>
 <style>
 :root{--bg:#0b0d10;--pn:#14171c;--pn2:#1c2027;--ln:rgba(255,255,255,.08);--tx:#eef1f5;--mu:#8b94a3;--ac:#3d7bff;--ok:#1fbf6a;--rd:#ff4757;--r:14px}
@@ -34,10 +34,36 @@ button:active{transform:scale(.96)}button.g{background:var(--pn2);color:var(--tx
 #tg{position:fixed;z-index:1000;left:10px;bottom:28px;width:56px;height:56px;padding:0;font-size:24px;border-radius:18px;background:rgba(18,21,26,.86);border:1px solid var(--ln);backdrop-filter:blur(10px);box-shadow:0 6px 20px rgba(0,0,0,.5)}
 body.hide .tb,body.hide #info,body.hide #pl{display:none!important}
 #ver{position:fixed;z-index:1001;left:10px;bottom:6px;font-size:11px;color:var(--mu);pointer-events:none}
-</style></head><body><div id="ver">T2</div><button id="tg" onclick="tgl()">▲</button><div id="wrap">
+.fab{position:absolute;z-index:995;display:flex;flex-direction:column;gap:8px}
+.fab button{width:52px;height:52px;min-width:0;padding:0;border-radius:50%;font-size:22px;background:rgba(18,21,26,.86);color:var(--tx);border:1px solid var(--ln);backdrop-filter:blur(10px);box-shadow:0 4px 14px rgba(0,0,0,.45)}
+.fab button.on{background:var(--ac);border-color:var(--ac)}
+#fabR{right:10px;bottom:12px}#fabL{left:10px;bottom:92px}#cmp span{display:inline-block;transition:transform .3s}
+#sett{position:absolute;z-index:1002;right:10px;top:10px;width:min(340px,calc(100% - 20px));max-height:calc(100% - 20px);overflow:auto;padding:14px 16px}
+#sett[hidden]{display:none}#sett h3{margin:0 0 6px;font-size:19px;display:flex;justify-content:space-between;align-items:center}
+#sett h3 button{height:44px;width:44px;padding:0;min-width:0;background:transparent;color:var(--mu);font-size:22px}
+.sr{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--ln);font-size:17px}
+.sw{position:relative;width:64px;height:38px;flex:none;border-radius:19px;background:#2c323c;border:1px solid var(--ln);cursor:pointer;min-width:0;padding:0}
+.sw:after{content:"";position:absolute;top:4px;left:4px;width:28px;height:28px;border-radius:50%;background:#cfd6e0;transition:left .2s}
+.sw.on{background:var(--ok)}.sw.on:after{left:30px;background:#fff}
+#toast{position:absolute;z-index:997;left:76px;bottom:12px;max-width:calc(100% - 150px);display:flex;align-items:center;gap:12px;padding:8px 8px 8px 14px;font-size:19px;font-weight:700;transform:translateY(20px);opacity:0;pointer-events:none;transition:.25s}
+#toast.show{transform:none;opacity:1;pointer-events:auto}#toast .ic{flex:none;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;background:var(--rd)}
+#toast.w .ic{background:#f5a623}#toast.ok .ic{background:var(--ok)}#toast.i .ic{background:var(--ac)}
+#toast button{height:44px;width:44px;min-width:0;padding:0;background:transparent;color:var(--mu);font-size:22px}
+#mapw{background:linear-gradient(#0e1726,#1d2a3d)}#map{transform-origin:50% 55%;transition:transform .5s}
+@media (max-height:600px){.fab{flex-direction:row}#fabL{bottom:76px}#fabR{bottom:12px}#toast{max-width:calc(100% - 262px)}#toast{font-size:16px}}
+.nt{filter:invert(.93) hue-rotate(180deg) brightness(.85) contrast(.92)}
+</style></head><body><div id="ver">T3</div><button id="tg" onclick="tgl()">▲</button><div id="wrap">
 <div class="pane" id="L"><div class="tb"><input id="from" placeholder="출발: 내 위치"><input id="q" placeholder="도착지 · 장소/주소"><button class="g i" onclick="me()" title="내 위치">📍</button><button class="g" onclick="sp()">검색</button><button onclick="route()">길찾기</button></div>
 <div class="tb s"><div class="seg" id="seg"><button onclick="ratio(50)">50:50</button><button onclick="ratio(60)">60:40</button><button onclick="ratio(40)">40:60</button></div><a class="lk" href="./">네이버판</a></div>
-<div id="mapw"><div id="map"></div><div id="info" class="info glass" hidden></div><div id="pl" class="glass" hidden></div><div id="nav" class="glass"><div class="top"><div id="nT">↑</div><div style="min-width:0;flex:1"><span id="nD"></span><span id="nI">-</span></div></div><div class="bot"><button class="stop" onclick="stopNav()">■ 안내 종료</button><button class="g" id="snd" onclick="tSnd()">🔊</button><span id="nR"></span></div></div><button id="navbtn" onclick="startNav()">▶ 안내 시작</button></div></div>
+<div id="mapw"><div id="map"></div><div id="info" class="info glass" hidden></div><div id="pl" class="glass" hidden></div><div id="nav" class="glass"><div class="top"><div id="nT">↑</div><div style="min-width:0;flex:1"><span id="nD"></span><span id="nI">-</span></div></div><div class="bot"><button class="stop" onclick="stopNav()">■ 안내 종료</button><button class="g" id="snd" onclick="tSnd()">🔊</button><span id="nR"></span></div></div><div class="fab" id="fabR"><button id="b3d" onclick="setM('v',M.v=='3d'?'2d':'3d')">3D</button><button id="bth" onclick="setM('th',isNight()?'day':'night')">☀️</button><button id="bly" onclick="sett.hidden=!sett.hidden" title="지도 설정">🗂️</button></div>
+<div class="fab" id="fabL"><button onclick="zm(1)">＋</button><button onclick="zm(-1)">－</button><button id="cmp" onclick="recenter()" title="내 위치/북쪽"><span>🧭</span></button></div>
+<div id="toast" class="glass"><span class="ic" id="tI">📷</span><span id="tT"></span><button onclick="hideToast()">✕</button></div>
+<div id="sett" class="glass" hidden><h3>지도 설정<button onclick="sett.hidden=true">✕</button></h3>
+<div class="sr">지도 보기<div class="seg" id="sV"><button data-k="v" data-v="2d">2D</button><button data-k="v" data-v="3d">3D</button></div></div>
+<div class="sr">지도 테마<div class="seg" id="sT"><button data-k="th" data-v="day">주간</button><button data-k="th" data-v="night">야간</button><button data-k="th" data-v="auto">자동</button></div></div>
+<div class="sr">교통정보<button class="sw" id="swT" onclick="setM('tr',!M.tr)"></button></div>
+<div class="sr">북쪽 고정<button class="sw" id="swN" onclick="setM('nu',!M.nu)"></button></div></div>
+<button id="navbtn" onclick="startNav()">▶ 안내 시작</button></div></div>
 <div id="bar"></div>
 <div class="pane" id="R"><div class="tb"><input id="v" placeholder="유튜브 링크 · ID · 검색어"><button onclick="go()">재생/검색</button></div>
 <div id="yt"><div id="res"></div></div></div></div>
@@ -46,7 +72,7 @@ const S=localStorage,API=['https://api.piped.private.coffee','https://pipedapi.k
 let st=JSON.parse(S.v10t||'{}');const sv=()=>S.v10t=JSON.stringify(st);
 const TK='iSBCMHTI7D2DqUdLdiY5U2aS4XZZEIgl5ATPkc9g',TA='https://apis.openapi.sk.com/tmap';
 const T=Tmapv2,LL=(a,b)=>new T.LatLng(a,b);const c0=st.c||[35.16,126.85];
-const map=new T.Map('map',{center:LL(c0[0],c0[1]),width:'100%',height:'100%',zoom:st.z||15,zoomControl:true,scrollwheel:true});
+const map=new T.Map('map',{center:LL(c0[0],c0[1]),width:'100%',height:'100%',zoom:st.z||15,zoomControl:false,scrollwheel:true});
 function fit0(){const w=document.getElementById('mapw'),e=document.getElementById('map');const W=w.clientWidth,H=w.clientHeight;if(!W||!H)return;e.style.width=W+'px';e.style.height=H+'px';try{map.resize(W,H)}catch(x){}}
 function fit(){fit0();requestAnimationFrame(fit0);setTimeout(fit0,300)}
 if(window.ResizeObserver)new ResizeObserver(fit).observe(document.getElementById('mapw'));addEventListener('resize',fit);addEventListener('orientationchange',fit);if(window.visualViewport)visualViewport.addEventListener('resize',fit);addEventListener('load',fit);fit();
@@ -76,13 +102,13 @@ window.RTdbg=()=>RT;let ORG='',DEST=null,RT=null,WID=null,SND=true,off=0,gi=0,sp
 async function drawRoute(A,B,nav){if(!nav)msg('경로 검색 중…');
  const r=await fetch(TA+'/routes?version=1&format=json',{method:'POST',headers:{appKey:TK,'Content-Type':'application/json'},body:JSON.stringify({startX:''+A[1],startY:''+A[0],endX:''+B.lng,endY:''+B.lat,reqCoordType:'WGS84GEO',resCoordType:'WGS84GEO',searchOption:'0',trafficInfo:'N'})});
  const j=await r.json();if(!j.features)return msg('길찾기 실패: '+((j.error&&j.error.message)||r.status),1);
- const path=[],guide=[];let sm=null;
+ const path=[],guide=[],alerts=[];let sm=null;
  for(const f of j.features){const g=f.geometry,p=f.properties;
   if(g.type=='LineString'){for(const c of g.coordinates){const l=path[path.length-1];if(!l||l[0]!=c[0]||l[1]!=c[1])path.push(c)}}
   else if(g.type=='Point'){if(p.pointType=='S'&&p.totalDistance!=null)sm=p;if(!path.length)path.push(g.coordinates);
-   if(p.pointType!='S'&&p.turnType!=200)guide.push({pointIndex:Math.max(0,path.length-1),instructions:p.description,turn:p.turnType})}}
+   const tt=+p.turnType,ds=p.description||'';if((tt>=191&&tt<=194)||/카메라|단속/.test(ds)){alerts.push({pointIndex:Math.max(0,path.length-1),turn:tt,text:ds})}else if(p.pointType!='S'&&tt!=200)guide.push({pointIndex:Math.max(0,path.length-1),instructions:p.description,turn:p.turnType})}}
  if(!sm)sm=j.features[0].properties;
- RT={path,guide,dur:sm.totalTime*1000,dist:sm.totalDistance,ci:0};gi=0;spoken={};
+ RT={path,guide,alerts,dur:sm.totalTime*1000,dist:sm.totalDistance,ci:0};gi=0;spoken={};AL={};
  rm(line);rm(mk);rm(mk2);
  const pp=path.map(p=>LL(p[1],p[0]));line=new T.Polyline({map,path:pp,strokeColor:'#e8303a',strokeWeight:8,strokeOpacity:.9});
  mk=new T.Marker({map,position:pp[0]});mk2=new T.Marker({map,position:pp[pp.length-1]});
@@ -97,14 +123,16 @@ function startNav(){if(!RT)return;SND=st.snd!==false;snd.textContent=SND?'🔊':
  if(!mk3)mk3=new T.Marker({map,position:map.getCenter(),iconHTML:DOT,iconSize:new T.Size(30,30)});
  WID=navigator.geolocation.watchPosition(onPos,e=>{if(nI.textContent=='-')nI.textContent='위치 오류: '+e.message},{enableHighAccuracy:true,maximumAge:1000,timeout:20000})}
 let mk3=null;
-function stopNav(silent){if(WID!=null)navigator.geolocation.clearWatch(WID);WID=null;nav.style.display='none';if(mk3){mk3.setMap(null);mk3=null}if(RT)info.hidden=false;if(!silent)say('안내를 종료합니다')}
+function stopNav(silent){HD=0;PH=null;setTimeout(applyView,0);if(WID!=null)navigator.geolocation.clearWatch(WID);WID=null;nav.style.display='none';if(mk3){mk3.setMap(null);mk3=null}if(RT)info.hidden=false;if(!silent)say('안내를 종료합니다')}
 function near(lat,lng){let bi=0,bd=1e9;const P=RT.path;const a=RT.ci||0,b=Math.min(P.length,a+300);for(let i=a;i<b;i++){const d=km(lat,lng,P[i][1],P[i][0]);if(d<bd){bd=d;bi=i}}if(bd<=50){RT.ci=bi;return[bi,bd]}bd=1e9;for(let i=0;i<P.length;i++){const d=km(lat,lng,P[i][1],P[i][0]);if(d<bd){bd=d;bi=i}}if(bd<=50)RT.ci=bi;return[bi,bd]}
 function along(i,j){let d=0;const P=RT.path;for(let k=i;k<j&&k<P.length-1;k++)d+=km(P[k][1],P[k][0],P[k+1][1],P[k+1][0]);return d}
 async function onPos(p){if(!RT||rer)return;const lat=p.coords.latitude,lng=p.coords.longitude;if(!isFinite(lat)||!isFinite(lng))return;here=[lat,lng];const ll=LL(lat,lng);if(mk3)mk3.setPosition(ll);map.setCenter(ll);
+ if(PH){const dd=km(PH[0],PH[1],lat,lng);if(dd>5){HD=brg(PH,[lat,lng]);PH=[lat,lng]}}else PH=[lat,lng];if(isFinite(p.coords.heading)&&p.coords.heading!=null&&(p.coords.speed||0)>1)HD=p.coords.heading;applyView();
  const[i,d]=near(lat,lng);
- if(d>50&&(p.coords.accuracy||0)<60){if(++off>=3){off=0;rer=true;nI.textContent='경로 재탐색 중…';say('경로를 재탐색합니다');try{await drawRoute(here,DEST,1)}catch(e){}rer=false}return}off=0;
+ if(d>50&&(p.coords.accuracy||0)<60){if(++off>=3){off=0;rer=true;nI.textContent='경로 재탐색 중…';toast('경로를 재탐색합니다','i','🔄');say('경로를 재탐색합니다');try{await drawRoute(here,DEST,1)}catch(e){}rer=false}return}off=0;
  const P=RT.path,last=P[P.length-1];const rem=Math.min(RT.dist,along(i,P.length-1));
- if(rem<30||(km(lat,lng,last[1],last[0])<20&&i>=P.length-3)){nT.textContent='🏁';nI.textContent='🏁 목적지 도착';nD.textContent='';nR.textContent='';say('목적지에 도착했습니다. 안내를 종료합니다');stopNav(1);navbtn.style.display='none';return}
+ if(rem<30||(km(lat,lng,last[1],last[0])<20&&i>=P.length-3)){nT.textContent='🏁';toast('목적지에 도착했습니다','ok','🏁');nI.textContent='🏁 목적지 도착';nD.textContent='';nR.textContent='';say('목적지에 도착했습니다. 안내를 종료합니다');stopNav(1);navbtn.style.display='none';return}
+ chkAlert(i);
  while(gi<RT.guide.length&&RT.guide[gi].pointIndex<=i)gi++;const g=RT.guide[gi];
  const remT=Math.round(RT.dur*(rem/RT.dist)/60000);nR.textContent='남은 '+fmt(rem)+' · '+remT+'분';
  if(g){const dg=along(i,g.pointIndex);nI.textContent=g.instructions;nT.textContent=TI(g.turn);nD.textContent=fmt(dg);
@@ -121,5 +149,35 @@ res.innerHTML='<div class="it">검색 실패 — 유튜브 링크를 붙여넣�
 function ratio(p){Lp.style.flex='0 0 '+p+'%';document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on',b.textContent.startsWith(Math.round(p)+':')));st.r=p;sv();setTimeout(()=>fit(),50)}const Lp=document.getElementById('L');if(st.r)ratio(st.r);
 let dr=false;bar.onpointerdown=e=>{dr=true;bar.setPointerCapture(e.pointerId)};bar.onpointermove=e=>{if(dr)ratio(Math.min(85,Math.max(15,e.clientX/innerWidth*100)))};bar.onpointerup=()=>dr=false;
 function tgl(x){const h=x===undefined?!document.body.classList.contains('hide'):x;document.body.classList.toggle('hide',h);tg.textContent=h?'☰':'▲';st.h=h;sv();setTimeout(()=>fit(),50)}tgl(!!st.h);
+// ===== T3: 지도 설정 / 테마 / 3D / 교통 / 헤딩 / 알림 =====
+const M=Object.assign({v:'2d',th:'auto',tr:false,nu:true},st.m||{});let HD=0,PH=null,TRD=null,TTO=null,AL={};
+function isNight(){if(M.th=='night')return true;if(M.th=='day')return false;const h=new Date().getHours();return h<6||h>=18}
+function setM(k,val){M[k]=val;st.m=M;sv();applyM()}
+function tileEl(){try{return map._data.mapTileLayerContainer.getElement()}catch(e){return null}}
+function applyM(){const n=isNight(),te=tileEl(),me=document.getElementById('map');
+ if(te){te.classList.toggle('nt',n);me.classList.remove('nt')}else me.classList.toggle('nt',n);
+ document.body.classList.toggle('night',n);bth.textContent=n?'🌙':'☀️';b3d.classList.toggle('on',M.v=='3d');
+ document.querySelectorAll('#sett .seg button').forEach(b=>b.classList.toggle('on',M[b.dataset.k]==b.dataset.v));
+ swT.classList.toggle('on',!!M.tr);swN.classList.toggle('on',!!M.nu);setTraffic(M.tr);applyView()}
+document.querySelectorAll('#sett .seg button').forEach(b=>b.onclick=()=>setM(b.dataset.k,b.dataset.v));
+function setTraffic(on){try{if(!T.extension||!T.extension.TData){if(on)console.log('traffic: TData 없음');return}
+ if(on&&!TRD){TRD=new T.extension.TData();TRD.autoTraffic(map,{trafficOnOff:true,trafficType:'AUTO'})}
+ else if(!on&&TRD){TRD.autoTraffic(map,{trafficOnOff:false});TRD=null}}catch(e){console.log('traffic',e.message)}}
+function applyView(){const me=document.getElementById('map');const rot=(!M.nu&&WID!=null)?HD:0;let t='';
+ if(M.v=='3d')t+='perspective(900px) rotateX(38deg) ';if(rot)t+='rotate('+(-rot)+'deg) ';
+ if(M.v=='3d'||rot)t+='scale('+(M.v=='3d'?1.55:1.45)+')';me.style.transform=t;cmp.firstChild.style.transform='rotate('+(-rot)+'deg)'}
+function brg(a,b){const r=Math.PI/180,y=Math.sin((b[1]-a[1])*r)*Math.cos(b[0]*r),x=Math.cos(a[0]*r)*Math.sin(b[0]*r)-Math.sin(a[0]*r)*Math.cos(b[0]*r)*Math.cos((b[1]-a[1])*r);return(Math.atan2(y,x)/r+360)%360}
+function zm(d){try{d>0?map.zoomIn():map.zoomOut()}catch(e){map.setZoom(map.getZoom()+d)}svc()}
+function recenter(){if(here)map.setCenter(LL(here[0],here[1]));else me()}
+function toast(t,cls,ic,ms){tT.textContent=t;tI.textContent=ic||'⚠️';toastEl.className='glass show '+(cls||'');clearTimeout(TTO);TTO=setTimeout(hideToast,ms||8000)}
+const toastEl=document.getElementById('toast');function hideToast(){toastEl.classList.remove('show')}
+function alertText(a){const sp=(a.text.match(/(\d{2,3})\s*(?:km|㎞)/i)||[])[1];
+ if(/카메라|단속/.test(a.text)||a.cam)return['전방 과속카메라'+(sp?' '+sp+'km/h':''),'','📷'];
+ if(a.turn==191)return['전방 제한속도'+(sp?' '+sp+'km/h':'')+' 구간','w','🚸'];if(a.turn==192)return['전방 사고다발 지역','w','⚠️'];
+ if(a.turn==193)return['전방 급커브','w','↪'];return['전방 낙석주의','w','🪨']}
+function chkAlert(i){const A=RT.alerts||[];for(let k=0;k<A.length;k++){const a=A[k];if(a.pointIndex<i||AL[k])continue;const d=along(i,a.pointIndex);
+ if(d<=500){AL[k]=1;const[t,c,ic]=alertText(a);toast(t+' · '+fmt(d),c,ic);say(t.replace('km/h','킬로'));break}}}
+window.T3=()=>({M,HD,nightTile:!!tileEl(),traffic:!!(T.extension&&T.extension.TData)});
+applyM();setInterval(()=>{if(M.th=='auto')applyM()},300000);
 if(st.v)play(st.v);
 </script></body></html>
