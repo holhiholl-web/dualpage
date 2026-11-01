@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>T4 T맵+유튜브</title>
+<title>T5 T맵+유튜브</title>
 <script src="https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=iSBCMHTI7D2DqUdLdiY5U2aS4XZZEIgl5ATPkc9g"></script>
 <style>
 :root{--bg:#0b0d10;--pn:#14171c;--pn2:#1c2027;--ln:rgba(255,255,255,.08);--tx:#eef1f5;--mu:#8b94a3;--ac:#3d7bff;--ok:#1fbf6a;--rd:#ff4757;--r:14px}
@@ -52,10 +52,6 @@ body.hide .tb,body.hide #info,body.hide #pl{display:none!important}
 #mapw{background:linear-gradient(#0e1726,#1d2a3d)}#map{transform-origin:50% 55%;transition:transform .5s}
 @media (max-height:600px){.fab{flex-direction:row}#fabL{bottom:76px}#fabR{bottom:12px}#toast{max-width:calc(100% - 262px)}#toast{font-size:16px}}
 .nt{filter:invert(.93) hue-rotate(180deg) brightness(.85) contrast(.92)}
-.iw{position:relative;flex:1 1 0;min-width:0;display:flex}.iw input{padding-right:56px}
-.mic{position:absolute;right:4px;top:4px;height:44px;width:44px;min-width:0;padding:0;border-radius:50%;background:transparent;font-size:22px}
-.mic.on{background:var(--rd);animation:pul 1.1s infinite}@keyframes pul{0%{box-shadow:0 0 0 0 rgba(255,71,87,.7)}100%{box-shadow:0 0 0 14px rgba(255,71,87,0)}}
-.iw input.lis{border-color:var(--rd);box-shadow:0 0 0 3px rgba(255,71,87,.3)}
 .chips{display:flex;gap:6px;overflow-x:auto;flex:1;min-width:0;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}
 .chips button{height:44px;font-size:16px;padding:0 14px;border-radius:22px;background:var(--pn2);border:1px solid var(--ln);color:var(--tx);max-width:200px;overflow:hidden;text-overflow:ellipsis}
 .chips button.e{color:var(--mu);border-style:dashed}.lk{margin-left:0;flex:none}
@@ -64,20 +60,40 @@ body.hide .tb,body.hide #info,body.hide #pl{display:none!important}
 .vc{cursor:pointer;border-radius:var(--r);overflow:hidden;background:var(--pn)}.vc img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#222}
 .vc .t{font-size:16px;font-weight:600;line-height:1.3;padding:8px 10px 2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.vc .c{font-size:14px;color:var(--mu);padding:0 10px 10px}
 .vc .d{position:relative}.vc .d b{position:absolute;right:6px;bottom:6px;background:rgba(0,0,0,.8);font-size:13px;padding:2px 6px;border-radius:6px}
-</style></head><body><div id="ver">T4</div><button id="tg" onclick="tgl()">▲</button><div id="wrap">
-<div class="pane" id="L"><div class="tb"><input id="from" placeholder="출발: 내 위치"><div class="iw"><input id="q" placeholder="도착지 · 장소/주소"><button class="mic" id="micQ" onclick="voice(q,route,this)" title="음성검색">🎤</button></div><button class="g i" onclick="me()" title="내 위치">📍</button><button class="g" onclick="sp()">검색</button><button onclick="route()">길찾기</button></div>
-<div class="tb s"><div class="seg" id="seg"><button onclick="ratio(50)">50:50</button><button onclick="ratio(60)">60:40</button><button onclick="ratio(40)">40:60</button></div><div class="chips" id="chips"></div><a class="lk" href="./">네이버판</a></div>
+/* T5: 초광폭 저높이 기기 */
+.tb{padding:6px 8px;gap:6px}.tb input,.tb button{height:46px}.tb input{font-size:18px}input.ki{cursor:pointer;caret-color:transparent}input.ki.act{border-color:var(--ac);box-shadow:0 0 0 3px rgba(61,123,255,.3)}
+#from{flex:.7 1 0}
+#tg{left:10px;bottom:10px;width:52px;height:52px}#ver{left:66px;bottom:2px}
+.fab button{width:48px;height:48px}
+#fabL{left:70px;bottom:10px;flex-direction:row!important}#fabR{right:10px;top:10px;bottom:auto!important;flex-direction:column!important}
+#nav,.info,#pl{right:68px!important}#sett{right:68px}
+#toast{left:10px!important;bottom:70px!important;max-width:calc(100% - 20px)!important}
+#kb{position:absolute;z-index:1500;left:0;right:0;bottom:0;display:none;flex-direction:column;gap:5px;padding:6px;background:rgba(14,16,20,.97);border-top:1px solid var(--ln);box-shadow:0 -10px 30px rgba(0,0,0,.6);height:max(52vh,272px);max-height:calc(100% - 4px)}
+#kb.on{display:flex}
+#kbP{display:flex;align-items:center;gap:6px;flex:none;height:44px}
+#kbT{flex:1;min-width:0;height:44px;display:flex;align-items:center;padding:0 12px;border-radius:12px;background:var(--pn2);border:1px solid var(--ac);font-size:20px;white-space:pre;overflow:hidden}
+#kbT i{display:inline-block;width:2px;height:24px;background:var(--ac);margin-left:1px;vertical-align:middle;animation:blk 1s steps(1) infinite}@keyframes blk{50%{opacity:0}}
+#kbL{flex:none;font-size:14px;color:var(--mu);padding:0 4px}
+#kbP button{height:44px;min-width:52px;padding:0 12px;font-size:18px}
+#chips{display:flex;gap:6px;overflow-x:auto;flex:none;height:44px;scrollbar-width:none}#chips:empty{display:none}#chips::-webkit-scrollbar{display:none}
+#chips button{height:44px;font-size:15px;padding:0 12px;border-radius:22px;background:var(--pn2);border:1px solid var(--ln);color:var(--tx);max-width:220px;overflow:hidden;text-overflow:ellipsis;flex:none}#chips button.e{color:var(--mu);border-style:dashed}
+.kr{display:flex;gap:5px;flex:1;min-height:44px}
+.kr button{flex:1 1 0;min-width:0;height:auto;padding:0;font-size:22px;font-weight:500;border-radius:10px;background:#2a2f38;color:var(--tx);border:0;box-shadow:0 2px 0 #0006}
+.kr button.f{background:#3a404b;font-size:17px}.kr button.w2{flex:1.6}.kr button.sp{flex:4.5}.kr button.go{flex:2;background:var(--ac)}.kr button.on{background:var(--ac)}
+.kr button:active{background:#55607a}
+</style></head><body><div id="ver">T5</div><button id="tg" onclick="tgl()">▲</button><div id="wrap"><div id="kb"><div id="kbP"><span id="kbL">도착지</span><div id="kbT"><span id="kbS"></span><i></i></div><button class="g" onclick="kbClear()">지우기</button><button class="g" onclick="kbClose()">✕</button></div><div id="chips"></div><div id="kbK"></div></div>
+<div class="pane" id="L"><div class="tb"><input id="from" class="ki" placeholder="출발: 내 위치" readonly inputmode="none"><input id="q" class="ki" placeholder="도착지 · 장소/주소" readonly inputmode="none"><button class="g" onclick="sp()">검색</button><button onclick="route()">길찾기</button></div>
 <div id="mapw"><div id="map"></div><div id="info" class="info glass" hidden></div><div id="pl" class="glass" hidden></div><div id="nav" class="glass"><div class="top"><div id="nT">↑</div><div style="min-width:0;flex:1"><span id="nD"></span><span id="nI">-</span></div></div><div class="bot"><button class="stop" onclick="stopNav()">■ 안내 종료</button><button class="g" id="snd" onclick="tSnd()">🔊</button><span id="nR"></span></div></div><div class="fab" id="fabR"><button id="b3d" onclick="setM('v',M.v=='3d'?'2d':'3d')">3D</button><button id="bth" onclick="setM('th',isNight()?'day':'night')">☀️</button><button id="bly" onclick="sett.hidden=!sett.hidden" title="지도 설정">🗂️</button></div>
-<div class="fab" id="fabL"><button onclick="zm(1)">＋</button><button onclick="zm(-1)">－</button><button id="cmp" onclick="recenter()" title="내 위치/북쪽"><span>🧭</span></button></div>
+<div class="fab" id="fabL"><button onclick="me()" title="내 위치">📍</button><button onclick="zm(1)">＋</button><button onclick="zm(-1)">－</button><button id="cmp" onclick="recenter()" title="내 위치/북쪽"><span>🧭</span></button></div>
 <div id="toast" class="glass"><span class="ic" id="tI">📷</span><span id="tT"></span><button onclick="hideToast()">✕</button></div>
 <div id="sett" class="glass" hidden><h3>지도 설정<button onclick="sett.hidden=true">✕</button></h3>
 <div class="sr">지도 보기<div class="seg" id="sV"><button data-k="v" data-v="2d">2D</button><button data-k="v" data-v="3d">3D</button></div></div>
 <div class="sr">지도 테마<div class="seg" id="sT"><button data-k="th" data-v="day">주간</button><button data-k="th" data-v="night">야간</button><button data-k="th" data-v="auto">자동</button></div></div>
 <div class="sr">교통정보<button class="sw" id="swT" onclick="setM('tr',!M.tr)"></button></div>
-<div class="sr">북쪽 고정<button class="sw" id="swN" onclick="setM('nu',!M.nu)"></button></div></div>
+<div class="sr">북쪽 고정<button class="sw" id="swN" onclick="setM('nu',!M.nu)"></button></div><div class="sr">화면 분할<div class="seg" id="seg"><button onclick="ratio(50)">50:50</button><button onclick="ratio(60)">60:40</button><button onclick="ratio(40)">40:60</button></div></div><div class="sr">지도 엔진<a class="lk" href="./">네이버판 열기</a></div></div>
 <button id="navbtn" onclick="startNav()">▶ 안내 시작</button></div></div>
 <div id="bar"></div>
-<div class="pane" id="R"><div class="tb"><button class="g i" onclick="home(1)" title="추천">🏠</button><div class="iw"><input id="v" placeholder="유튜브 링크 · ID · 검색어"><button class="mic" id="micV" onclick="voice(v,go,this)" title="음성검색">🎤</button></div><button onclick="go()">재생/검색</button></div>
+<div class="pane" id="R"><div class="tb"><button class="g i" onclick="home(1)" title="추천">🏠</button><input id="v" class="ki" placeholder="유튜브 검색어 · 링크" readonly inputmode="none"><button onclick="go()">재생/검색</button></div>
 <div id="yt"><div id="res"></div></div></div></div>
 <script>
 const S=localStorage,API=['https://api.piped.private.coffee','https://pipedapi.kavin.rocks','https://pipedapi.adminforge.de'];
@@ -191,24 +207,9 @@ function chkAlert(i){const A=RT.alerts||[];for(let k=0;k<A.length;k++){const a=A
  if(d<=500){AL[k]=1;const[t,c,ic]=alertText(a);toast(t+' · '+fmt(d),c,ic);say(t.replace('km/h','킬로'));break}}}
 window.T3=()=>({M,HD,nightTile:!!tileEl(),traffic:!!(T.extension&&T.extension.TData)});
 applyM();setInterval(()=>{if(M.th=='auto')applyM()},300000);
-// ===== T4: 음성검색 / 빠른 목적지 / 유튜브 홈 =====
-let REC=null,RTO=null;
-function voice(inp,run,btn){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
- if(REC){REC.abort();return}
- if(!SR){inp.focus();return toast('이 브라우저는 음성검색 미지원 · 핸들 음성버튼으로 입력해 보세요','w','🎤')}
- const r=new SR();r.lang='ko-KR';r.interimResults=true;r.maxAlternatives=1;r.continuous=false;REC=r;const old=inp.value,ph=inp.placeholder;let fin='',err='';
- const end=()=>{clearTimeout(RTO);REC=null;btn.classList.remove('on');inp.classList.remove('lis');inp.placeholder=ph};
- btn.classList.add('on');inp.classList.add('lis');inp.value='';inp.placeholder='말씀하세요…';
- r.onresult=e=>{let t='';for(let i=0;i<e.results.length;i++){t+=e.results[i][0].transcript;if(e.results[i].isFinal)fin=t}inp.value=t};
- r.onerror=e=>{err=e.error};
- r.onend=()=>{end();if(fin.trim()){inp.value=fin.trim();run()}else{inp.value=old;
-  if(err=='not-allowed'||err=='service-not-allowed')toast('마이크 권한이 필요합니다','w','🎤');
-  else if(err=='network')toast('이 브라우저는 음성검색 미지원 (서버 연결 불가)','w','🎤');
-  else if(err&&err!='aborted')toast('음성 인식 실패: '+err,'w','🎤');else if(err!='aborted')toast('음성이 들리지 않았어요','i','🎤')}};
- try{r.start()}catch(x){end();return toast('이 브라우저는 음성검색 미지원','w','🎤')}
- RTO=setTimeout(()=>{try{r.stop()}catch(x){}},10000)}
+// ===== T4/T5: 빠른 목적지 / 유튜브 홈 =====
 function addRecent(x){if(!x||!isFinite(x.lat))return;const n=x.n.split(',')[0];st.rc=[{n,lat:x.lat,lng:x.lng}].concat((st.rc||[]).filter(r=>r.n!=n)).slice(0,6);sv();chips()}
-async function goDest(x){try{DEST={n:x.n,lat:x.lat,lng:x.lng};ORG='';q.value=x.n;msg('내 위치 확인 중…');const A=await myPos();await drawRoute(A,DEST)}catch(e){msg('오류: '+e.message,1)}}
+async function goDest(x){try{kbClose();DEST={n:x.n,lat:x.lat,lng:x.lng};ORG='';q.value=x.n;msg('내 위치 확인 중…');const A=await myPos();await drawRoute(A,DEST)}catch(e){msg('오류: '+e.message,1)}}
 function favSet(k,lab){const cur=DEST&&q.value.trim()&&DEST.n.split(',')[0];if(!cur)return toast(lab+': 먼저 도착지를 검색한 뒤 길게 눌러 저장하세요','i','📌');
  st[k]={n:DEST.n.split(',')[0],lat:DEST.lat,lng:DEST.lng};sv();chips();toast(lab+' 저장: '+st[k].n,'ok','📌')}
 function chips(){const c=document.getElementById('chips');c.innerHTML='';
@@ -229,6 +230,67 @@ async function home(force){res.style.display='block';yt.querySelectorAll('iframe
   L=L.filter(x=>x.url&&x.url.includes('v=')&&x.title);if(L.length)S.v10h=JSON.stringify({t:Date.now(),L})}
  if(!L.length){res.innerHTML='<div class="hh">추천 영상을 불러오지 못했어요 — 검색하거나 링크를 붙여넣어 주세요</div>';return}
  res.innerHTML='<div class="hh"><span>🔥 지금 인기 · 추천</span></div><div class="hg"></div>';const g=res.querySelector('.hg');L.slice(0,40).forEach(x=>g.appendChild(card(x)))}
+
+/*HG*/
+const HG=(()=>{const CHO='ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ',JUNG='ㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ',JONG=' ㄱㄲㄳㄴㄵㄶㄷㄹㄺㄻㄼㄽㄾㄿㅀㅁㅂㅄㅅㅆㅇㅈㅊㅋㅌㅍㅎ';
+ const VC={'ㅗㅏ':'ㅘ','ㅗㅐ':'ㅙ','ㅗㅣ':'ㅚ','ㅜㅓ':'ㅝ','ㅜㅔ':'ㅞ','ㅜㅣ':'ㅟ','ㅡㅣ':'ㅢ'};
+ const JC={'ㄱㅅ':'ㄳ','ㄴㅈ':'ㄵ','ㄴㅎ':'ㄶ','ㄹㄱ':'ㄺ','ㄹㅁ':'ㄻ','ㄹㅂ':'ㄼ','ㄹㅅ':'ㄽ','ㄹㅌ':'ㄾ','ㄹㅍ':'ㄿ','ㄹㅎ':'ㅀ','ㅂㅅ':'ㅄ'};
+ const JS={};for(const k in JC)JS[JC[k]]=[k[0],k[1]];
+ const isV=c=>JUNG.includes(c),isC=c=>CHO.includes(c)||JONG.indexOf(c)>0;
+ const mk=(c,j,t)=>String.fromCharCode(0xAC00+(CHO.indexOf(c)*21+JUNG.indexOf(j))*28+(t?JONG.indexOf(t):0));
+ const dec=ch=>{const n=ch.charCodeAt(0)-0xAC00;if(n<0||n>11171)return null;return[CHO[Math.floor(n/588)],JUNG[Math.floor(n%588/28)],n%28?JONG[n%28]:'']};
+ // st={text, hist:[]}  hist non-empty = composing last char
+ function key(st,k){const t=st.text,last=t.slice(-1),pre=t.slice(0,-1),comp=st.hist.length>0;
+  const push=nt=>{st.hist.push(t);st.text=nt};
+  if(isV(k)){
+   if(comp){const d=dec(last);
+    if(d&&d[2]){let a=d[2],b='';if(JS[a]){[a,b]=JS[a]}else{b=a;a=''}
+     if(CHO.includes(b)){const base=pre+mk(d[0],d[1],a);st.hist=[base,base+b];st.text=base+mk(b,k);return st}}
+    else if(d&&!d[2]&&VC[d[1]+k]){push(pre+mk(d[0],VC[d[1]+k]));return st}
+    else if(!d&&CHO.includes(last)){push(pre+mk(last,k));return st}
+    else if(!d&&VC[last+k]){push(pre+VC[last+k]);return st}}
+   st.hist=[t];st.text=t+k;return st}
+  if(isC(k)){
+   if(comp){const d=dec(last);
+    if(d&&!d[2]&&JONG.indexOf(k)>0){push(pre+mk(d[0],d[1],k));return st}
+    if(d&&d[2]&&JC[d[2]+k]){push(pre+mk(d[0],d[1],JC[d[2]+k]));return st}}
+   st.hist=[t];st.text=t+k;return st}
+  st.hist=[];st.text=t+k;return st}
+ function back(st){if(st.hist.length){st.text=st.hist.pop()}else st.text=st.text.slice(0,-1);return st}
+ function type(seq){const st={text:'',hist:[]};for(const c of seq){if(c=='\b')back(st);else key(st,c)}return st.text}
+ return{key,back,type,commit:st=>{st.hist=[];return st}}})();
+/*HG*/
+// ===== T5: 가상 키보드 =====
+const KB={f:null,st:{text:'',hist:[]},ko:true,sh:false,sym:false};
+const KO=[['ㅂ','ㅈ','ㄷ','ㄱ','ㅅ','ㅛ','ㅕ','ㅑ','ㅐ','ㅔ'],['ㅁ','ㄴ','ㅇ','ㄹ','ㅎ','ㅗ','ㅓ','ㅏ','ㅣ'],['ㅋ','ㅌ','ㅊ','ㅍ','ㅠ','ㅜ','ㅡ']];
+const KS={'ㅂ':'ㅃ','ㅈ':'ㅉ','ㄷ':'ㄸ','ㄱ':'ㄲ','ㅅ':'ㅆ','ㅐ':'ㅒ','ㅔ':'ㅖ'};
+const EN=[['q','w','e','r','t','y','u','i','o','p'],['a','s','d','f','g','h','j','k','l'],['z','x','c','v','b','n','m']];
+const SY=[['1','2','3','4','5','6','7','8','9','0'],['-','/',':','(',')','&','@','.',','],['?','!','\'','#','%','+','=']];
+const KBF={q:['도착지',()=>route()],from:['출발지',()=>kbOpen(q)],v:['유튜브 검색',()=>go()]};
+function kbRender(){const K=document.getElementById('kbK');K.innerHTML='';const L=KB.sym?SY:KB.ko?KO:EN;
+ const row=(keys)=>{const r=document.createElement('div');r.className='kr';keys.forEach(k=>{const b=document.createElement('button');
+  if(typeof k=='string'){let c=k;if(KB.sh&&!KB.sym)c=KB.ko?(KS[k]||k):k.toUpperCase();b.textContent=c;b.dataset.c=c}else{b.textContent=k.t;b.className=k.c||'f';b.dataset.a=k.a}r.appendChild(b)});K.appendChild(r)};
+ row(L[0]);row(L[1]);row([{t:KB.sym?'':'⇧',a:'sh',c:'f w2'+(KB.sh?' on':'')}].concat(L[2]).concat([{t:'⌫',a:'bs',c:'f w2'}]));
+ row([{t:KB.sym?'가':'123',a:'sym',c:'f w2'},{t:KB.ko?'한/영 ▸A':'한/영 ▸한',a:'ko',c:'f w2'},{t:'',a:'sp',c:'sp'},{t:KBF[KB.f.id][0]=='출발지'?'다음':'검색',a:'go',c:'go'}]);
+ document.getElementById("kbS").textContent=KB.st.text;KB.f.value=KB.st.text;const T_=document.getElementById("kbT");T_.scrollLeft=T_.scrollWidth}
+function kbKey(c){HG.key(KB.st,c);if(KB.sh&&!KB.ko){}KB.sh=false;kbRender()}
+function kbAct(a){const S=KB.st;
+ if(a=='bs'){HG.back(S)}else if(a=='sp'){HG.commit(S);S.text+=' '}else if(a=='sh'){if(!KB.sym)KB.sh=!KB.sh}
+ else if(a=='ko'){HG.commit(S);KB.ko=!KB.ko;KB.sym=false;KB.sh=false;st.kbko=KB.ko;sv()}else if(a=='sym'){HG.commit(S);KB.sym=!KB.sym;KB.sh=false}
+ else if(a=='go'){const f=KB.f,run=KBF[f.id][1];f.value=S.text.trim();kbClose();run();return}kbRender()}
+let KBR=null,KBT=null;
+document.getElementById('kbK').addEventListener('pointerdown',e=>{const b=e.target.closest('button');if(!b)return;e.preventDefault();
+ const fire=()=>b.dataset.c?kbKey(b.dataset.c):kbAct(b.dataset.a);fire();
+ if(b.dataset.a=='bs'){clearTimeout(KBT);clearInterval(KBR);KBT=setTimeout(()=>{KBR=setInterval(()=>{HG.back(KB.st);kbRender()},80)},450)}});
+['pointerup','pointercancel','pointerleave'].forEach(ev=>document.getElementById('kbK').addEventListener(ev,()=>{clearTimeout(KBT);clearInterval(KBR)}));
+function kbOpen(f){KB.f=f;KB.st={text:f.value||'',hist:[]};KB.ko=st.kbko!==false;KB.sh=KB.sym=false;
+ document.querySelectorAll('input.ki').forEach(x=>x.classList.toggle('act',x==f));const pane=f.closest('.pane'),kb=document.getElementById('kb');pane.appendChild(kb);kb.classList.add('on');
+ document.getElementById('kbL').textContent=KBF[f.id][0];document.getElementById('chips').style.display=f.id=='q'?'':'none';kbRender()}
+function kbClose(){document.getElementById('kb').classList.remove('on');document.querySelectorAll('input.ki').forEach(x=>x.classList.remove('act'));if(KB.f)KB.f.value=KB.st.text.trim()}
+function kbClear(){KB.st={text:'',hist:[]};kbRender()}
+document.querySelectorAll('input.ki').forEach(f=>{f.addEventListener('pointerdown',e=>{e.preventDefault();kbOpen(f)});f.addEventListener('focus',()=>{f.blur();if(!document.getElementById('kb').classList.contains('on')||KB.f!=f)kbOpen(f)})});
+// 물리 키보드(테스트/PC)용: 영문은 그대로, Enter/Backspace/Escape
+addEventListener('keydown',e=>{if(!document.getElementById('kb').classList.contains('on'))return;if(e.key=='Enter')kbAct('go');else if(e.key=='Backspace')kbAct('bs');else if(e.key=='Escape')kbClose();else if(e.key==' ')kbAct('sp');else return;e.preventDefault()});
 
 if(st.v)play(st.v);else home();
 </script></body></html>
