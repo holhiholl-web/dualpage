@@ -1,7 +1,6 @@
 <!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>T8 듀얼맵+유튜브</title>
+<title>T9 듀얼맵+유튜브</title>
 <script src="https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=iSBCMHTI7D2DqUdLdiY5U2aS4XZZEIgl5ATPkc9g"></script>
-<script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=pjnsybl1fs"></script>
 <style>
 :root{--bg:#0b0d10;--pn:#14171c;--pn2:#1c2027;--ln:rgba(255,255,255,.08);--tx:#eef1f5;--mu:#8b94a3;--ac:#3d7bff;--ok:#1fbf6a;--rd:#ff4757;--r:14px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font-family:-apple-system,"Pretendard","Noto Sans KR","Apple SD Gothic Neo",system-ui,sans-serif;overflow:hidden}
@@ -82,14 +81,15 @@ body.hide .tb,body.hide #info,body.hide #pl{display:none!important}
 .kr button{flex:1 1 0;min-width:0;height:auto;padding:0;font-size:22px;font-weight:500;border-radius:10px;background:#2a2f38;color:var(--tx);border:0;box-shadow:0 2px 0 #0006}
 .kr button.f{background:#3a404b;font-size:17px}.kr button.w2{flex:1.6}.kr button.sp{flex:4.5}.kr button.go{flex:2;background:var(--ac)}.kr button.on{background:var(--ac)}
 .kr button:active{background:#55607a}
-#here0{position:absolute;z-index:999;left:50%;top:50%;transform:translate(-50%,-130%);height:48px;background:var(--ok);box-shadow:0 4px 16px #000a}#here0[hidden]{display:none}
+#lpc{position:absolute;z-index:1001;width:min(340px,calc(100% - 90px));padding:10px 10px 10px 14px}#lpc[hidden]{display:none}#lpc .ln{font-size:18px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#lpc .la{font-size:14px;color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}#lpc button{height:46px;font-size:16px;padding:0 10px}#lpc .x{width:44px;min-width:0;height:44px;padding:0;background:transparent;color:var(--mu);font-size:20px}
 .eng{position:absolute;left:0;top:0;width:100%;height:100%}
 #fabR button.eb{font-weight:900;font-size:20px;font-family:Arial,sans-serif;opacity:.75}
 #bet b{background:linear-gradient(135deg,#ff2d6f,#7b3dff 55%,#2d8bff);-webkit-background-clip:text;background-clip:text;color:transparent}
 #ben b{color:#03c75a}
 #fabR button.eb.on{opacity:1;background:#fff;border:2px solid #fff;box-shadow:0 0 0 3px rgba(61,123,255,.6),0 4px 14px rgba(0,0,0,.45)}
 #fabR button.eb:disabled{opacity:.25}
-</style></head><body><div id="ver">T8</div><button id="tg" onclick="tgl()">▲</button><div id="wrap"><div id="kb"><div id="kbP"><span id="kbL">도착지</span><div id="kbT"><span id="kbS"></span><i></i></div><button class="g" onclick="kbClear()">지우기</button><button class="g" onclick="kbClose()">✕</button></div><div id="chips"></div><div id="kbK"></div></div>
+#fabR button.eb.ld{animation:pul 1s infinite}@keyframes pul{50%{opacity:.35}}
+</style></head><body><div id="ver">T9</div><button id="tg" onclick="tgl()">▲</button><div id="wrap"><div id="kb"><div id="kbP"><span id="kbL">도착지</span><div id="kbT"><span id="kbS"></span><i></i></div><button class="g" onclick="kbClear()">지우기</button><button class="g" onclick="kbClose()">✕</button></div><div id="chips"></div><div id="kbK"></div></div>
 <div class="pane" id="L"><div class="tb"><input id="from" class="ki" placeholder="출발: 내 위치" readonly inputmode="none"><input id="q" class="ki" placeholder="도착지 · 장소/주소" readonly inputmode="none"><button class="g" onclick="sp()">검색</button><button onclick="route()">길찾기</button></div>
 <div id="mapw"><div id="map"><div id="tm" class="eng"></div><div id="nm" class="eng"></div></div><div id="info" class="info glass" hidden></div><div id="pl" class="glass" hidden></div><div id="nav" class="glass"><div class="top"><div id="nT">↑</div><div style="min-width:0;flex:1"><span id="nD"></span><span id="nI">-</span></div></div><div class="bot"><button class="stop" onclick="stopNav()">■ 안내 종료</button><button class="g" id="snd" onclick="tSnd()">🔊</button><span id="nR"></span></div></div><div class="fab" id="fabR"><button id="bet" class="eb" onclick="setEng('t')" title="T맵"><b>T</b></button><button id="ben" class="eb" onclick="setEng('n')" title="네이버지도"><b>N</b></button><button id="b3d" onclick="setM('v',M.v=='3d'?'2d':'3d')">3D</button><button id="bth" onclick="setM('th',isNight()?'day':'night')">☀️</button><button id="bly" onclick="sett.hidden=!sett.hidden" title="지도 설정">🗂️</button></div>
 <div class="fab" id="fabL"><button onclick="me()" title="내 위치">📍</button><button onclick="zm(1)">＋</button><button onclick="zm(-1)">－</button><button id="cmp" onclick="recenter()" title="내 위치/북쪽"><span>🧭</span></button></div>
@@ -99,7 +99,7 @@ body.hide .tb,body.hide #info,body.hide #pl{display:none!important}
 <div class="sr">지도 테마<div class="seg" id="sT"><button data-k="th" data-v="day">주간</button><button data-k="th" data-v="night">야간</button><button data-k="th" data-v="auto">자동</button></div></div>
 <div class="sr">교통정보<button class="sw" id="swT" onclick="setM('tr',!M.tr)"></button></div>
 <div class="sr">북쪽 고정<button class="sw" id="swN" onclick="setM('nu',!M.nu)"></button></div><div class="sr">화면 분할<div class="seg" id="seg"><button onclick="ratio(50)">50:50</button><button onclick="ratio(60)">60:40</button><button onclick="ratio(40)">40:60</button></div></div><div class="sr">소리<span style="display:flex;gap:6px"><button class="g" style="height:44px;font-size:16px" onclick="tSnd();sndLbl()" id="sndS"></button><button style="height:44px;font-size:16px" onclick="sndTest()">소리 테스트</button></span></div><pre id="sdiag" hidden style="margin:6px 0;padding:8px;background:#0008;border-radius:10px;font-size:13px;white-space:pre-wrap;color:#cfd6e0"></pre><div class="sr">지도 엔진<a class="lk" href="./">네이버판 열기</a></div></div>
-<button id="here0" hidden onclick="setOrigin()">📍 여기서 출발</button><button id="navbtn" onclick="startNav()">▶ 안내 시작</button></div></div>
+<div id="lpc" class="glass" hidden><div style="display:flex;align-items:flex-start;gap:8px"><div style="flex:1;min-width:0"><div id="lpcN" class="ln"></div><div id="lpcA" class="la"></div></div><button class="x" onclick="lpClose()">✕</button></div><div style="display:flex;gap:6px;margin-top:8px"><button onclick="lpGo()" style="flex:1.4">🚗 여기로 길찾기</button><button class="g" onclick="lpFrom()" style="flex:1">여기서 출발</button></div></div><button id="navbtn" onclick="startNav()">▶ 안내 시작</button></div></div>
 <div id="bar"></div>
 <div class="pane" id="R"><div class="tb"><button class="g i" onclick="home(1)" title="추천">🏠</button><input id="v" class="ki" placeholder="유튜브 검색어 · 링크" readonly inputmode="none"><button onclick="go()">재생/검색</button></div>
 <div id="yt"><div id="res"></div></div></div></div>
@@ -108,9 +108,12 @@ const S=localStorage,API=['https://api.piped.private.coffee','https://pipedapi.k
 let st=JSON.parse(S.v10t||'{}');const sv=()=>S.v10t=JSON.stringify(st);
 const TK='iSBCMHTI7D2DqUdLdiY5U2aS4XZZEIgl5ATPkc9g',TA='https://apis.openapi.sk.com/tmap';
 // ===== T8: 듀얼 엔진 파사드 (T맵 / 네이버) =====
-const TM=window.Tmapv2||null,NM=(window.naver&&naver.maps)||null;
+const TM=window.Tmapv2||null;let NM=(window.naver&&naver.maps)||null,NLP=null;
+function loadNaver(){if(NM)return Promise.resolve(NM);if(NLP)return NLP;NLP=new Promise((ok,no)=>{let n=0;const go=()=>{const sc=document.createElement('script');sc.src='https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=pjnsybl1fs&_r='+n;let done=false;const to=setTimeout(()=>fail('timeout'),12000);
+ sc.onload=()=>{const t=setInterval(()=>{if(window.naver&&naver.maps&&naver.maps.Map){clearInterval(t);clearTimeout(to);done=true;NM=naver.maps;ok(NM)}},50);setTimeout(()=>clearInterval(t),5000)};sc.onerror=()=>fail('error');
+ function fail(w){if(done)return;done=true;clearTimeout(to);sc.remove();if(++n<3)setTimeout(go,1500);else{NLP=null;no(new Error(w))}}document.head.appendChild(sc)};go()});return NLP}
 const LL=(a,b)=>({_a:+a,_b:+b,lat(){return this._a},lng(){return this._b}});
-const c0=st.c||[35.16,126.85];let ENG=(st.eng=='t'||st.eng=='n')?st.eng:'n';if(ENG=='n'&&!NM)ENG='t';if(ENG=='t'&&!TM&&NM)ENG='n';
+const c0=st.c||[35.16,126.85];const WANT=(st.eng=='t'||st.eng=='n')?st.eng:'n';let ENG=WANT;if(ENG=='n'&&!NM)ENG='t';if(ENG=='t'&&!TM&&NM)ENG='n';
 const NAT={t:null,n:null},HND={},OV=new Set();
 function nLL(e,p){return e=='t'?new TM.LatLng(p.lat(),p.lng()):new NM.LatLng(p.lat(),p.lng())}
 function fromN(p){return LL(p.lat(),p.lng())}
@@ -137,15 +140,17 @@ XO.prototype.kill=function(){try{this.n&&this.n.setMap(null)}catch(x){}this.n=nu
 XO.prototype.setMap=function(m){if(!m){this.kill();OV.delete(this)}};
 XO.prototype.setPosition=function(p){this.o.position=p;try{this.n&&this.n.setPosition(nLL(this.e,p))}catch(x){}};
 const XMarker=function(o){return new XO('m',o)},XLine=function(o){return new XO('l',o)};
-function engBtns(){['t','n'].forEach(e=>{const b=document.getElementById('be'+e);if(b){b.classList.toggle('on',ENG==e);b.disabled=e=='t'?!TM:!NM}})}
-function setEng(e,why){if(e==ENG&&NAT[e])return engBtns();if(e=='t'&&!TM||e=='n'&&!NM){toast((e=='t'?'T맵':'네이버지도')+' 엔진을 불러오지 못했어요','w','🗺️');return}
+function engBtns(){['t','n'].forEach(e=>{const b=document.getElementById('be'+e);if(b){b.classList.toggle('on',ENG==e);b.disabled=e=='t'&&!TM;b.classList.toggle('ld',e=='n'&&!!NLP&&!NM)}})}
+function setEng(e,why){if(e==ENG&&NAT[e])return engBtns();if(e=='t'&&!TM){toast('T맵 엔진을 불러오지 못했어요','w','🗺️');return}
+ if(e=='n'&&!NM){toast('네이버 지도 불러오는 중…','i','⏳',12000);const p=loadNaver();engBtns();p.then(()=>{engBtns();setEng('n',why)}).catch(()=>{engBtns();toast('네이버 지도 로드 실패 — N을 다시 눌러 재시도','w','🗺️')});return}
  let c=c0,z=st.z||15;try{if(NAT[ENG]){const g=map.getCenter();c=[g.lat(),g.lng()];z=map.getZoom()}}catch(x){}
  try{if(TRD)setTraffic(false)}catch(x){}
  OV.forEach(o=>o.kill());const old=ENG;ENG=e;st.eng=e;sv();mkNative(e,c,z);
  document.getElementById('tm').style.display=e=='t'?'block':'none';document.getElementById('nm').style.display=e=='n'?'block':'none';
  try{NMAP().setCenter(nLL(e,LL(c[0],c[1])));NMAP().setZoom(z)}catch(x){}
- OV.forEach(o=>o.mk());fit();engBtns();if(typeof applyM=='function')applyM();if(why)toast(why,'w','🔁');else if(old!=e)toast((e=='t'?'T맵':'네이버지도')+'으로 전환','i','🗺️',2500)}
+ OV.forEach(o=>o.mk());fit();engBtns();if(typeof applyM=='function')applyM();if(why)toast(why,'w','🔁');else if(old!=e&&why!==false)toast((e=='t'?'T맵으로':'네이버 지도로')+' 전환','i','🗺️',2500)}
 mkNative(ENG,c0,st.z||15);document.getElementById(ENG=='t'?'nm':'tm').style.display='none';
+if(WANT=='n'&&!NM)setTimeout(()=>loadNaver().then(()=>{if(st.eng!='t'){setEng('n',false);st.eng='n';sv()}}).catch(()=>toast('네이버 지도를 불러오지 못해 T맵으로 표시 중 — N을 눌러 재시도','w','🗺️')),0);
 
 function fit0(){const w=document.getElementById('mapw'),e=document.getElementById('map');const W=w.clientWidth,H=w.clientHeight;if(!W||!H)return;e.style.width=W+'px';e.style.height=H+'px';try{map.resize(W,H)}catch(x){}}
 function fit(){fit0();requestAnimationFrame(fit0);setTimeout(fit0,300)}
@@ -164,16 +169,46 @@ function gset(p){const c=p.coords;here=[c.latitude,c.longitude];GP={lat:here[0],
 function gwatch(){if(!navigator.geolocation)return;try{navigator.geolocation.watchPosition(p=>{GERR=0;gset(p);if(mk3&&WID==null){}},e=>{GERR=e.code},{enableHighAccuracy:true,maximumAge:600000,timeout:60000})}catch(x){}}
 function gget(hi,to){return new Promise((ok,no)=>{if(!navigator.geolocation)return no({code:2});navigator.geolocation.getCurrentPosition(p=>ok(gset(p)),no,{enableHighAccuracy:hi,timeout:to,maximumAge:600000})})}
 function myPos(){if(GP&&Date.now()-GP.t<600000){here=[GP.lat,GP.lng];return Promise.resolve(here)}
- return gget(true,20000).catch(e=>{if(e&&e.code==1)throw gerr(e);return gget(false,20000)}).catch(e=>{throw e instanceof Error?e:gerr(e)})}
+ return gget(true,5000).catch(e=>{if(e&&e.code==1)throw gerr(e);return gget(false,3000)}).catch(e=>{throw e instanceof Error?e:gerr(e)})}
 // 경로 출발점: 수동 지정 > 신선한 GPS > GPS 재시도 > 저장된 마지막 위치 > 지도 중심 (절대 실패하지 않음)
-async function startPt(){if(MAN)return MAN;try{return await myPos()}catch(e){
+async function startPt(){if(MAN)return MAN;let n=8,ti=null;if(!(GP&&Date.now()-GP.t<600000)){msg('내 위치 확인 중… '+n+'초');ti=setInterval(()=>{n--;if(n>0&&!info.hidden&&info.textContent.startsWith('내 위치 확인'))info.textContent='내 위치 확인 중… '+n+'초'},1000)}
+ try{const r=await myPos();clearInterval(ti);return r}catch(e){clearInterval(ti);
  if(GP){toast(e.message+' · 마지막 위치에서 출발','w','📍');here=here||[GP.lat,GP.lng];ORG='마지막 위치';return[GP.lat,GP.lng]}
  const c=map.getCenter();toast(e.message+' · 현재 위치를 못 잡아 지도 중심에서 출발','w','📍');ORG='지도 중심';return[c.lat(),c.lng()]}}
 async function me(){try{const[a,b]=await myPos();MAN=null;pin(a,b,'내 위치');from.value=''}catch(e){toast(e.message,'w','📍')}}
-function mapTap(lat,lng){if(!isFinite(lat))return;const b=document.getElementById('here0');b.dataset.p=lat+','+lng;b.hidden=false;clearTimeout(b._t);b._t=setTimeout(()=>b.hidden=true,6000)}
-function setOrigin(){const b=document.getElementById('here0'),[a,c]=b.dataset.p.split(',').map(Number);b.hidden=true;MAN=[a,c];from.value='지도 선택 지점';rm(mk);mk=XMarker({position:LL(a,c),map,title:'출발'});toast('출발지 설정: 지도 선택 지점','ok','📍')}
-try{map.addListener('click',e=>{const l=e&&(e.latLng||e._latlng);if(l)mapTap(l.lat?l.lat():l._lat,l.lng?l.lng():l._lng)})}catch(x){}
 gwatch();
+// ===== T9: 길게 눌러 목적지 설정 =====
+function px2ll(x,y){try{if(ENG=='t'){const r=NAT.t.screenToReal(new TM.Point(x,y));return LL(r.lat(),r.lng())}
+ const c=NAT.n.getProjection().fromOffsetToCoord(new NM.Point(x,y));return LL(c.lat(),c.lng())}catch(e){return null}}
+// 화면 좌표 → 지도 요소 내부 좌표 (3D 기울기/회전 CSS 변환을 역산)
+function scr2map(cx,cy){const el=document.getElementById('map'),w=document.getElementById('mapw').getBoundingClientRect();const cs=getComputedStyle(el);
+ const ox=parseFloat(cs.transformOrigin.split(' ')[0])||0,oy=parseFloat(cs.transformOrigin.split(' ')[1])||0;
+ if(!cs.transform||cs.transform=='none')return[cx-w.left,cy-w.top];const m=new DOMMatrix(cs.transform);const X=cx-w.left-ox,Y=cy-w.top-oy;
+ const a1=m.m11-X*m.m14,b1=m.m21-X*m.m24,c1=X*m.m44-m.m41,a2=m.m12-Y*m.m14,b2=m.m22-Y*m.m24,c2=Y*m.m44-m.m42,d=a1*b2-a2*b1;if(Math.abs(d)<1e-9)return[cx-w.left,cy-w.top];
+ return[(c1*b2-c2*b1)/d+ox,(a1*c2-a2*c1)/d+oy]}
+let LPT=null,LP0=null,LPN=0,DPIN=null;
+const MW=document.getElementById('map');
+MW.addEventListener('pointerdown',e=>{LPN++;clearTimeout(LPT);if(LPN>1){LP0=null;return}LP0=[e.clientX,e.clientY];LPT=setTimeout(()=>{const p=LP0;LP0=null;if(p)longPress(p[0],p[1])},600)},true);
+MW.addEventListener('pointermove',e=>{if(LP0&&Math.hypot(e.clientX-LP0[0],e.clientY-LP0[1])>10){clearTimeout(LPT);LP0=null}},true);
+['pointerup','pointercancel','pointerleave'].forEach(t=>MW.addEventListener(t,e=>{LPN=Math.max(0,LPN-1);if(t!='pointerleave'){clearTimeout(LPT);LP0=null}},true));
+MW.addEventListener('contextmenu',e=>e.preventDefault());
+const PINH='<div style="width:30px;height:30px;transform:translate(0,-12px)"><svg viewBox="0 0 24 24" width="30" height="30"><path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7z" fill="#ff4757" stroke="#fff" stroke-width="1.5"/><circle cx="12" cy="9" r="2.6" fill="#fff"/></svg></div>';
+async function longPress(cx,cy){const[x,y]=scr2map(cx,cy);const p=px2ll(x,y);if(!p)return;try{navigator.vibrate&&navigator.vibrate(30)}catch(e){}
+ const la=p.lat(),lo=p.lng();rm(DPIN);DPIN=XMarker({map,position:LL(la,lo),iconHTML:PINH,iconSize:[30,30]});
+ const cd=document.getElementById('lpc'),w=document.getElementById('mapw').getBoundingClientRect();cd.dataset.p=la+','+lo;
+ lpcN.textContent='주소 확인 중…';lpcA.textContent=la.toFixed(5)+', '+lo.toFixed(5);cd.hidden=false;
+ const W=cd.offsetWidth,H=cd.offsetHeight;cd.style.left=Math.max(8,Math.min(w.width-W-70,cx-w.left-W/2))+'px';cd.style.top=Math.max(8,Math.min(w.height-H-70,cy-w.top-H-26))+'px';
+ const nm=await revGeo(la,lo);if(cd.dataset.p!=la+','+lo)return;lpcN.textContent=nm.n;lpcA.textContent=nm.a;cd.dataset.n=nm.n}
+async function revGeo(la,lo){try{const j=await (await fetch(TA+'/geo/reversegeocoding?version=1&format=json&coordType=WGS84GEO&addressType=A10&lat='+la+'&lon='+lo,{headers:{appKey:TK}})).json();const a=j.addressInfo||{};
+ const full=a.fullAddress||'';const parts=full.split(',');const road=parts.find(x=>/로|길/.test(x))||parts[0]||'';const n=a.buildingName||(a.legalDong&&a.bunji?a.legalDong+' '+a.bunji:'')||road.trim();
+ if(n)return{n:n.trim(),a:((road||full).replace(a.buildingName||'@@','').trim())||full}}catch(e){}return{n:'지도 선택 지점 ('+la.toFixed(4)+', '+lo.toFixed(4)+')',a:'주소 정보 없음'}}
+function lpClose(){document.getElementById('lpc').hidden=true;rm(DPIN);DPIN=null}
+async function lpGo(){const cd=document.getElementById('lpc'),[la,lo]=cd.dataset.p.split(',').map(Number),n=cd.dataset.n||('지도 선택 지점');cd.hidden=true;
+ DEST={n,lat:la,lng:lo};q.value=n;addRecent(DEST);rm(DPIN);DPIN=null;try{ORG='';let A;if(MAN&&from.value=='지도 선택 지점'){A=MAN;ORG='지도 선택 지점'}else{MAN=null;A=await startPt()}await drawRoute(A,DEST)}catch(e){msg('오류: '+e.message,1)}}
+function lpFrom(){const cd=document.getElementById('lpc'),[a,c]=cd.dataset.p.split(',').map(Number);cd.hidden=true;rm(DPIN);DPIN=null;MAN=[a,c];from.value='지도 선택 지점';rm(mk);mk=XMarker({position:LL(a,c),map,title:'출발'});toast('출발지 설정: '+(cd.dataset.n||'지도 선택 지점'),'ok','📍')}
+try{map.addListener('click',()=>{if(!document.getElementById('lpc').hidden&&!LP0)lpClose();sett.hidden=true})}catch(x){}
+window.T9={longPress,scr2map,px2ll};
+
 // 장소 찾기: TMAP POI 통합검색 (내 위치 기준 거리순)
 async function find(s){if(!here&&GP)here=[GP.lat,GP.lng];
  const c=here||[map.getCenter().lat(),map.getCenter().lng()];
@@ -187,7 +222,7 @@ function km(a,b,c,d){const R=6371e3,t=Math.PI/180,x=Math.sin((c-a)*t/2)**2+Math.
 function pick(list){return new Promise(ok=>{pl.innerHTML='<div style="background:#333">후보를 선택하세요 ✕</div>';pl.firstChild.onclick=()=>{pl.hidden=true;msg('취소됨')};list.forEach(x=>{const d=document.createElement('div');d.textContent=x.n+(here?'  ('+(km(here[0],here[1],x.lat,x.lng)/1000).toFixed(1)+'km)':'');d.onclick=()=>{pl.hidden=true;ok(x)};pl.appendChild(d)});pl.hidden=false})}
 async function sp(){try{const s=q.value.trim();if(!s)return;const l=await find(s);if(!l.length)return msg('결과 없음',1);const x=await pick(l);pin(x.lat,x.lng,x.n);msg('')}catch(e){msg('오류: '+e.message,1)}}
 async function route(){try{const s=q.value.trim();if(!s)return msg('도착지를 입력하세요',1);
- let A;if(MAN&&from.value=='지도 선택 지점'){A=MAN;ORG='지도 선택 지점'}else if(from.value.trim()){MAN=null;const l=await find(from.value.trim());if(!l.length)return msg('출발지 결과 없음',1);const x=await pick(l);A=[x.lat,x.lng];ORG=x.n.split(',')[0]}else{ORG='';MAN=null;msg('내 위치 확인 중…');A=await startPt()}
+ let A;if(MAN&&from.value=='지도 선택 지점'){A=MAN;ORG='지도 선택 지점'}else if(from.value.trim()){MAN=null;const l=await find(from.value.trim());if(!l.length)return msg('출발지 결과 없음',1);const x=await pick(l);A=[x.lat,x.lng];ORG=x.n.split(',')[0]}else{ORG='';MAN=null;A=await startPt()}
  msg('도착지 찾는 중…');const l=await find(s);if(!l.length)return msg('도착지를 찾지 못했어요: '+s,1);const B=l[0];DEST=B;addRecent(B);
  await drawRoute(A,B);}catch(e){msg('오류: '+e.message,1)}}
 window.RTdbg=()=>RT;let ORG='',DEST=null,RT=null,WID=null,SND=st.snd!==false,off=0,gi=0,spoken={},rer=false;
@@ -320,7 +355,7 @@ window.T3=()=>({M,HD,nightTile:!!tileEl(),traffic:!!TRD,eng:ENG});
 applyM();setInterval(()=>{if(M.th=='auto')applyM()},300000);
 // ===== T4/T5: 빠른 목적지 / 유튜브 홈 =====
 function addRecent(x){if(!x||!isFinite(x.lat))return;const n=x.n.split(',')[0];st.rc=[{n,lat:x.lat,lng:x.lng}].concat((st.rc||[]).filter(r=>r.n!=n)).slice(0,6);sv();chips()}
-async function goDest(x){try{kbClose();DEST={n:x.n,lat:x.lat,lng:x.lng};ORG='';q.value=x.n;msg('내 위치 확인 중…');const A=await startPt();await drawRoute(A,DEST)}catch(e){msg('오류: '+e.message,1)}}
+async function goDest(x){try{kbClose();DEST={n:x.n,lat:x.lat,lng:x.lng};ORG='';q.value=x.n;const A=await startPt();await drawRoute(A,DEST)}catch(e){msg('오류: '+e.message,1)}}
 function favSet(k,lab){const cur=DEST&&q.value.trim()&&DEST.n.split(',')[0];if(!cur)return toast(lab+': 먼저 도착지를 검색한 뒤 길게 눌러 저장하세요','i','📌');
  st[k]={n:DEST.n.split(',')[0],lat:DEST.lat,lng:DEST.lng};sv();chips();toast(lab+' 저장: '+st[k].n,'ok','📌')}
 function chips(){const c=document.getElementById('chips');c.innerHTML='';
