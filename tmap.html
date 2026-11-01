@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>T6 T맵+유튜브</title>
+<title>T7 T맵+유튜브</title>
 <script src="https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=iSBCMHTI7D2DqUdLdiY5U2aS4XZZEIgl5ATPkc9g"></script>
 <style>
 :root{--bg:#0b0d10;--pn:#14171c;--pn2:#1c2027;--ln:rgba(255,255,255,.08);--tx:#eef1f5;--mu:#8b94a3;--ac:#3d7bff;--ok:#1fbf6a;--rd:#ff4757;--r:14px}
@@ -82,7 +82,7 @@ body.hide .tb,body.hide #info,body.hide #pl{display:none!important}
 .kr button.f{background:#3a404b;font-size:17px}.kr button.w2{flex:1.6}.kr button.sp{flex:4.5}.kr button.go{flex:2;background:var(--ac)}.kr button.on{background:var(--ac)}
 .kr button:active{background:#55607a}
 #here0{position:absolute;z-index:999;left:50%;top:50%;transform:translate(-50%,-130%);height:48px;background:var(--ok);box-shadow:0 4px 16px #000a}#here0[hidden]{display:none}
-</style></head><body><div id="ver">T6</div><button id="tg" onclick="tgl()">▲</button><div id="wrap"><div id="kb"><div id="kbP"><span id="kbL">도착지</span><div id="kbT"><span id="kbS"></span><i></i></div><button class="g" onclick="kbClear()">지우기</button><button class="g" onclick="kbClose()">✕</button></div><div id="chips"></div><div id="kbK"></div></div>
+</style></head><body><div id="ver">T7</div><button id="tg" onclick="tgl()">▲</button><div id="wrap"><div id="kb"><div id="kbP"><span id="kbL">도착지</span><div id="kbT"><span id="kbS"></span><i></i></div><button class="g" onclick="kbClear()">지우기</button><button class="g" onclick="kbClose()">✕</button></div><div id="chips"></div><div id="kbK"></div></div>
 <div class="pane" id="L"><div class="tb"><input id="from" class="ki" placeholder="출발: 내 위치" readonly inputmode="none"><input id="q" class="ki" placeholder="도착지 · 장소/주소" readonly inputmode="none"><button class="g" onclick="sp()">검색</button><button onclick="route()">길찾기</button></div>
 <div id="mapw"><div id="map"></div><div id="info" class="info glass" hidden></div><div id="pl" class="glass" hidden></div><div id="nav" class="glass"><div class="top"><div id="nT">↑</div><div style="min-width:0;flex:1"><span id="nD"></span><span id="nI">-</span></div></div><div class="bot"><button class="stop" onclick="stopNav()">■ 안내 종료</button><button class="g" id="snd" onclick="tSnd()">🔊</button><span id="nR"></span></div></div><div class="fab" id="fabR"><button id="b3d" onclick="setM('v',M.v=='3d'?'2d':'3d')">3D</button><button id="bth" onclick="setM('th',isNight()?'day':'night')">☀️</button><button id="bly" onclick="sett.hidden=!sett.hidden" title="지도 설정">🗂️</button></div>
 <div class="fab" id="fabL"><button onclick="me()" title="내 위치">📍</button><button onclick="zm(1)">＋</button><button onclick="zm(-1)">－</button><button id="cmp" onclick="recenter()" title="내 위치/북쪽"><span>🧭</span></button></div>
@@ -91,7 +91,7 @@ body.hide .tb,body.hide #info,body.hide #pl{display:none!important}
 <div class="sr">지도 보기<div class="seg" id="sV"><button data-k="v" data-v="2d">2D</button><button data-k="v" data-v="3d">3D</button></div></div>
 <div class="sr">지도 테마<div class="seg" id="sT"><button data-k="th" data-v="day">주간</button><button data-k="th" data-v="night">야간</button><button data-k="th" data-v="auto">자동</button></div></div>
 <div class="sr">교통정보<button class="sw" id="swT" onclick="setM('tr',!M.tr)"></button></div>
-<div class="sr">북쪽 고정<button class="sw" id="swN" onclick="setM('nu',!M.nu)"></button></div><div class="sr">화면 분할<div class="seg" id="seg"><button onclick="ratio(50)">50:50</button><button onclick="ratio(60)">60:40</button><button onclick="ratio(40)">40:60</button></div></div><div class="sr">지도 엔진<a class="lk" href="./">네이버판 열기</a></div></div>
+<div class="sr">북쪽 고정<button class="sw" id="swN" onclick="setM('nu',!M.nu)"></button></div><div class="sr">화면 분할<div class="seg" id="seg"><button onclick="ratio(50)">50:50</button><button onclick="ratio(60)">60:40</button><button onclick="ratio(40)">40:60</button></div></div><div class="sr">소리<span style="display:flex;gap:6px"><button class="g" style="height:44px;font-size:16px" onclick="tSnd();sndLbl()" id="sndS"></button><button style="height:44px;font-size:16px" onclick="sndTest()">소리 테스트</button></span></div><pre id="sdiag" hidden style="margin:6px 0;padding:8px;background:#0008;border-radius:10px;font-size:13px;white-space:pre-wrap;color:#cfd6e0"></pre><div class="sr">지도 엔진<a class="lk" href="./">네이버판 열기</a></div></div>
 <button id="here0" hidden onclick="setOrigin()">📍 여기서 출발</button><button id="navbtn" onclick="startNav()">▶ 안내 시작</button></div></div>
 <div id="bar"></div>
 <div class="pane" id="R"><div class="tb"><button class="g i" onclick="home(1)" title="추천">🏠</button><input id="v" class="ki" placeholder="유튜브 검색어 · 링크" readonly inputmode="none"><button onclick="go()">재생/검색</button></div>
@@ -144,7 +144,7 @@ async function route(){try{const s=q.value.trim();if(!s)return msg('도착지를
  let A;if(MAN&&from.value=='지도 선택 지점'){A=MAN;ORG='지도 선택 지점'}else if(from.value.trim()){MAN=null;const l=await find(from.value.trim());if(!l.length)return msg('출발지 결과 없음',1);const x=await pick(l);A=[x.lat,x.lng];ORG=x.n.split(',')[0]}else{ORG='';MAN=null;msg('내 위치 확인 중…');A=await startPt()}
  msg('도착지 찾는 중…');const l=await find(s);if(!l.length)return msg('도착지를 찾지 못했어요: '+s,1);const B=l[0];DEST=B;addRecent(B);
  await drawRoute(A,B);}catch(e){msg('오류: '+e.message,1)}}
-window.RTdbg=()=>RT;let ORG='',DEST=null,RT=null,WID=null,SND=true,off=0,gi=0,spoken={},rer=false;
+window.RTdbg=()=>RT;let ORG='',DEST=null,RT=null,WID=null,SND=st.snd!==false,off=0,gi=0,spoken={},rer=false;
 async function drawRoute(A,B,nav){if(!nav)msg('경로 검색 중…');
  const r=await fetch(TA+'/routes?version=1&format=json',{method:'POST',headers:{appKey:TK,'Content-Type':'application/json'},body:JSON.stringify({startX:''+A[1],startY:''+A[0],endX:''+B.lng,endY:''+B.lat,reqCoordType:'WGS84GEO',resCoordType:'WGS84GEO',searchOption:'0',trafficInfo:'N'})});
  const j=await r.json();if(!j.features)return msg('길찾기 실패: '+((j.error&&j.error.message)||r.status),1);
@@ -160,8 +160,37 @@ async function drawRoute(A,B,nav){if(!nav)msg('경로 검색 중…');
  mk=new T.Marker({map,position:pp[0]});mk2=new T.Marker({map,position:pp[pp.length-1]});
  if(!nav){const b=new T.LatLngBounds();pp.forEach(p=>b.extend(p));map.fitBounds(b,{top:40,right:40,bottom:40,left:40});}
  const m=Math.round(sm.totalTime/60);(nav?()=>{}:msg)('🚗 총 '+(sm.totalDistance/1000).toFixed(1)+'km · '+(m>=60?Math.floor(m/60)+'시간 ':'')+m%60+'분 · 통행료 '+(sm.totalFare||0).toLocaleString()+'원 · 택시비 약 '+(sm.taxiFare||0).toLocaleString()+'원'+(DEST?' · '+(ORG||'내 위치')+' → '+DEST.n.split(',')[0]:''));if(!nav){const nb=document.createElement('button');nb.textContent='▶ 안내 시작';nb.onclick=startNav;info.appendChild(nb);info.hidden=false}}
-function say(t){if(!SND||!window.speechSynthesis)return;const u=new SpeechSynthesisUtterance(t);u.lang='ko-KR';speechSynthesis.cancel();speechSynthesis.speak(u)}
-function tSnd(){SND=!SND;snd.textContent=SND?'🔊':'🔇';st.snd=SND;sv()}
+// ===== T7: 오디오 (TTS 음성선택/잠금해제/폴백/덕킹) =====
+const SS=window.speechSynthesis||null;let KV=null,ACX=null,UNL=false,SPK=null,KEEP=null,DUCK=null;
+function pickVoice(){if(!SS)return;const V=SS.getVoices()||[];KV=V.find(v=>/^ko(-|_|$)/i.test(v.lang)&&v.localService)||V.find(v=>/^ko/i.test(v.lang))||V.find(v=>/korean|한국/i.test(v.name))||null}
+if(SS){pickVoice();try{SS.addEventListener('voiceschanged',pickVoice)}catch(e){SS.onvoiceschanged=pickVoice}setTimeout(pickVoice,1000);setTimeout(pickVoice,3000)}
+function actx(){try{if(!ACX){const C=window.AudioContext||window.webkitAudioContext;if(C)ACX=new C()}if(ACX&&ACX.state=='suspended')ACX.resume()}catch(e){}return ACX}
+function unlock(){if(UNL)return;UNL=true;actx();try{if(SS){const u=new SpeechSynthesisUtterance(' ');u.volume=0;u.lang='ko-KR';SS.speak(u)}}catch(e){}}
+addEventListener('pointerdown',unlock,{capture:true});addEventListener('keydown',unlock,{capture:true});
+function chime(n){const a=actx();if(!a)return false;try{const t=a.currentTime;[880,1320].slice(0,n||2).forEach((f,i)=>{const o=a.createOscillator(),g=a.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0.0001,t+i*.18);g.gain.exponentialRampToValueAtTime(.35,t+i*.18+.02);g.gain.exponentialRampToValueAtTime(.0001,t+i*.18+.3);o.connect(g).connect(a.destination);o.start(t+i*.18);o.stop(t+i*.18+.32)});return true}catch(e){return false}}
+function duck(on){if(on){if(DUCK==null){DUCK=YTV.vol;ytCmd('setVolume',[Math.max(5,Math.round(DUCK*0.25))])}}else if(DUCK!=null){ytCmd('setVolume',[DUCK]);DUCK=null}}
+function sayEnd(){clearInterval(KEEP);KEEP=null;clearTimeout(SPK);SPK=null;duck(false)}
+function say(t,force){if(!SND&&!force)return;const fb=()=>{chime(2);toast('🔊 '+t,'i','🔔',5000)};
+ if(!SS||(SS.getVoices&&SS.getVoices().length===0&&UNL&&Date.now()-T7T>4000&&!KV)){fb();return'fallback'}
+ try{SS.cancel();if(SS.paused)SS.resume();const u=new SpeechSynthesisUtterance(t);u.lang='ko-KR';try{if(KV)u.voice=KV}catch(x){};u.rate=1.05;u.volume=1;
+  u.onstart=()=>duck(true);u.onend=sayEnd;u.onerror=e=>{sayEnd();if(e.error!='interrupted'&&e.error!='canceled')fb()};
+  duck(true);SS.speak(u);clearInterval(KEEP);KEEP=setInterval(()=>{if(!SS.speaking)return sayEnd();SS.pause();SS.resume()},10000);clearTimeout(SPK);SPK=setTimeout(sayEnd,Math.max(6000,t.length*400));return'tts'}catch(e){fb();return'fallback'}}
+const T7T=Date.now();
+// 유튜브 IFrame API(postMessage) — 볼륨/음소거 상태 수신, 덕킹
+const YTV={vol:100,muted:null,state:null};
+function ytFrame(){return yt.querySelector('iframe')}
+function ytCmd(f,a){const fr=ytFrame();(window.__yt=window.__yt||[]).push([f,a]);try{fr&&fr.contentWindow.postMessage(JSON.stringify({event:'command',func:f,args:a||[]}),'*')}catch(e){}}
+addEventListener('message',e=>{if(!/youtube(-nocookie)?\.com$/.test((e.origin||'').replace(/^https?:\/\/(www\.)?/,'')))return;let d;try{d=JSON.parse(e.data)}catch(x){return}
+ if(d&&d.info){if(d.info.volume!=null&&DUCK==null)YTV.vol=d.info.volume;if(d.info.muted!=null)YTV.muted=d.info.muted;if(d.info.playerState!=null)YTV.state=d.info.playerState}});
+function ytHook(fr){fr.addEventListener('load',()=>{let n=0;const h=setInterval(()=>{try{fr.contentWindow.postMessage(JSON.stringify({event:'listening',id:'yt1'}),'*')}catch(e){}if(++n>8)clearInterval(h)},500);
+ if(UNL){setTimeout(()=>{ytCmd('unMute');if(YTV.vol<10)ytCmd('setVolume',[100])},1500)}})}
+async function sndTest(){unlock();actx();const c=chime(2);let r='';setTimeout(()=>{r=say('안내 음성 테스트입니다',true)},700);await new Promise(o=>setTimeout(o,900));
+ const V=SS?SS.getVoices():[];const ko=V.filter(v=>/^ko/i.test(v.lang));
+ const L=['speechSynthesis: '+(SS?'있음':'없음 ✗'),'음성 수: '+V.length+' (한국어 '+ko.length+')','한국어 음성: '+(KV?KV.name+' ['+KV.lang+(KV.localService?', 로컬':', 온라인')+']':'없음 ✗'),
+  'AudioContext: '+(ACX?ACX.state:'없음')+(c?' (차임 재생)':''),'출력: '+(r=='tts'?'TTS':'차임+화면표시 폴백'),'안내음성: '+(SND?'켜짐':'꺼짐'),
+  '유튜브: '+(ytFrame()?('볼륨 '+YTV.vol+(YTV.muted==null?' · 상태 미수신':(YTV.muted?' · 음소거 ✗':' · 소리 켜짐'))):'재생 중 아님'),'UA: '+navigator.userAgent.slice(0,90)];
+ const d=document.getElementById('sdiag');d.textContent=L.join('\n');d.hidden=false;return L}
+function tSnd(){SND=!SND;setTimeout(sndLbl,0);if(SND){unlock();chime(1)}else{try{SS&&SS.cancel()}catch(e){}sayEnd()}snd.textContent=SND?'🔊':'🔇';st.snd=SND;sv()}
 function TI(t){t=+t;if(t==12||t==16||t==17)return'↰';if(t==13||t==18||t==19)return'↱';if(t==14)return'↶';if(t==201)return'🏁';if(t>=125&&t<=129)return'⤴';return'↑'}
 function fmt(m){return m>=1000?(m/1000).toFixed(1)+'km':Math.round(m/10)*10+'m'}
 const DOT='<div style="width:22px;height:22px;border-radius:50%;background:#2a7fff;border:4px solid #fff;box-shadow:0 0 6px #000"></div>';
@@ -187,7 +216,7 @@ async function onPos(p){if(!RT||rer)return;const lat=p.coords.latitude,lng=p.coo
  else{nT.textContent='↑';nI.textContent='목적지까지 직진';nD.textContent=fmt(rem)}}
 function vid(s){s=s.trim();if(/^[\w-]{11}$/.test(s))return s;const m=s.match(/(?:v=|youtu\.be\/|shorts\/|live\/|embed\/)([\w-]{11})/);return m&&m[1]}
 function play(id){res.style.display='none';yt.querySelectorAll('iframe').forEach(f=>f.remove());const f=document.createElement('iframe');f.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';f.allowFullscreen=true;
-f.src='https://www.youtube-nocookie.com/embed/'+id+'?autoplay=1&playsinline=1&rel=0';yt.appendChild(f);st.v=id;sv()}
+f.src='https://www.youtube-nocookie.com/embed/'+id+'?autoplay=1&playsinline=1&rel=0&enablejsapi=1&origin='+encodeURIComponent(location.origin);ytHook(f);yt.appendChild(f);st.v=id;sv()}
 async function go(){const s=v.value;const id=vid(s);if(id)return play(id);if(!s.trim())return home(1);res.style.display='block';yt.querySelectorAll('iframe').forEach(f=>f.remove());res.innerHTML='<div class="hh">검색 중…</div>';
 const j=await pjson('/search?filter=videos&q='+encodeURIComponent(s));const L=j&&j.items?j.items.filter(x=>x.url&&x.title):[];
 if(!L.length){res.innerHTML='<div class="hh">검색 실패 — 유튜브 링크를 붙여넣어 주세요</div>';return}
@@ -310,5 +339,6 @@ document.querySelectorAll('input.ki').forEach(f=>{f.addEventListener('pointerdow
 // 물리 키보드(테스트/PC)용: 영문은 그대로, Enter/Backspace/Escape
 addEventListener('keydown',e=>{if(!document.getElementById('kb').classList.contains('on'))return;if(e.key=='Enter')kbAct('go');else if(e.key=='Backspace')kbAct('bs');else if(e.key=='Escape')kbClose();else if(e.key==' ')kbAct('sp');else return;e.preventDefault()});
 
+function sndLbl(){sndS.textContent=SND?'🔊 안내음성 켜짐':'🔇 안내음성 꺼짐';snd.textContent=SND?'🔊':'🔇'}sndLbl();
 if(st.v)play(st.v);else home();
 </script></body></html>
