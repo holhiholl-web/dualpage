@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>K4 아이카 스마트 노래방</title>
+<title>K5 아이카 스마트 노래방</title>
 <style>
 :root{--bg:#0a0b10;--pn:#14161d;--pn2:#1d2029;--ln:rgba(255,255,255,.08);--tx:#f1f3f8;--mu:#8d95a6;--ac:#ff3d7f;--ac2:#7b5cff;--ok:#1fbf6a;--rd:#ff4757;--r:14px;--ly:34px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font-family:-apple-system,"Pretendard","Noto Sans KR","Apple SD Gothic Neo",system-ui,sans-serif;overflow:hidden;user-select:none}
@@ -70,8 +70,8 @@ body.col #dv,body.fs #dv{display:none}@media (max-width:640px) and (min-height:5
 <div id="wrap"><div id="P"><div class="bar"><button class="i" onclick="hbT()" title="상단 숨기기">⌃</button><a class="nav" href="./dual.html"><button>🧭 내비</button></a><span class="brand">아이카 노래방</span>
 <button onclick="restart()" title="처음부터">⏮</button><button id="bpp" onclick="pp()">⏯</button><button onclick="next()" title="다음곡">⏭ 다음곡</button>
 <button class="i" onclick="vol(-10)">🔉</button><span class="vol" id="vv">80</span><button class="i" onclick="vol(10)">🔊</button>
-<button id="blo" onclick="lyT()">가사</button><button id="bfz" onclick="fz()">글자 M</button><button onclick="fsT()">⤢ 크게</button></div>
-<button id="hb" onclick="hbT()" title="상단 숨기기">⌃</button><div id="ess"><button onclick="pp()">⏯</button><button onclick="next()">⏭</button></div><div id="pw"><div id="idle"><b>🎤 아이카 스마트 노래방</b>노래를 검색해서 예약하세요</div><div id="yt"></div></div>
+<button id="blo" onclick="lyT()">🙈 가사끄기</button><button id="bfz" onclick="fz()">글자 M</button><button onclick="fsT()">⤢ 크게</button></div>
+<button id="hb" onclick="hbT()" title="상단 숨기기">⌃</button><div id="ess"><button onclick="pp()">⏯</button><button onclick="next()">⏭</button><button id="blo2" onclick="lyT()">🙈 가사끄기</button></div><div id="pw"><div id="idle"><b>🎤 아이카 스마트 노래방</b>노래를 검색해서 예약하세요</div><div id="yt"></div></div>
 <div id="ly"><div id="lcd"></div><div id="l1">♪</div><div id="l2"></div><div id="lsrc"></div><div id="sy"><button onclick="off(-.5)" title="가사 빠르게">−</button><span id="ofs">0.0s</span><button onclick="off(.5)" title="가사 늦게">+</button></div></div></div>
 <div id="dv" title="드래그: 폭 조절 · 두 번 탭: 초기화"></div><div id="S"><div class="tabs"><button id="col" onclick="colT(1)" title="패널 접기">›</button><button data-t="s" class="on" onclick="tab('s')"><span class="em">🔎 </span>검색</button><button data-t="q" onclick="tab('q')"><span class="em">📋 </span>예약 <span id="qn"></span></button><button data-t="f" onclick="tab('f')"><span class="em">⭐ </span><span class="lg">즐겨찾기</span><span class="sh">⭐ 찜</span></button><button data-t="r" onclick="tab('r')"><span class="em">🕘 </span>최근</button></div>
 <div class="pane on" id="ps"><div class="srow"><input id="sq" readonly inputmode="none" placeholder="제목 · 가수 검색"><button id="bmr" onclick="mrT()">노래방</button><button class="p" onclick="search()">검색</button></div><div class="chips" id="cats"></div><div class="chips" id="rs"></div><div id="sr"></div></div>
@@ -108,7 +108,7 @@ const HG=(()=>{const CHO='ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍ
  function type(seq){const st={text:'',hist:[]};for(const c of seq){if(c=='\b')back(st);else key(st,c)}return st.text}
  return{key,back,type,commit:st=>{st.hist=[];return st}}})();
 /*HG*/
-// ===== 아이카 스마트 노래방 K4 =====
+// ===== 아이카 스마트 노래방 K5 =====
 const LS=localStorage,K='k1';let st={};try{st=JSON.parse(LS[K]||'{}')}catch(e){}const sv=()=>{try{LS[K]=JSON.stringify(st)}catch(e){}};
 st.q=st.q||[];st.fav=st.fav||[];st.rec=st.rec||[];st.rs=st.rs||[];st.off=st.off||{};st.mr=st.mr||'노래방';st.vol=st.vol??80;st.fz=st.fz||'M';
 const $=id=>document.getElementById(id);
@@ -274,7 +274,7 @@ function tick(){if(!LY||!LY.L||!YR||!CUR||LY.id!=CUR.id)return;let t=0;try{t=YP.
  const cd=$('lcd');if(i<0&&L.length){const r=L[0].t-t;cd.innerHTML=r<=4.5&&r>0?[3,2,1].map(n=>'<i class="'+(r<=n-1?'off':'')+'"></i>').join(''):''}else cd.innerHTML='';
  if(i!=LI){LI=i;const a=i>=0?L[i]:null,b=L[i+1];const l1=$('l1');l1.innerHTML='';if(a){const s=document.createElement('span');s.textContent=a.x;l1.appendChild(s)}else l1.textContent=i<0?'♪ 전주 중…':'';$('l2').textContent=b?b.x:''}}
 setInterval(tick,200);
-function lyT(){document.body.classList.toggle('lyoff');$('blo').classList.toggle('on',!document.body.classList.contains('lyoff'))}
+function lyT(v){st.lyoff=v===undefined?!st.lyoff:!!v;sv();document.body.classList.toggle('lyoff',st.lyoff);const t=st.lyoff?'🎤 가사켜기':'🙈 가사끄기';['blo','blo2'].forEach(i=>{const b=$(i);if(b){b.textContent=t;b.classList.toggle('on',!st.lyoff);b.title=st.lyoff?'하단 가사창 보이기':'하단 가사창 숨기기'}})}
 function fz(){st.fz={S:'M',M:'L',L:'S'}[st.fz];sv();afz()}function afz(){document.documentElement.style.setProperty('--ly',{S:'24px',M:'34px',L:'46px'}[st.fz]);$('bfz').textContent='글자 '+st.fz}
 // --- 가상 키보드 (dual.html과 같은 자체 코드) ---
 const KB={f:null,st:{text:'',hist:[]},ko:st.kbko!==false,sh:false,sym:false};
@@ -298,7 +298,7 @@ function kbClear(){KB.st={text:'',hist:[]};kbRender()}
 $('sq').addEventListener('pointerdown',e=>{e.preventDefault();kbOpen($('sq'))});
 addEventListener('keydown',e=>{if(!$('kb').classList.contains('on'))return;if(e.key=='Enter')kbAct('go');else if(e.key=='Backspace')kbAct('bs');else if(e.key=='Escape')kbClose();else return;e.preventDefault()});
 // --- 시작 ---
-$('vv').textContent=st.vol;$('bmr').textContent=st.mr||'원곡';$('bmr').classList.toggle('on',!!st.mr);$('blo').classList.add('on');afz();rrs();rq();home();
+$('vv').textContent=st.vol;$('bmr').textContent=st.mr||'원곡';$('bmr').classList.toggle('on',!!st.mr);afz();rrs();rq();home();
 
 CATS.forEach(g=>{const b=document.createElement('button');b.textContent=g;b.onclick=()=>home(g);$('cats').appendChild(b)});[...$('cats').children].forEach(b=>b.classList.toggle('on',b.textContent==(st.cat||'차트인기')));
 // ===== K2: 패널 접기 · 임베드 · 덕킹 =====
@@ -321,4 +321,6 @@ if(st.sw)sw(st.sw*innerWidth);
  const up=()=>{if(!dr)return;dr=false;const w=$('S').getBoundingClientRect().width;st.sw=w/innerWidth;sv()};d.addEventListener('pointerup',up);d.addEventListener('pointercancel',up)})();
 addEventListener('resize',()=>{if(st.sw)sw(st.sw*innerWidth)});
 window.addEventListener('message',e=>{const d=e.data;if(d&&d.type=='chrome')hbT(!!d.hide,1)});
+
+lyT(!!st.lyoff);
 </script></body></html>
