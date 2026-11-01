@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>K7 아이카 스마트 노래방</title>
+<title>K8 아이카 스마트 노래방</title>
 <style>
 :root{--bg:#0a0b10;--pn:#14161d;--pn2:#1d2029;--ln:rgba(255,255,255,.08);--tx:#f1f3f8;--mu:#8d95a6;--ac:#ff3d7f;--ac2:#7b5cff;--ok:#1fbf6a;--rd:#ff4757;--r:14px;--ly:34px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font-family:-apple-system,"Pretendard","Noto Sans KR","Apple SD Gothic Neo",system-ui,sans-serif;overflow:hidden;user-select:none}
@@ -108,7 +108,7 @@ const HG=(()=>{const CHO='ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍ
  function type(seq){const st={text:'',hist:[]};for(const c of seq){if(c=='\b')back(st);else key(st,c)}return st.text}
  return{key,back,type,commit:st=>{st.hist=[];return st}}})();
 /*HG*/
-// ===== 아이카 스마트 노래방 K7 =====
+// ===== 아이카 스마트 노래방 K8 =====
 const LS=localStorage,K='k1';let st={};try{st=JSON.parse(LS[K]||'{}')}catch(e){}const sv=()=>{try{LS[K]=JSON.stringify(st)}catch(e){}};
 st.q=st.q||[];st.fav=st.fav||[];st.rec=st.rec||[];st.rs=st.rs||[];st.off=st.off||{};st.mr=st.mr||'노래방';st.vol=st.vol??80;st.fz=st.fz||'M';
 const $=id=>document.getElementById(id);
@@ -187,7 +187,7 @@ const SONGS=`차트인기|A2O LITE|NEON
 트로트|영탁|막걸리 한잔
 트로트|김연자|아모르 파티
 트로트|나훈아|테스형!
-레전드|리쌍|내가 웃는게 웃는게 아니야
+레전드|리쌍|내가 웃는게 아니야
 레전드|부활|Never Ending Story
 레전드|김건모|잘못된 만남
 레전드|쿨|애상
@@ -203,10 +203,15 @@ const SONGS=`차트인기|A2O LITE|NEON
 팝송|Ed Sheeran|Perfect
 팝송|ABBA|Dancing Queen
 팝송|Lady Gaga, Bruno Mars|Die With A Smile`.split('\n').map(l=>{const[g,a,t]=l.split('|');return{g,a,t}});
-let HC=JSON.parse(LS.k1r||'{}');
-async function resolve(x){const k=x.a+'|'+x.t,c=HC[k];if(c&&Date.now()-c.ts<864e5)return c.v;
- let L=null;if(st.mr=='노래방'){const K=await ytSearch(x.a+' '+x.t+' 금영 노래방');if(K&&K.some(v=>GOODCH.test(v.c+' '+v.t)&&one(v)))L=K}if(!L)L=await ytSearch(x.a+' '+x.t+' '+(st.mr||'노래방'));if(!L)return null;const v=await pickOk(rank(L).filter(one));if(v)v.q=x.a+' '+x.t;
- if(v){HC[k]={ts:Date.now(),v:slim(v)};try{LS.k1r=JSON.stringify(HC)}catch(e){}}return v}
+try{delete LS.k1r}catch(e){}   // K8: 예전(TJ 위주) 매칭 캐시 폐기
+const HCK='k8r';let HC=JSON.parse(LS[HCK]||'{}');
+const KYRE=/금영|KY\s*Karaoke|KY\.\s?\d+|KY\s*Noraebang|KY\s*ENTERTAINMENT|KY\s*노래방/i,VARI=/여자키|남자키|멜로디\s*제거|고음질\s*MR|\bMR\b|키\s*[+-]|\bkey\b/i;
+const nz=t=>(t||'').toLowerCase().replace(/[\s'’`!?.,·()\[\]-]/g,'');
+function kyPick(L,x){const T=nz(x.t),A=nz(x.a.split(/[,(]/)[0]);return L.filter(v=>one(v)&&KYRE.test(v.c+' '+v.t)&&!isBlk(v.id)&&nz(v.t).includes(T)).map((v,i)=>[v,(nz(v.t).includes(A)?0:5)+(VARI.test(v.t)?3:0)+(/금영\s*노래방\s*공식|KY\s*Karaoke/i.test(v.c)?0:2)+i*0.01]).sort((p,q)=>p[1]-q[1]).map(z=>z[0])}
+async function resolve(x){const k=x.a+'|'+x.t,c=HC[k];if(c&&Date.now()-c.ts<864e5)return c.v;let v=null;
+ if(st.mr!=='MR'&&st.mr!==''){for(const q of [x.a+' '+x.t+' 금영노래방','KY '+x.t+' '+x.a]){const L=await ytSearch(q);if(L){const K=kyPick(L,x);v=await pickOk(K);if(v)break}}}
+ if(!v){const L=await ytSearch(x.a+' '+x.t+' '+(st.mr||'노래방'));if(!L)return null;v=await pickOk(rank(L).filter(one))}
+ if(v){v.q=x.a+' '+x.t;HC[k]={ts:Date.now(),v:slim(v)};try{LS[HCK]=JSON.stringify(HC)}catch(e){}}return v}
 // --- 목록 + 무한 스크롤 ---
 let FEED=null;   // {box, more:async()=>items[]|null, busy}
 function feed(title,first,more){$('sr').innerHTML='';const h=document.createElement('div');h.className='h hh';h.innerHTML='<span>'+title+'</span>';
@@ -221,7 +226,7 @@ function feed(title,first,more){$('sr').innerHTML='';const h=document.createElem
 const IO=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)&&FEED)FEED.load()},{root:null,rootMargin:'0px 0px 200px 0px'});
 async function search(q){q=(q??$('sq').value).trim();if(!q)return home();$('sq').value=q;st.rs=[q].concat(st.rs.filter(x=>x!=q)).slice(0,8);sv();rrs();tab('s');$('cats').hidden=true;
  const full=st.mr&&!new RegExp(st.mr,'i').test(q)?q+' '+st.mr:q;let pg=null,first=true;
- const F=feed('🔎 '+esc(full),[],async()=>{let r;if(first){const [a,ky]=await Promise.all([ytPage(full),st.mr=='노래방'?ytSearch(q+' 금영 노래방'):null]);r=a;const K=(ky||[]).filter(v=>GOODCH.test(v.c+' '+v.t));if(K.length){r=r||{L:[],more:null};r={L:K.concat(r.L),more:r.more}}}else r=pg&&pg.more?await pg.more():null;
+ const F=feed('🔎 '+esc(full),[],async()=>{let r;if(first){const [a,ky]=await Promise.all([ytPage(full),st.mr=='노래방'?ytSearch(q+' 금영노래방'):null]);r=a;const K=(ky||[]).filter(v=>GOODCH.test(v.c+' '+v.t));if(K.length){r=r||{L:[],more:null};r={L:K.concat(r.L),more:r.more}}}else r=pg&&pg.more?await pg.more():null;
   if(first&&!r){F.more=null;$('sr').querySelector('.ft').insertAdjacentHTML('beforebegin','<div class="empty">검색 서버에 연결하지 못했어요. 잠시 후 다시 시도하세요.</div>');return null}
   first=false;pg=r;if(!r||!r.more)F.more=null;return r?r.L:null})}
 function home(g){g=g||st.cat||'차트인기';st.cat=g;sv();$('cats').hidden=false;[...$('cats').children].forEach(b=>b.classList.toggle('on',b.textContent==g));
@@ -333,7 +338,7 @@ function banOff(){const b=$('ban');const w=Math.max(0,BANT-Date.now());clearTime
 st.blk=st.blk||{};st.emb=st.emb||{};
 function isBlk(id){return!!(st.blk&&st.blk[id])}
 function markBlk(id){st.blk[id]=Date.now();const k=Object.keys(st.blk);if(k.length>500)k.sort((a,b)=>st.blk[a]-st.blk[b]).slice(0,k.length-500).forEach(x=>delete st.blk[x]);sv()}
-const BADCH=/\bTJ\b|티제이|태진|ziller|질러|TJ\s*Media|TJ\s*Karaoke|TJ\s*KARAOKE/i,GOODCH=/금영|KY\s*Karaoke|KY\s*KARAOKE|KUMYOUNG|KY\s*노래방|노래방\s*반주|노래방 MR/i;
+const BADCH=/\bTJ\b|티제이|태진|ziller|질러|TJ\s*Media|TJ\s*Karaoke|TJ\s*KARAOKE/i,GOODCH=/금영|KY\s*Karaoke|KY\s*KARAOKE|KY\.\s?\d+|KY\s*Noraebang|KY\s*ENTERTAINMENT|KUMYOUNG|KY\s*노래방/i;
 function score(x){let s=0;if(isBlk(x.id))s-=100;const E=st.emb||{};if(E[x.id]===0)s-=100;if(E[x.id]===1)s+=5;if(GOODCH.test(x.c+' '+x.t))s+=10;if(BADCH.test(x.c+' '+x.t))s-=8;return s}
 function rank(L,stable){const a=L.map((x,i)=>[x,score(x),i]);const tier=x=>x[1]<-50?3:GOODCH.test(x[0].c+' '+x[0].t)?0:BADCH.test(x[0].c+' '+x[0].t)?2:1;a.sort((p,q)=>stable?(tier(p)-tier(q))||p[2]-q[2]:q[1]-p[1]||p[2]-q[2]);return a.map(z=>z[0])}
 // oEmbed 퍼가기 확인: 401/403/404 → 차단, 네트워크/CORS 실패 → 알 수 없음(통과)
