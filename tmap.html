@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>T5 T맵+유튜브</title>
+<title>T6 T맵+유튜브</title>
 <script src="https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=iSBCMHTI7D2DqUdLdiY5U2aS4XZZEIgl5ATPkc9g"></script>
 <style>
 :root{--bg:#0b0d10;--pn:#14171c;--pn2:#1c2027;--ln:rgba(255,255,255,.08);--tx:#eef1f5;--mu:#8b94a3;--ac:#3d7bff;--ok:#1fbf6a;--rd:#ff4757;--r:14px}
@@ -81,7 +81,8 @@ body.hide .tb,body.hide #info,body.hide #pl{display:none!important}
 .kr button{flex:1 1 0;min-width:0;height:auto;padding:0;font-size:22px;font-weight:500;border-radius:10px;background:#2a2f38;color:var(--tx);border:0;box-shadow:0 2px 0 #0006}
 .kr button.f{background:#3a404b;font-size:17px}.kr button.w2{flex:1.6}.kr button.sp{flex:4.5}.kr button.go{flex:2;background:var(--ac)}.kr button.on{background:var(--ac)}
 .kr button:active{background:#55607a}
-</style></head><body><div id="ver">T5</div><button id="tg" onclick="tgl()">▲</button><div id="wrap"><div id="kb"><div id="kbP"><span id="kbL">도착지</span><div id="kbT"><span id="kbS"></span><i></i></div><button class="g" onclick="kbClear()">지우기</button><button class="g" onclick="kbClose()">✕</button></div><div id="chips"></div><div id="kbK"></div></div>
+#here0{position:absolute;z-index:999;left:50%;top:50%;transform:translate(-50%,-130%);height:48px;background:var(--ok);box-shadow:0 4px 16px #000a}#here0[hidden]{display:none}
+</style></head><body><div id="ver">T6</div><button id="tg" onclick="tgl()">▲</button><div id="wrap"><div id="kb"><div id="kbP"><span id="kbL">도착지</span><div id="kbT"><span id="kbS"></span><i></i></div><button class="g" onclick="kbClear()">지우기</button><button class="g" onclick="kbClose()">✕</button></div><div id="chips"></div><div id="kbK"></div></div>
 <div class="pane" id="L"><div class="tb"><input id="from" class="ki" placeholder="출발: 내 위치" readonly inputmode="none"><input id="q" class="ki" placeholder="도착지 · 장소/주소" readonly inputmode="none"><button class="g" onclick="sp()">검색</button><button onclick="route()">길찾기</button></div>
 <div id="mapw"><div id="map"></div><div id="info" class="info glass" hidden></div><div id="pl" class="glass" hidden></div><div id="nav" class="glass"><div class="top"><div id="nT">↑</div><div style="min-width:0;flex:1"><span id="nD"></span><span id="nI">-</span></div></div><div class="bot"><button class="stop" onclick="stopNav()">■ 안내 종료</button><button class="g" id="snd" onclick="tSnd()">🔊</button><span id="nR"></span></div></div><div class="fab" id="fabR"><button id="b3d" onclick="setM('v',M.v=='3d'?'2d':'3d')">3D</button><button id="bth" onclick="setM('th',isNight()?'day':'night')">☀️</button><button id="bly" onclick="sett.hidden=!sett.hidden" title="지도 설정">🗂️</button></div>
 <div class="fab" id="fabL"><button onclick="me()" title="내 위치">📍</button><button onclick="zm(1)">＋</button><button onclick="zm(-1)">－</button><button id="cmp" onclick="recenter()" title="내 위치/북쪽"><span>🧭</span></button></div>
@@ -91,7 +92,7 @@ body.hide .tb,body.hide #info,body.hide #pl{display:none!important}
 <div class="sr">지도 테마<div class="seg" id="sT"><button data-k="th" data-v="day">주간</button><button data-k="th" data-v="night">야간</button><button data-k="th" data-v="auto">자동</button></div></div>
 <div class="sr">교통정보<button class="sw" id="swT" onclick="setM('tr',!M.tr)"></button></div>
 <div class="sr">북쪽 고정<button class="sw" id="swN" onclick="setM('nu',!M.nu)"></button></div><div class="sr">화면 분할<div class="seg" id="seg"><button onclick="ratio(50)">50:50</button><button onclick="ratio(60)">60:40</button><button onclick="ratio(40)">40:60</button></div></div><div class="sr">지도 엔진<a class="lk" href="./">네이버판 열기</a></div></div>
-<button id="navbtn" onclick="startNav()">▶ 안내 시작</button></div></div>
+<button id="here0" hidden onclick="setOrigin()">📍 여기서 출발</button><button id="navbtn" onclick="startNav()">▶ 안내 시작</button></div></div>
 <div id="bar"></div>
 <div class="pane" id="R"><div class="tb"><button class="g i" onclick="home(1)" title="추천">🏠</button><input id="v" class="ki" placeholder="유튜브 검색어 · 링크" readonly inputmode="none"><button onclick="go()">재생/검색</button></div>
 <div id="yt"><div id="res"></div></div></div></div>
@@ -108,23 +109,40 @@ function svc(){try{const c=map.getCenter();st.c=[c.lat(),c.lng()];st.z=map.getZo
 let mk=null,mk2=null,line=null,here=null;
 function rm(o){if(o)o.setMap(null)}
 function pin(a,b,t){rm(mk);mk=new T.Marker({position:LL(a,b),map,title:t||''});map.setCenter(LL(a,b));map.setZoom(16)}
-function msg(t,e){info.hidden=!t;info.textContent=t||'';info.className='info'+(e?' e':'')}
+let MTO=null;function msg(t,e){clearTimeout(MTO);info.hidden=!t;info.textContent=t||'';info.className='info glass'+(e?' e':'');if(e)MTO=setTimeout(()=>{if(info.className.includes(' e'))info.hidden=true},8000)}
 q.onkeydown=e=>{if(e.key=='Enter')route()};v.onkeydown=e=>{if(e.key=='Enter')go()};
-function myPos(){return new Promise((ok,no)=>navigator.geolocation.getCurrentPosition(p=>{here=[p.coords.latitude,p.coords.longitude];ok(here)},e=>no(new Error('위치 권한 실패: '+e.message)),{enableHighAccuracy:true,timeout:15000}))}
-async function me(){try{const[a,b]=await myPos();pin(a,b,'내 위치');from.value=''}catch(e){msg(e.message,1)}}
+// ===== T6: 위치 (상시 감시 + 캐시 + 폴백) =====
+let GP=null;try{GP=JSON.parse(localStorage.v10gp||'null')}catch(e){}let MAN=null,GERR=0;
+const GMSG={1:'위치 권한이 거부됨 — 브라우저 설정에서 위치 허용 필요',2:'위치 신호 없음 (GPS 수신 불가)',3:'위치 응답 시간 초과'};
+function gerr(e){return new Error(GMSG[e&&e.code]||('위치 오류: '+(e&&e.message||'')))}
+function gset(p){const c=p.coords;here=[c.latitude,c.longitude];GP={lat:here[0],lng:here[1],t:Date.now(),acc:c.accuracy};try{localStorage.v10gp=JSON.stringify(GP)}catch(x){}return here}
+function gwatch(){if(!navigator.geolocation)return;try{navigator.geolocation.watchPosition(p=>{GERR=0;gset(p);if(mk3&&WID==null){}},e=>{GERR=e.code},{enableHighAccuracy:true,maximumAge:600000,timeout:60000})}catch(x){}}
+function gget(hi,to){return new Promise((ok,no)=>{if(!navigator.geolocation)return no({code:2});navigator.geolocation.getCurrentPosition(p=>ok(gset(p)),no,{enableHighAccuracy:hi,timeout:to,maximumAge:600000})})}
+function myPos(){if(GP&&Date.now()-GP.t<600000){here=[GP.lat,GP.lng];return Promise.resolve(here)}
+ return gget(true,20000).catch(e=>{if(e&&e.code==1)throw gerr(e);return gget(false,20000)}).catch(e=>{throw e instanceof Error?e:gerr(e)})}
+// 경로 출발점: 수동 지정 > 신선한 GPS > GPS 재시도 > 저장된 마지막 위치 > 지도 중심 (절대 실패하지 않음)
+async function startPt(){if(MAN)return MAN;try{return await myPos()}catch(e){
+ if(GP){toast(e.message+' · 마지막 위치에서 출발','w','📍');here=here||[GP.lat,GP.lng];ORG='마지막 위치';return[GP.lat,GP.lng]}
+ const c=map.getCenter();toast(e.message+' · 현재 위치를 못 잡아 지도 중심에서 출발','w','📍');ORG='지도 중심';return[c.lat(),c.lng()]}}
+async function me(){try{const[a,b]=await myPos();MAN=null;pin(a,b,'내 위치');from.value=''}catch(e){toast(e.message,'w','📍')}}
+function mapTap(lat,lng){if(!isFinite(lat))return;const b=document.getElementById('here0');b.dataset.p=lat+','+lng;b.hidden=false;clearTimeout(b._t);b._t=setTimeout(()=>b.hidden=true,6000)}
+function setOrigin(){const b=document.getElementById('here0'),[a,c]=b.dataset.p.split(',').map(Number);b.hidden=true;MAN=[a,c];from.value='지도 선택 지점';rm(mk);mk=new T.Marker({position:LL(a,c),map,title:'출발'});toast('출발지 설정: 지도 선택 지점','ok','📍')}
+try{map.addListener('click',e=>{const l=e&&(e.latLng||e._latlng);if(l)mapTap(l.lat?l.lat():l._lat,l.lng?l.lng():l._lng)})}catch(x){}
+gwatch();
 // 장소 찾기: TMAP POI 통합검색 (내 위치 기준 거리순)
-async function find(s){if(!here)try{await myPos()}catch(e){}
+async function find(s){if(!here&&GP)here=[GP.lat,GP.lng];
  const c=here||[map.getCenter().lat(),map.getCenter().lng()];
  const u=TA+'/pois?version=1&count=15&reqCoordType=WGS84GEO&resCoordType=WGS84GEO&searchKeyword='+encodeURIComponent(s)+'&centerLat='+c[0]+'&centerLon='+c[1];
  const r=await fetch(u,{headers:{appKey:TK}});if(r.status==204)return[];const j=await r.json();const P=((j.searchPoiInfo||{}).pois||{}).poi||[];
  const L=P.map(x=>({n:x.name+', '+[x.upperAddrName,x.middleAddrName,x.lowerAddrName,x.roadName&&x.firstBuildNo?x.roadName+' '+x.firstBuildNo:x.detailAddrName].filter(Boolean).join(' '),lat:+(x.frontLat||x.noorLat),lng:+(x.frontLon||x.noorLon)}));
+if(!L.length){try{const g=await (await fetch(TA+'/geo/fullAddrGeo?version=1&format=json&coordType=WGS84GEO&fullAddr='+encodeURIComponent(s),{headers:{appKey:TK}})).json();const C=((g.coordinateInfo||{}).coordinate)||[];C.forEach(x=>{const la=+(x.lat||x.newLat),lo=+(x.lon||x.newLon);if(la&&lo)L.push({n:s+', '+[x.city_do,x.gu_gun,x.eup_myun,x.legalDong,x.adminDong,x.ri,x.bunji,x.newRoadName,x.newBuildingIndex].filter(Boolean).join(' '),lat:la,lng:lo})})}catch(e){}}
  if(here)L.sort((a,b)=>km(here[0],here[1],a.lat,a.lng)-km(here[0],here[1],b.lat,b.lng));return L}
 function km(a,b,c,d){const R=6371e3,t=Math.PI/180,x=Math.sin((c-a)*t/2)**2+Math.cos(a*t)*Math.cos(c*t)*Math.sin((d-b)*t/2)**2;return 2*R*Math.asin(Math.sqrt(x))}
 function pick(list){return new Promise(ok=>{pl.innerHTML='<div style="background:#333">후보를 선택하세요 ✕</div>';pl.firstChild.onclick=()=>{pl.hidden=true;msg('취소됨')};list.forEach(x=>{const d=document.createElement('div');d.textContent=x.n+(here?'  ('+(km(here[0],here[1],x.lat,x.lng)/1000).toFixed(1)+'km)':'');d.onclick=()=>{pl.hidden=true;ok(x)};pl.appendChild(d)});pl.hidden=false})}
 async function sp(){try{const s=q.value.trim();if(!s)return;const l=await find(s);if(!l.length)return msg('결과 없음',1);const x=await pick(l);pin(x.lat,x.lng,x.n);msg('')}catch(e){msg('오류: '+e.message,1)}}
 async function route(){try{const s=q.value.trim();if(!s)return msg('도착지를 입력하세요',1);
- let A;if(from.value.trim()){const l=await find(from.value.trim());if(!l.length)return msg('출발지 결과 없음',1);const x=await pick(l);A=[x.lat,x.lng];ORG=x.n.split(',')[0]}else{ORG='';msg('내 위치 확인 중…');A=await myPos()}
- const l=await find(s);if(!l.length)return msg('도착지 결과 없음',1);const B=await pick(l);DEST=B;addRecent(B);
+ let A;if(MAN&&from.value=='지도 선택 지점'){A=MAN;ORG='지도 선택 지점'}else if(from.value.trim()){MAN=null;const l=await find(from.value.trim());if(!l.length)return msg('출발지 결과 없음',1);const x=await pick(l);A=[x.lat,x.lng];ORG=x.n.split(',')[0]}else{ORG='';MAN=null;msg('내 위치 확인 중…');A=await startPt()}
+ msg('도착지 찾는 중…');const l=await find(s);if(!l.length)return msg('도착지를 찾지 못했어요: '+s,1);const B=l[0];DEST=B;addRecent(B);
  await drawRoute(A,B);}catch(e){msg('오류: '+e.message,1)}}
 window.RTdbg=()=>RT;let ORG='',DEST=null,RT=null,WID=null,SND=true,off=0,gi=0,spoken={},rer=false;
 async function drawRoute(A,B,nav){if(!nav)msg('경로 검색 중…');
@@ -149,7 +167,7 @@ function fmt(m){return m>=1000?(m/1000).toFixed(1)+'km':Math.round(m/10)*10+'m'}
 const DOT='<div style="width:22px;height:22px;border-radius:50%;background:#2a7fff;border:4px solid #fff;box-shadow:0 0 6px #000"></div>';
 function startNav(){if(!RT)return;SND=st.snd!==false;snd.textContent=SND?'🔊':'🔇';navbtn.style.display='none';nav.style.display='block';info.hidden=true;setTimeout(fit,50);if(here)map.setCenter(LL(here[0],here[1]));map.setZoom(17);say('경로 안내를 시작합니다');
  if(!mk3)mk3=new T.Marker({map,position:map.getCenter(),iconHTML:DOT,iconSize:new T.Size(30,30)});
- WID=navigator.geolocation.watchPosition(onPos,e=>{if(nI.textContent=='-')nI.textContent='위치 오류: '+e.message},{enableHighAccuracy:true,maximumAge:1000,timeout:20000})}
+ WID=navigator.geolocation.watchPosition(p=>{gset(p);onPos(p)},e=>{if(e.code==1||!navigator.__gt||Date.now()-navigator.__gt>30000){navigator.__gt=Date.now();toast(gerr(e).message+' · GPS 수신 대기 중','w','📡',5000)}},{enableHighAccuracy:true,maximumAge:2000,timeout:30000})}
 let mk3=null;
 function stopNav(silent){HD=0;PH=null;setTimeout(applyView,0);if(WID!=null)navigator.geolocation.clearWatch(WID);WID=null;nav.style.display='none';if(mk3){mk3.setMap(null);mk3=null}if(RT)info.hidden=false;if(!silent)say('안내를 종료합니다')}
 function near(lat,lng){let bi=0,bd=1e9;const P=RT.path;const a=RT.ci||0,b=Math.min(P.length,a+300);for(let i=a;i<b;i++){const d=km(lat,lng,P[i][1],P[i][0]);if(d<bd){bd=d;bi=i}}if(bd<=50){RT.ci=bi;return[bi,bd]}bd=1e9;for(let i=0;i<P.length;i++){const d=km(lat,lng,P[i][1],P[i][0]);if(d<bd){bd=d;bi=i}}if(bd<=50)RT.ci=bi;return[bi,bd]}
@@ -209,7 +227,7 @@ window.T3=()=>({M,HD,nightTile:!!tileEl(),traffic:!!(T.extension&&T.extension.TD
 applyM();setInterval(()=>{if(M.th=='auto')applyM()},300000);
 // ===== T4/T5: 빠른 목적지 / 유튜브 홈 =====
 function addRecent(x){if(!x||!isFinite(x.lat))return;const n=x.n.split(',')[0];st.rc=[{n,lat:x.lat,lng:x.lng}].concat((st.rc||[]).filter(r=>r.n!=n)).slice(0,6);sv();chips()}
-async function goDest(x){try{kbClose();DEST={n:x.n,lat:x.lat,lng:x.lng};ORG='';q.value=x.n;msg('내 위치 확인 중…');const A=await myPos();await drawRoute(A,DEST)}catch(e){msg('오류: '+e.message,1)}}
+async function goDest(x){try{kbClose();DEST={n:x.n,lat:x.lat,lng:x.lng};ORG='';q.value=x.n;msg('내 위치 확인 중…');const A=await startPt();await drawRoute(A,DEST)}catch(e){msg('오류: '+e.message,1)}}
 function favSet(k,lab){const cur=DEST&&q.value.trim()&&DEST.n.split(',')[0];if(!cur)return toast(lab+': 먼저 도착지를 검색한 뒤 길게 눌러 저장하세요','i','📌');
  st[k]={n:DEST.n.split(',')[0],lat:DEST.lat,lng:DEST.lng};sv();chips();toast(lab+' 저장: '+st[k].n,'ok','📌')}
 function chips(){const c=document.getElementById('chips');c.innerHTML='';
