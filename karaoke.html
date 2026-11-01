@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>K2 아이카 스마트 노래방</title>
+<title>K3 아이카 스마트 노래방</title>
 <style>
 :root{--bg:#0a0b10;--pn:#14161d;--pn2:#1d2029;--ln:rgba(255,255,255,.08);--tx:#f1f3f8;--mu:#8d95a6;--ac:#ff3d7f;--ac2:#7b5cff;--ok:#1fbf6a;--rd:#ff4757;--r:14px;--ly:34px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font-family:-apple-system,"Pretendard","Noto Sans KR","Apple SD Gothic Neo",system-ui,sans-serif;overflow:hidden;user-select:none}
@@ -47,7 +47,18 @@ body.emb #kb{height:max(50vh,230px)}body.emb .kr button{font-size:19px}body.emb 
 .hh{display:flex;align-items:center;justify-content:space-between;gap:6px}.hh .one{height:44px;min-width:0;font-size:13px;padding:0 10px;border-radius:18px}
 #cats button{height:44px;font-size:15px}#cats button.on{background:var(--ac);border-color:var(--ac)}
 .ft{display:flex;justify-content:center;padding:8px 0 14px}.ft button{width:70%}.spin{width:32px;height:32px;border:4px solid #333;border-top-color:var(--ac);border-radius:50%;animation:sp 0.8s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
-[hidden]{display:none!important}</style></head><body>
+[hidden]{display:none!important}.bar{flex:none}@media (max-width:640px) and (min-height:560px){#wrap{flex-direction:column}#P{flex:0 0 52%!important}#S{flex:1 1 auto!important;border-left:0;border-top:1px solid var(--ln);min-height:0}#ly{padding-right:110px}}.tabs .sh{display:none}@media (max-width:800px){.tabs .lg{display:none}.tabs .sh{display:inline}}@media (max-width:1000px){
+#P{flex:1 1 auto!important}#S{flex:0 0 clamp(300px,40vw,360px)!important}
+.tabs{gap:3px;padding:4px}.tabs button{font-size:14px;padding:0 2px;min-width:0;overflow:hidden;text-overflow:ellipsis}#col{width:40px;min-width:40px;flex:none}
+.pane{padding:4px}.it{flex-wrap:wrap;gap:4px 6px;padding:5px}.it img{width:56px!important}.it .n{width:20px}
+.it .t{flex:1 1 calc(100% - 70px);min-width:0}.it .n~.t{flex-basis:calc(100% - 96px)}
+.it .t b{display:block;-webkit-line-clamp:unset;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:15px;word-break:normal}.it .t small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px}
+.it>button{height:44px;min-width:44px;padding:0 10px;font-size:14px}.it>button:first-of-type{margin-left:auto}
+#ly{padding-right:110px}#sy{top:50%;bottom:auto;transform:translateY(-50%);flex-direction:column;gap:2px;right:8px}#sy span{font-size:11px}#sy button{height:36px!important}#lsrc{right:110px}
+.srow button{padding:0 10px}.hh span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+}
+@media (max-height:500px) and (max-width:1000px){#ly{height:calc(var(--ly)*2.8)}}
+</style></head><body>
 <button id="fsx" onclick="fsT()">⤢ 패널</button>
 <div id="wrap"><div id="P"><div class="bar"><a class="nav" href="./dual.html"><button>🧭 내비</button></a><span class="brand">아이카 노래방</span>
 <button onclick="restart()" title="처음부터">⏮</button><button id="bpp" onclick="pp()">⏯</button><button onclick="next()" title="다음곡">⏭ 다음곡</button>
@@ -55,7 +66,7 @@ body.emb #kb{height:max(50vh,230px)}body.emb .kr button{font-size:19px}body.emb 
 <button id="blo" onclick="lyT()">가사</button><button id="bfz" onclick="fz()">글자 M</button><button onclick="fsT()">⤢ 크게</button></div>
 <div id="pw"><div id="idle"><b>🎤 아이카 스마트 노래방</b>노래를 검색해서 예약하세요</div><div id="yt"></div></div>
 <div id="ly"><div id="lcd"></div><div id="l1">♪</div><div id="l2"></div><div id="lsrc"></div><div id="sy"><button onclick="off(-.5)" title="가사 빠르게">−</button><span id="ofs">0.0s</span><button onclick="off(.5)" title="가사 늦게">+</button></div></div></div>
-<div id="S"><div class="tabs"><button id="col" onclick="colT(1)" title="패널 접기">›</button><button data-t="s" class="on" onclick="tab('s')"><span class="em">🔎 </span>검색</button><button data-t="q" onclick="tab('q')"><span class="em">📋 </span>예약 <span id="qn"></span></button><button data-t="f" onclick="tab('f')"><span class="em">⭐ </span>즐겨찾기</button><button data-t="r" onclick="tab('r')"><span class="em">🕘 </span>최근</button></div>
+<div id="S"><div class="tabs"><button id="col" onclick="colT(1)" title="패널 접기">›</button><button data-t="s" class="on" onclick="tab('s')"><span class="em">🔎 </span>검색</button><button data-t="q" onclick="tab('q')"><span class="em">📋 </span>예약 <span id="qn"></span></button><button data-t="f" onclick="tab('f')"><span class="em">⭐ </span><span class="lg">즐겨찾기</span><span class="sh">⭐ 찜</span></button><button data-t="r" onclick="tab('r')"><span class="em">🕘 </span>최근</button></div>
 <div class="pane on" id="ps"><div class="srow"><input id="sq" readonly inputmode="none" placeholder="제목 · 가수 검색"><button id="bmr" onclick="mrT()">노래방</button><button class="p" onclick="search()">검색</button></div><div class="chips" id="cats"></div><div class="chips" id="rs"></div><div id="sr"></div></div>
 <div class="pane" id="pq"></div><div class="pane" id="pf"></div><div class="pane" id="pr"></div></div></div>
 <div id="kb"><div id="kbP"><div id="kbT"><span id="kbS"></span><i></i></div><button onclick="kbClear()">지우기</button><button onclick="kbClose()">✕</button></div><div id="kbK" style="display:flex;flex-direction:column;gap:5px;flex:1"></div></div>
@@ -90,7 +101,7 @@ const HG=(()=>{const CHO='ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍ
  function type(seq){const st={text:'',hist:[]};for(const c of seq){if(c=='\b')back(st);else key(st,c)}return st.text}
  return{key,back,type,commit:st=>{st.hist=[];return st}}})();
 /*HG*/
-// ===== 아이카 스마트 노래방 K2 =====
+// ===== 아이카 스마트 노래방 K3 =====
 const LS=localStorage,K='k1';let st={};try{st=JSON.parse(LS[K]||'{}')}catch(e){}const sv=()=>{try{LS[K]=JSON.stringify(st)}catch(e){}};
 st.q=st.q||[];st.fav=st.fav||[];st.rec=st.rec||[];st.rs=st.rs||[];st.off=st.off||{};st.mr=st.mr||'노래방';st.vol=st.vol??80;st.fz=st.fz||'M';
 const $=id=>document.getElementById(id);
@@ -111,7 +122,7 @@ function pNext(a,q,j){const tok=j.nextpage;return{L:mapP(j),more:tok?async()=>{c
 async function iPage(a,q,n){const j=await jget(a+'/api/v1/search?type=video&page='+n+'&q='+encodeURIComponent(q));if(!Array.isArray(j)||!j.length)return null;return{L:mapI(j),more:()=>iPage(a,q,n+1)}}
 async function ytSearch(q){const r=await ytPage(q);return r?r.L:null}
 function row(x,mode,i){const d=document.createElement('div');d.className='it'+(mode=='q'&&i==0&&CUR&&CUR.id==x.id?' cur':'');
- d.innerHTML=(mode=='q'?'<span class="n">'+(i+1)+'</span>':'')+'<img loading="lazy"><div class="t"><b></b><small></small></div>';d.querySelector('img').src=x.th||('https://i.ytimg.com/vi/'+x.id+'/mqdefault.jpg');
+ d.innerHTML=(mode=='q'?'<span class="n">'+(i+1)+'</span>':'')+'<img loading="lazy"><div class="t"><b></b><small></small></div>';const im=d.querySelector('img'),yi='https://i.ytimg.com/vi/'+x.id+'/mqdefault.jpg';im.src=x.th||yi;im.onerror=()=>{if(im.src!=yi)im.src=yi};
  d.querySelector('b').textContent=x.t;d.querySelector('small').textContent=[x.c,fmtD(x.d)].filter(Boolean).join(' · ');d.querySelector('.t').onclick=()=>playNow(x);
  const B=(t,f,ti)=>{const b=document.createElement('button');b.textContent=t;if(ti)b.title=ti;b.onclick=e=>{e.stopPropagation();f()};d.appendChild(b)};
  const isF=st.fav.some(f=>f.id==x.id);
