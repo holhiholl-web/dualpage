@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>T12 듀얼맵+유튜브</title>
+<title>T13 듀얼맵+유튜브</title>
 <script src="https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=iSBCMHTI7D2DqUdLdiY5U2aS4XZZEIgl5ATPkc9g"></script>
 <style>
 :root{--bg:#0b0d10;--pn:#14171c;--pn2:#1c2027;--ln:rgba(255,255,255,.08);--tx:#eef1f5;--mu:#8b94a3;--ac:#3d7bff;--ok:#1fbf6a;--rd:#ff4757;--r:14px}
@@ -101,7 +101,7 @@ body.mk #R>.tb,body.mk #yt{display:none}body.mk #kw{display:block}body.mk .kbar{
 .hbt{position:absolute;z-index:1500;top:0;left:calc(50% - 32px);width:64px;height:44px;min-width:0;padding:0;font-size:20px;border-radius:0 0 14px 14px;background:rgba(18,21,26,.7);border:1px solid var(--ln);border-top:0;color:#fff;opacity:.75}
 .hbt{top:var(--tbh,58px)}body.hl #hl,body.hr #hr{top:0}body.ml #hr,body.mk #hr{display:none}body.hl #L>.tb,body.hl #nav{display:none!important}body.hr #R>.tb,body.hr .kbar{display:none!important}
 #mapw{isolation:isolate}
-</style></head><body><div id="ver">T12</div><button id="tg" onclick="tgl()">▲</button><div id="wrap"><div id="kb"><div id="kbP"><span id="kbL">도착지</span><div id="kbT"><span id="kbS"></span><i></i></div><button class="g" onclick="kbClear()">지우기</button><button class="g" onclick="kbClose()">✕</button></div><div id="chips"></div><div id="kbK"></div></div>
+</style><script src="./loc-relay.js"></script></head><body><div id="ver">T13</div><button id="tg" onclick="tgl()">▲</button><div id="wrap"><div id="kb"><div id="kbP"><span id="kbL">도착지</span><div id="kbT"><span id="kbS"></span><i></i></div><button class="g" onclick="kbClear()">지우기</button><button class="g" onclick="kbClose()">✕</button></div><div id="chips"></div><div id="kbK"></div></div>
 <div class="pane" id="L"><button class="hbt" id="hl" onclick="hT('l')" title="상단 숨기기">⌃</button><div class="tb"><input id="from" class="ki" placeholder="출발: 내 위치" readonly inputmode="none"><input id="q" class="ki" placeholder="도착지 · 장소/주소" readonly inputmode="none"><button class="g" onclick="sp()">검색</button><button onclick="route()">길찾기</button></div>
 <div id="mapw"><div id="map"><div id="tm" class="eng"></div><div id="nm" class="eng"></div></div><div id="info" class="info glass" hidden></div><div id="pl" class="glass" hidden></div><div id="nav" class="glass"><div class="top"><div id="nT">↑</div><div style="min-width:0;flex:1"><span id="nD"></span><span id="nI">-</span></div></div><div class="bot"><button class="stop" onclick="stopNav()">■ 안내 종료</button><button class="g" id="snd" onclick="tSnd()">🔊</button><span id="nR"></span></div></div><div class="fab" id="fabR"><button id="bet" class="eb" onclick="setEng('t')" title="T맵"><b>T</b></button><button id="ben" class="eb" onclick="setEng('n')" title="네이버지도"><b>N</b></button><button id="b3d" onclick="setM('v',M.v=='3d'?'2d':'3d')">3D</button><button id="bth" onclick="setM('th',isNight()?'day':'night')">☀️</button><button id="bly" onclick="sett.hidden=!sett.hidden" title="지도 설정">🗂️</button></div>
 <div class="fab" id="fabL"><button onclick="me()" title="내 위치">📍</button><button onclick="zm(1)">＋</button><button onclick="zm(-1)">－</button><button id="cmp" onclick="recenter()" title="내 위치/북쪽"><span>🧭</span></button></div>
@@ -471,4 +471,10 @@ rMode('l');
 function hT(k,v){const key='h'+k;st[key]=v===undefined?!st[key]:!!v;sv();document.body.classList.toggle(key,st[key]);const b=document.getElementById(key);b.textContent=st[key]?'⌄':'⌃';b.title=st[key]?'상단 보이기':'상단 숨기기';
  if(k=='r')kPost({type:'chrome',hide:st[key]});setTimeout(()=>dispatchEvent(new Event('resize')),50)}
 ['hl','hr'].forEach(i=>{const b=document.getElementById(i);b.parentNode.appendChild(b)});hT('l',!!st.hl);hT('r',!!st.hr);addEventListener('message',e=>{const d=e.data;if(d&&d.type=='kchrome'&&e.source===(kFr()||{}).contentWindow)hT('r',!!d.hide)});requestAnimationFrame(()=>{const t=document.querySelector('#L>.tb');if(t&&t.offsetHeight)document.documentElement.style.setProperty('--tbh',t.offsetHeight+'px')});
+
+// ===== T13: 휴대폰 위치 마커 =====
+let PHM=null;function phPos(p){const c=p.coords;here=[c.latitude,c.longitude];GP={lat:here[0],lng:here[1],t:Date.now(),acc:c.accuracy};try{localStorage.v10gp=JSON.stringify(GP)}catch(x){}
+ if(mk3){if(PHM){rm(PHM);PHM=null}return}const ll=LL(here[0],here[1]);if(PHM)PHM.setPosition(ll);else PHM=XMarker({position:ll,map,title:'내 위치(휴대폰)'});
+ if(!window.__phFirst){window.__phFirst=1;try{map.setCenter(ll)}catch(e){}}window.__phN=(window.__phN||0)+1;window.__phLL=[+here[0].toFixed(4),+here[1].toFixed(4)]}
+if(window.RELAY){RELAY.listeners.push(phPos);if(RELAY.last)phPos({coords:{latitude:RELAY.last.lat,longitude:RELAY.last.lng,accuracy:RELAY.last.acc}})}
 </script></body></html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b0d12">
+<title>아이카 위치 보내기</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;background:#0b0d12;color:#f1f3f8;font-family:-apple-system,"Pretendard","Noto Sans KR",system-ui,sans-serif}
+main{max-width:520px;margin:0 auto;padding:22px 18px 40px;display:flex;flex-direction:column;gap:16px}
+h1{font-size:26px;margin:4px 0}p{margin:0;color:#9aa3b5;font-size:17px;line-height:1.5}
+#code{width:100%;height:84px;font-size:46px;font-weight:800;letter-spacing:12px;text-align:center;border-radius:18px;border:2px solid #333a4a;background:#151821;color:#ffd84d;outline:none}#code:focus{border-color:#7b5cff}
+button{height:76px;border:0;border-radius:20px;font-size:26px;font-weight:800;color:#fff;background:linear-gradient(135deg,#ff3d7f,#7b5cff)}button.stop{background:#2a2d38;border:1px solid #444}
+#st{font-size:30px;font-weight:800;text-align:center;padding:18px;border-radius:18px;background:#151821}#st.ok{color:#5dffa0}#st.err{color:#ff7b7b}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:18px;background:#151821;border-radius:16px;padding:14px 16px}.kv b{color:#9aa3b5;font-weight:600}
+.warn{background:#2a1d0c;color:#ffd08a;border-radius:14px;padding:14px;font-size:17px;line-height:1.5}
+</style></head><body><main>
+<h1>📱 아이카에 내 위치 보내기</h1>
+<p>차량 화면에 보이는 <b>6자리 코드</b>를 입력하고 시작을 누르세요.</p>
+<input id="code" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="000000">
+<button id="go">▶ 위치 보내기 시작</button>
+<div id="st">대기 중</div>
+<div class="kv"><b>정확도</b><span id="acc">-</span><b>속도</b><span id="spd">-</span><b>보낸 횟수</b><span id="cnt">0</span><b>화면 켜짐 유지</b><span id="wl">-</span><b>마지막 전송</b><span id="last">-</span></div>
+<div class="warn">⚠️ 운전하는 동안 <b>이 화면을 켠 채로</b> 두세요. 다른 앱으로 가거나 화면이 꺼지면 위치 전송이 멈춥니다.<br>휴대폰 위치 권한을 <b>허용</b>해 주세요.</div>
+</main>
+<script>
+const W='https://dualpage-loc.holhiholl.workers.dev';const $=id=>document.getElementById(id);
+const qs=new URLSearchParams(location.search);const C=$('code');C.value=(qs.get('code')||localStorage.phcode||'').replace(/\D/g,'').slice(0,6);
+let WID=null,LAST=null,SENT=0,TIMER=null,WL=null,RUN=false,FAIL=0,LASTSENT=0;
+function st(t,c){$('st').textContent=t;$('st').className=c||''}
+async function wake(){try{if('wakeLock' in navigator){WL=await navigator.wakeLock.request('screen');$('wl').textContent='✅ 켜짐';WL.addEventListener('release',()=>{$('wl').textContent='꺼짐'})}else $('wl').textContent='지원 안 됨 (화면 자동꺼짐을 꺼 두세요)'}catch(e){$('wl').textContent='실패: '+e.message}}
+document.addEventListener('visibilitychange',()=>{if(RUN&&document.visibilityState==='visible')wake()});
+async function send(){if(!LAST||!RUN)return;const p=LAST;if(p.sent&&Date.now()-LASTSENT<3000)return;p.sent=1;
+ try{const r=await fetch(W+'/loc?code='+C.value,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p.d)});if(!r.ok)throw new Error('HTTP '+r.status);SENT++;FAIL=0;LASTSENT=Date.now();$('cnt').textContent=SENT;st('✅ 전송 중','ok')}
+ catch(e){FAIL++;p.sent=0;st('⚠️ 전송 실패 · 재시도 중 ('+e.message+')','err')}}
+function start(){const code=C.value.replace(/\D/g,'');if(!/^\d{6}$/.test(code)){st('코드 6자리를 입력하세요','err');C.focus();return}localStorage.phcode=code;C.blur();
+ if(!navigator.geolocation){st('이 브라우저는 위치를 지원하지 않아요','err');return}
+ RUN=true;$('go').textContent='■ 멈추기';$('go').className='stop';st('📡 GPS 잡는 중…');wake();
+ WID=navigator.geolocation.watchPosition(p=>{const c=p.coords;LAST={d:{lat:c.latitude,lng:c.longitude,acc:c.accuracy,heading:(c.heading==null||isNaN(c.heading))?null:c.heading,speed:(c.speed==null||isNaN(c.speed))?null:c.speed,ts:p.timestamp||Date.now()}};
+  $('acc').textContent='±'+Math.round(c.accuracy)+' m';$('spd').textContent=c.speed!=null&&!isNaN(c.speed)?Math.round(c.speed*3.6)+' km/h':'-'},
+  e=>{st(e.code==1?'❌ 위치 권한이 거부됐어요 — 설정에서 허용해 주세요':'⚠️ GPS 오류: '+e.message,'err')},{enableHighAccuracy:true,maximumAge:0,timeout:20000});
+ TIMER=setInterval(()=>{send();if(LASTSENT)$('last').textContent=Math.round((Date.now()-LASTSENT)/1000)+'초 전'},1000)}
+function stop(){RUN=false;if(WID!=null)navigator.geolocation.clearWatch(WID);WID=null;clearInterval(TIMER);try{WL&&WL.release()}catch(e){}WL=null;$('go').textContent='▶ 위치 보내기 시작';$('go').className='';st('멈춤')}
+$('go').onclick=()=>RUN?stop():start();C.addEventListener('input',()=>{C.value=C.value.replace(/\D/g,'').slice(0,6)});
+window.__ph={start,stop,state:()=>({RUN,SENT,FAIL})};
+</script></body></html>
