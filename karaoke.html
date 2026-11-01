@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>K1 아이카 스마트 노래방</title>
+<title>K2 아이카 스마트 노래방</title>
 <style>
 :root{--bg:#0a0b10;--pn:#14161d;--pn2:#1d2029;--ln:rgba(255,255,255,.08);--tx:#f1f3f8;--mu:#8d95a6;--ac:#ff3d7f;--ac2:#7b5cff;--ok:#1fbf6a;--rd:#ff4757;--r:14px;--ly:34px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font-family:-apple-system,"Pretendard","Noto Sans KR","Apple SD Gothic Neo",system-ui,sans-serif;overflow:hidden;user-select:none}
@@ -35,19 +35,31 @@ body.fs #S,body.fs #P>.bar{display:none}body.fs #P{flex:1}#fsx{display:none;posi
 .kr{display:flex;gap:5px;flex:1;min-height:44px}.kr button{flex:1 1 0;min-width:0;height:auto;padding:0;font-size:22px;font-weight:500;border-radius:10px;background:#2a2d38;border:0}
 .kr button.f{background:#3a3e4b;font-size:17px}.kr button.w2{flex:1.6}.kr button.sp{flex:4.5}.kr button.go{flex:2;background:linear-gradient(135deg,var(--ac),var(--ac2))}.kr button.on{background:var(--ac2)}
 @media (max-width:1100px){.bar .brand,.bar #vv{display:none}.bar button{padding-left:9px;padding-right:9px}.bar .x{display:none}.it img{width:72px}}
-</style></head><body>
+#col{flex:none;width:44px;min-width:44px;padding:0;font-size:22px}#opn{display:none;position:fixed;z-index:1400;right:0;top:50%;transform:translateY(-50%);width:40px;height:96px;min-width:0;padding:0;border-radius:14px 0 0 14px;font-size:24px;background:rgba(123,92,255,.85);border:0}
+body.col #S{display:none}body.col #P{flex:1}body.col #opn{display:block}body.fs #opn{display:none}
+#sy{position:absolute;right:12px;bottom:16px;display:flex;gap:4px;align-items:center}#sy button{height:44px;width:44px;min-width:44px;padding:0;font-size:20px;background:rgba(40,43,54,.8)}#sy span{font-size:13px;color:var(--mu);min-width:40px;text-align:center}
+#lsrc{bottom:2px;right:150px}
+.tabs .tl{display:inline}
+body.emb .nav,body.emb .brand{display:none}
+body.emb button{height:44px;min-width:44px;font-size:15px}body.emb button.i{width:44px}body.emb .bar{padding:4px 6px;gap:4px}body.emb #P{flex-basis:62%}body.emb .it img{width:64px}body.emb .it button{height:44px;min-width:44px}
+body.emb #kb{height:max(50vh,230px)}body.emb .kr button{font-size:19px}body.emb #vv{display:none}
+@media (max-width:1100px){.tabs button{font-size:14px;padding:0 3px}.tabs .em{display:none}}
+.hh{display:flex;align-items:center;justify-content:space-between;gap:6px}.hh .one{height:44px;min-width:0;font-size:13px;padding:0 10px;border-radius:18px}
+#cats button{height:44px;font-size:15px}#cats button.on{background:var(--ac);border-color:var(--ac)}
+.ft{display:flex;justify-content:center;padding:8px 0 14px}.ft button{width:70%}.spin{width:32px;height:32px;border:4px solid #333;border-top-color:var(--ac);border-radius:50%;animation:sp 0.8s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
+[hidden]{display:none!important}</style></head><body>
 <button id="fsx" onclick="fsT()">⤢ 패널</button>
-<div id="wrap"><div id="P"><div class="bar"><a href="./dual.html"><button>🧭 내비</button></a><span class="brand">아이카 노래방</span>
+<div id="wrap"><div id="P"><div class="bar"><a class="nav" href="./dual.html"><button>🧭 내비</button></a><span class="brand">아이카 노래방</span>
 <button onclick="restart()" title="처음부터">⏮</button><button id="bpp" onclick="pp()">⏯</button><button onclick="next()" title="다음곡">⏭ 다음곡</button>
 <button class="i" onclick="vol(-10)">🔉</button><span class="vol" id="vv">80</span><button class="i" onclick="vol(10)">🔊</button>
-<button id="blo" onclick="lyT()">가사</button><button id="bfz" onclick="fz()">글자 M</button><button class="i x" onclick="off(-.5)">−</button><span class="vol x" id="ofs">0.0s</span><button class="i x" onclick="off(.5)">+</button><button onclick="fsT()">⤢ 크게</button></div>
+<button id="blo" onclick="lyT()">가사</button><button id="bfz" onclick="fz()">글자 M</button><button onclick="fsT()">⤢ 크게</button></div>
 <div id="pw"><div id="idle"><b>🎤 아이카 스마트 노래방</b>노래를 검색해서 예약하세요</div><div id="yt"></div></div>
-<div id="ly"><div id="lcd"></div><div id="l1">♪</div><div id="l2"></div><div id="lsrc"></div></div></div>
-<div id="S"><div class="tabs"><button data-t="s" class="on" onclick="tab('s')">🔎 검색</button><button data-t="q" onclick="tab('q')">📋 예약 <span id="qn"></span></button><button data-t="f" onclick="tab('f')">⭐ 즐겨찾기</button><button data-t="r" onclick="tab('r')">🕘 최근</button></div>
-<div class="pane on" id="ps"><div class="srow"><input id="sq" readonly inputmode="none" placeholder="제목 · 가수 검색"><button id="bmr" onclick="mrT()">노래방</button><button class="p" onclick="search()">검색</button></div><div class="chips" id="rs"></div><div id="sr"></div></div>
+<div id="ly"><div id="lcd"></div><div id="l1">♪</div><div id="l2"></div><div id="lsrc"></div><div id="sy"><button onclick="off(-.5)" title="가사 빠르게">−</button><span id="ofs">0.0s</span><button onclick="off(.5)" title="가사 늦게">+</button></div></div></div>
+<div id="S"><div class="tabs"><button id="col" onclick="colT(1)" title="패널 접기">›</button><button data-t="s" class="on" onclick="tab('s')"><span class="em">🔎 </span>검색</button><button data-t="q" onclick="tab('q')"><span class="em">📋 </span>예약 <span id="qn"></span></button><button data-t="f" onclick="tab('f')"><span class="em">⭐ </span>즐겨찾기</button><button data-t="r" onclick="tab('r')"><span class="em">🕘 </span>최근</button></div>
+<div class="pane on" id="ps"><div class="srow"><input id="sq" readonly inputmode="none" placeholder="제목 · 가수 검색"><button id="bmr" onclick="mrT()">노래방</button><button class="p" onclick="search()">검색</button></div><div class="chips" id="cats"></div><div class="chips" id="rs"></div><div id="sr"></div></div>
 <div class="pane" id="pq"></div><div class="pane" id="pf"></div><div class="pane" id="pr"></div></div></div>
 <div id="kb"><div id="kbP"><div id="kbT"><span id="kbS"></span><i></i></div><button onclick="kbClear()">지우기</button><button onclick="kbClose()">✕</button></div><div id="kbK" style="display:flex;flex-direction:column;gap:5px;flex:1"></div></div>
-<div id="toast"></div>
+<button id="opn" onclick="colT(0)" title="패널 열기">‹</button><div id="toast"></div>
 <script>
 /*HG*/
 const HG=(()=>{const CHO='ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ',JUNG='ㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ',JONG=' ㄱㄲㄳㄴㄵㄶㄷㄹㄺㄻㄼㄽㄾㄿㅀㅁㅂㅄㅅㅆㅇㅈㅊㅋㅌㅍㅎ';
@@ -78,7 +90,7 @@ const HG=(()=>{const CHO='ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍ
  function type(seq){const st={text:'',hist:[]};for(const c of seq){if(c=='\b')back(st);else key(st,c)}return st.text}
  return{key,back,type,commit:st=>{st.hist=[];return st}}})();
 /*HG*/
-// ===== 아이카 스마트 노래방 K1 =====
+// ===== 아이카 스마트 노래방 K2 =====
 const LS=localStorage,K='k1';let st={};try{st=JSON.parse(LS[K]||'{}')}catch(e){}const sv=()=>{try{LS[K]=JSON.stringify(st)}catch(e){}};
 st.q=st.q||[];st.fav=st.fav||[];st.rec=st.rec||[];st.rs=st.rs||[];st.off=st.off||{};st.mr=st.mr||'노래방';st.vol=st.vol??80;st.fz=st.fz||'M';
 const $=id=>document.getElementById(id);
@@ -88,8 +100,16 @@ const fmtD=s=>s>0?Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0'):
 // --- 검색 (Piped → Invidious 다중 인스턴스) ---
 const PIPED=['https://api.piped.private.coffee','https://pipedapi.kavin.rocks','https://pipedapi.adminforge.de'],INV=['https://inv.nadeko.net','https://invidious.nerdvpn.de','https://yewtu.be'];
 async function jget(u,ms){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms||8000);try{const r=await fetch(u,{signal:c.signal});if(!r.ok)return null;return await r.json()}catch(e){return null}finally{clearTimeout(t)}}
-async function ytSearch(q){for(const a of PIPED){const j=await jget(a+'/search?filter=videos&q='+encodeURIComponent(q));if(j&&j.items&&j.items.length)return j.items.filter(x=>x.url&&x.url.includes('v=')).map(x=>({id:x.url.split('v=')[1].slice(0,11),t:x.title,c:x.uploaderName||'',d:x.duration||0,th:x.thumbnail}))}
- for(const a of INV){const j=await jget(a+'/api/v1/search?type=video&q='+encodeURIComponent(q));if(Array.isArray(j)&&j.length)return j.filter(x=>x.videoId).map(x=>({id:x.videoId,t:x.title,c:x.author||'',d:x.lengthSeconds||0,th:'https://i.ytimg.com/vi/'+x.videoId+'/mqdefault.jpg'}))}return null}
+const BAD=/모음|플레이리스트|playlist|연속\s*듣기|\d+\s*시간|\d+\s*곡|top\s*\d+|베스트\s*\d+|메들리|medley|1hour|hour/i;
+const one=x=>!(x.d>600||BAD.test(x.t));
+function mapP(j){return(j.items||[]).filter(x=>x.url&&x.url.includes('v=')).map(x=>({id:x.url.split('v=')[1].slice(0,11),t:x.title,c:x.uploaderName||'',d:x.duration||0,th:x.thumbnail}))}
+function mapI(j){return j.filter(x=>x.videoId).map(x=>({id:x.videoId,t:x.title,c:x.author||'',d:x.lengthSeconds||0,th:'https://i.ytimg.com/vi/'+x.videoId+'/mqdefault.jpg'}))}
+// 반환: {L, more:()=>Promise<{L,more}>|null}
+async function ytPage(q){for(const a of PIPED){const j=await jget(a+'/search?filter=videos&q='+encodeURIComponent(q));if(j&&j.items&&j.items.length)return pNext(a,q,j)}
+ for(const a of INV){const r=await iPage(a,q,1);if(r)return r}return null}
+function pNext(a,q,j){const tok=j.nextpage;return{L:mapP(j),more:tok?async()=>{const k=await jget(a+'/nextpage/search?filter=videos&q='+encodeURIComponent(q)+'&nextpage='+encodeURIComponent(tok));return k&&k.items&&k.items.length?pNext(a,q,k):null}:null}}
+async function iPage(a,q,n){const j=await jget(a+'/api/v1/search?type=video&page='+n+'&q='+encodeURIComponent(q));if(!Array.isArray(j)||!j.length)return null;return{L:mapI(j),more:()=>iPage(a,q,n+1)}}
+async function ytSearch(q){const r=await ytPage(q);return r?r.L:null}
 function row(x,mode,i){const d=document.createElement('div');d.className='it'+(mode=='q'&&i==0&&CUR&&CUR.id==x.id?' cur':'');
  d.innerHTML=(mode=='q'?'<span class="n">'+(i+1)+'</span>':'')+'<img loading="lazy"><div class="t"><b></b><small></small></div>';d.querySelector('img').src=x.th||('https://i.ytimg.com/vi/'+x.id+'/mqdefault.jpg');
  d.querySelector('b').textContent=x.t;d.querySelector('small').textContent=[x.c,fmtD(x.d)].filter(Boolean).join(' · ');d.querySelector('.t').onclick=()=>playNow(x);
@@ -99,12 +119,96 @@ function row(x,mode,i){const d=document.createElement('div');d.className='it'+(m
  else{B('예약',()=>reserve(x));B('우선',()=>reserve(x,1),'우선예약');B(isF?'★':'☆',()=>{favT(x);d.lastChild.textContent=st.fav.some(f=>f.id==x.id)?'★':'☆'},'즐겨찾기')}
  return d}
 function list(el,arr,mode,emp){el.innerHTML='';if(!arr.length){el.innerHTML='<div class="empty">'+emp+'</div>';return}arr.forEach((x,i)=>el.appendChild(row(x,mode,i)))}
-async function search(q){q=(q??$('sq').value).trim();if(!q)return home();$('sq').value=q;st.rs=[q].concat(st.rs.filter(x=>x!=q)).slice(0,8);sv();rrs();tab('s');
- const full=st.mr&&!new RegExp(st.mr,'i').test(q)?q+' '+st.mr:q;$('sr').innerHTML='<div class="empty">검색 중…</div>';const L=await ytSearch(full);
- if(!L){$('sr').innerHTML='<div class="empty">검색 서버에 연결하지 못했어요. 잠시 후 다시 시도하세요.</div>';return}$('sr').innerHTML='<div class="h">🔎 '+esc(full)+'</div>';const box=document.createElement('div');$('sr').appendChild(box);list(box,L,'s','결과 없음')}
-async function home(){const C=JSON.parse(sessionStorage.k1h||'null');let L=C&&Date.now()-C.t<1800000?C.L:null;$('sr').innerHTML='<div class="empty">인기 노래방 곡 불러오는 중…</div>';
- if(!L){L=[];for(const k of ['노래방 인기곡','TJ 노래방 인기차트','금영 노래방 인기곡']){const r=await ytSearch(k);if(r)L=L.concat(r.slice(0,10));if(L.length>=24)break}const seen={};L=L.filter(x=>!seen[x.id]&&(seen[x.id]=1));if(L.length)sessionStorage.k1h=JSON.stringify({t:Date.now(),L})}
- if(!L.length){$('sr').innerHTML='<div class="empty">추천 목록을 불러오지 못했어요 — 검색해 보세요</div>';return}$('sr').innerHTML='<div class="h">🔥 지금 인기 노래방</div>';const b=document.createElement('div');$('sr').appendChild(b);list(b,L,'s','')}
+// --- 큐레이션 인기곡 (곡 단위, 영상은 필요할 때 검색해 24h 캐시) ---
+const CATS=['차트인기','발라드','댄스','트로트','레전드','팝송'];
+const SONGS=`차트인기|A2O LITE|NEON
+차트인기|머무르|꿈꾸던 어른이 되었나요?
+차트인기|리센느|LOVE ATTACK
+차트인기|PLAVE|Star Trace
+차트인기|소연|퇴사할게여
+차트인기|IVE|Looks Can Kill
+차트인기|HUNTR/X|Golden
+차트인기|한로로|0+0
+차트인기|G-DRAGON|CRAYON
+차트인기|aespa|Lemonade
+차트인기|I.O.I|갑자기
+차트인기|ILLIT|체포하겠어
+차트인기|NCT WISH|I SPY
+차트인기|AKMU|개화
+차트인기|방탄소년단|ARIRANG
+차트인기|임영웅|IM HERO
+발라드|izi|응급실
+발라드|이무진|신호등
+발라드|김광석|서른 즈음에
+발라드|성시경|거리에서
+발라드|박효신|야생화
+발라드|아이유|밤편지
+발라드|윤하|사건의 지평선
+발라드|폴킴|모든 날, 모든 순간
+발라드|김민석|취중고백
+발라드|임재현|사랑에 연습이 있었다면
+발라드|이적|걱정말아요 그대
+발라드|버즈|가시
+발라드|SG워너비|라라라
+발라드|M.C the MAX|어디에도
+댄스|NewJeans|Hype Boy
+댄스|IVE|LOVE DIVE
+댄스|아이유|좋은날
+댄스|빅뱅|뱅뱅뱅
+댄스|싸이|강남스타일
+댄스|소녀시대|Gee
+댄스|DAY6|예뻤어
+댄스|QWER|고민중독
+댄스|ROSÉ|APT.
+댄스|방탄소년단|Dynamite
+트로트|임영웅|사랑은 늘 도망가
+트로트|송가인|가인이어라
+트로트|장윤정|어머나
+트로트|홍진영|사랑의 배터리
+트로트|박상철|무조건
+트로트|영탁|막걸리 한잔
+트로트|김연자|아모르 파티
+트로트|나훈아|테스형!
+레전드|리쌍|내가 웃는게 웃는게 아니야
+레전드|부활|Never Ending Story
+레전드|김건모|잘못된 만남
+레전드|쿨|애상
+레전드|노라조|형
+레전드|윤도현|사랑했나봐
+레전드|조용필|바운스
+레전드|YB|나는 나비
+레전드|이승철|소녀시대
+레전드|자우림|스물다섯, 스물하나
+팝송|Bruno Mars|Just The Way You Are
+팝송|Adele|Someone Like You
+팝송|Queen|Bohemian Rhapsody
+팝송|Ed Sheeran|Perfect
+팝송|ABBA|Dancing Queen
+팝송|Lady Gaga, Bruno Mars|Die With A Smile`.split('\n').map(l=>{const[g,a,t]=l.split('|');return{g,a,t}});
+let HC=JSON.parse(LS.k1r||'{}');
+async function resolve(x){const k=x.a+'|'+x.t,c=HC[k];if(c&&Date.now()-c.ts<864e5)return c.v;
+ const L=await ytSearch(x.a+' '+x.t+' '+(st.mr||'노래방'));if(!L)return null;const v=L.find(one)||null;
+ if(v){HC[k]={ts:Date.now(),v:slim(v)};try{LS.k1r=JSON.stringify(HC)}catch(e){}}return v}
+// --- 목록 + 무한 스크롤 ---
+let FEED=null;   // {box, more:async()=>items[]|null, busy}
+function feed(title,first,more){$('sr').innerHTML='';const h=document.createElement('div');h.className='h hh';h.innerHTML='<span>'+title+'</span>';
+ const ob=document.createElement('button');ob.className='one'+(st.one!==false?' on':'');ob.textContent='1곡만';ob.title='10분 넘는 모음 영상 숨기기';ob.onclick=()=>{st.one=st.one===false;sv();FEED&&FEED.re()};h.appendChild(ob);$('sr').appendChild(h);
+ const box=document.createElement('div');$('sr').appendChild(box);const ft=document.createElement('div');ft.className='ft';$('sr').appendChild(ft);
+ const seen={},all=[];const F=FEED={box,more,busy:false,
+  add(L){L.forEach(x=>{if(seen[x.id])return;seen[x.id]=1;all.push(x);if(st.one===false||one(x))box.appendChild(row(x,'s'))})},
+  re(){box.innerHTML='';all.forEach(x=>{if(st.one===false||one(x))box.appendChild(row(x,'s'))});document.querySelector('#sr .one').classList.toggle('on',st.one!==false)},
+  async load(){if(F.busy||!F.more||FEED!==F)return;F.busy=true;ft.innerHTML='<div class="spin"></div>';let L=null;try{L=await F.more()}catch(e){}
+   if(FEED!==F)return;F.busy=false;if(L&&L.length)F.add(L);ft.innerHTML='';if(F.more){const b=document.createElement('button');b.textContent='더 보기';b.onclick=()=>F.load();ft.appendChild(b);if(L&&L.length&&box.children.length<6)F.load()}else if(!box.children.length)ft.innerHTML='<div class="empty">결과 없음</div>'}};
+ F.add(first||[]);IO.disconnect();IO.observe(ft);F.load();return F}
+const IO=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)&&FEED)FEED.load()},{root:null,rootMargin:'0px 0px 200px 0px'});
+async function search(q){q=(q??$('sq').value).trim();if(!q)return home();$('sq').value=q;st.rs=[q].concat(st.rs.filter(x=>x!=q)).slice(0,8);sv();rrs();tab('s');$('cats').hidden=true;
+ const full=st.mr&&!new RegExp(st.mr,'i').test(q)?q+' '+st.mr:q;let pg=null,first=true;
+ const F=feed('🔎 '+esc(full),[],async()=>{const r=first?await ytPage(full):pg&&pg.more?await pg.more():null;
+  if(first&&!r){F.more=null;$('sr').querySelector('.ft').insertAdjacentHTML('beforebegin','<div class="empty">검색 서버에 연결하지 못했어요. 잠시 후 다시 시도하세요.</div>');return null}
+  first=false;pg=r;if(!r||!r.more)F.more=null;return r?r.L:null})}
+function home(g){g=g||st.cat||'차트인기';st.cat=g;sv();$('cats').hidden=false;[...$('cats').children].forEach(b=>b.classList.toggle('on',b.textContent==g));
+ const S=SONGS.filter(x=>x.g==g);let i=0;
+ const F=feed('🔥 '+esc(g),[],async()=>{const B=S.slice(i,i+8);i+=8;if(i>=S.length)F.more=null;const R=await Promise.all(B.map(resolve));return R.filter(Boolean)})}
 function rrs(){const c=$('rs');c.innerHTML='';st.rs.forEach(s=>{const b=document.createElement('button');b.textContent='🕘 '+s;b.onclick=()=>search(s);c.appendChild(b)})}
 function mrT(){st.mr=st.mr=='노래방'?'MR':st.mr=='MR'?'':'노래방';sv();$('bmr').textContent=st.mr||'원곡';$('bmr').classList.toggle('on',!!st.mr)}
 // --- 예약 / 즐겨찾기 / 최근 ---
@@ -177,4 +281,16 @@ $('sq').addEventListener('pointerdown',e=>{e.preventDefault();kbOpen($('sq'))});
 addEventListener('keydown',e=>{if(!$('kb').classList.contains('on'))return;if(e.key=='Enter')kbAct('go');else if(e.key=='Backspace')kbAct('bs');else if(e.key=='Escape')kbClose();else return;e.preventDefault()});
 // --- 시작 ---
 $('vv').textContent=st.vol;$('bmr').textContent=st.mr||'원곡';$('bmr').classList.toggle('on',!!st.mr);$('blo').classList.add('on');afz();rrs();rq();home();
+
+CATS.forEach(g=>{const b=document.createElement('button');b.textContent=g;b.onclick=()=>home(g);$('cats').appendChild(b)});[...$('cats').children].forEach(b=>b.classList.toggle('on',b.textContent==(st.cat||'차트인기')));
+// ===== K2: 패널 접기 · 임베드 · 덕킹 =====
+const EMB=/[?&]embed=1/.test(location.search)||(()=>{try{return self!==top}catch(e){return true}})();if(EMB)document.body.classList.add('emb');
+function colT(c){st.col=!!c;sv();document.body.classList.toggle('col',st.col)}if(st.col)document.body.classList.add('col');
+let DK=null;
+window.addEventListener('message',e=>{let d=e.data;if(typeof d=='string'){try{d=JSON.parse(d)}catch(x){return}}if(!d||typeof d!='object')return;
+ try{if(d.type=='duck'){DK=Math.min(st.vol,Math.round(d.vol!=null?d.vol:20));YP&&YP.setVolume(DK)}
+ else if(d.type=='restore'){DK=null;YP&&YP.setVolume(st.vol)}
+ else if(d.type=='pause'){YP&&YP.pauseVideo()}
+ else if(d.type=='play'){CUR&&YP&&YP.playVideo()}}catch(x){}
+ window.__kmsg=(window.__kmsg||[]).concat([d.type])});
 </script></body></html>
