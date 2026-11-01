@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>K5 아이카 스마트 노래방</title>
+<title>K6 아이카 스마트 노래방</title>
 <style>
 :root{--bg:#0a0b10;--pn:#14161d;--pn2:#1d2029;--ln:rgba(255,255,255,.08);--tx:#f1f3f8;--mu:#8d95a6;--ac:#ff3d7f;--ac2:#7b5cff;--ok:#1fbf6a;--rd:#ff4757;--r:14px;--ly:34px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font-family:-apple-system,"Pretendard","Noto Sans KR","Apple SD Gothic Neo",system-ui,sans-serif;overflow:hidden;user-select:none}
@@ -47,7 +47,7 @@ body.emb #kb{height:max(50vh,230px)}body.emb .kr button{font-size:19px}body.emb 
 .hh{display:flex;align-items:center;justify-content:space-between;gap:6px}.hh .one{height:44px;min-width:0;font-size:13px;padding:0 10px;border-radius:18px}
 #cats button{height:44px;font-size:15px}#cats button.on{background:var(--ac);border-color:var(--ac)}
 .ft{display:flex;justify-content:center;padding:8px 0 14px}.ft button{width:70%}.spin{width:32px;height:32px;border:4px solid #333;border-top-color:var(--ac);border-radius:50%;animation:sp 0.8s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
-[hidden]{display:none!important}#l1 span{background:none!important;-webkit-background-clip:border-box!important;background-clip:border-box!important;color:#ffd84d!important}#l1{text-shadow:0 2px 6px rgba(0,0,0,.8)!important}#ly{contain:paint;padding-right:110px!important}#l1,#l2{display:block;max-width:100%}
+[hidden]{display:none!important}#ban{position:absolute;inset:0;z-index:40;display:none;align-items:center;justify-content:center;text-align:center;padding:5%;background:radial-gradient(circle,#2a1020,#0a0508 75%);color:#fff;font-weight:800;font-size:clamp(18px,min(3.6vw,6.5vh),40px);line-height:1.3;overflow:hidden;word-break:keep-all;text-shadow:0 2px 8px #000}#ban.on{display:flex}#ban .bb{display:flex;gap:12px;justify-content:center;margin-top:14px;flex-wrap:wrap}#ban .bb button{height:56px;font-size:clamp(18px,2.4vw,26px);padding:0 22px;border-radius:18px}#ban #byt{background:#ff0000;border:0}#ban .l1,#ban .l2{white-space:nowrap;display:table;margin-left:auto;margin-right:auto}#ban .l2{margin-top:8px;color:#ff6b6b;font-size:1.15em}#ban small{display:block;margin-top:12px;font-size:.75em;color:#ffd84d}#l1 span{background:none!important;-webkit-background-clip:border-box!important;background-clip:border-box!important;color:#ffd84d!important}#l1{text-shadow:0 2px 6px rgba(0,0,0,.8)!important}#ly{contain:paint;padding-right:110px!important}#l1,#l2{display:block;max-width:100%}
 #sy{top:50%!important;bottom:auto!important;transform:translateY(-50%);flex-direction:column;gap:2px;right:8px!important}#sy span{font-size:11px}#sy button{height:36px!important}#lsrc{right:110px!important}
 #P{position:relative}#hb{display:none;position:absolute;z-index:60;right:8px;top:4px;width:56px;height:44px;min-width:0;padding:0;font-size:20px;background:rgba(20,22,29,.75)}body.hb #P>.bar{display:none}body.hb #hb{display:block}
 #ess{display:none;position:absolute;z-index:60;left:8px;top:4px;gap:6px}#ess button{background:rgba(20,22,29,.75)}body.hb #ess{display:flex}body.fs #hb,body.fs #ess{display:none}
@@ -71,7 +71,7 @@ body.col #dv,body.fs #dv{display:none}@media (max-width:640px) and (min-height:5
 <button onclick="restart()" title="처음부터">⏮</button><button id="bpp" onclick="pp()">⏯</button><button onclick="next()" title="다음곡">⏭ 다음곡</button>
 <button class="i" onclick="vol(-10)">🔉</button><span class="vol" id="vv">80</span><button class="i" onclick="vol(10)">🔊</button>
 <button id="blo" onclick="lyT()">🙈 가사끄기</button><button id="bfz" onclick="fz()">글자 M</button><button onclick="fsT()">⤢ 크게</button></div>
-<button id="hb" onclick="hbT()" title="상단 숨기기">⌃</button><div id="ess"><button onclick="pp()">⏯</button><button onclick="next()">⏭</button><button id="blo2" onclick="lyT()">🙈 가사끄기</button></div><div id="pw"><div id="idle"><b>🎤 아이카 스마트 노래방</b>노래를 검색해서 예약하세요</div><div id="yt"></div></div>
+<button id="hb" onclick="hbT()" title="상단 숨기기">⌃</button><div id="ess"><button onclick="pp()">⏯</button><button onclick="next()">⏭</button><button id="blo2" onclick="lyT()">🙈 가사끄기</button></div><div id="pw"><div id="idle"><b>🎤 아이카 스마트 노래방</b>노래를 검색해서 예약하세요</div><div id="yt"></div><div id="ban"></div></div>
 <div id="ly"><div id="lcd"></div><div id="l1">♪</div><div id="l2"></div><div id="lsrc"></div><div id="sy"><button onclick="off(-.5)" title="가사 빠르게">−</button><span id="ofs">0.0s</span><button onclick="off(.5)" title="가사 늦게">+</button></div></div></div>
 <div id="dv" title="드래그: 폭 조절 · 두 번 탭: 초기화"></div><div id="S"><div class="tabs"><button id="col" onclick="colT(1)" title="패널 접기">›</button><button data-t="s" class="on" onclick="tab('s')"><span class="em">🔎 </span>검색</button><button data-t="q" onclick="tab('q')"><span class="em">📋 </span>예약 <span id="qn"></span></button><button data-t="f" onclick="tab('f')"><span class="em">⭐ </span><span class="lg">즐겨찾기</span><span class="sh">⭐ 찜</span></button><button data-t="r" onclick="tab('r')"><span class="em">🕘 </span>최근</button></div>
 <div class="pane on" id="ps"><div class="srow"><input id="sq" readonly inputmode="none" placeholder="제목 · 가수 검색"><button id="bmr" onclick="mrT()">노래방</button><button class="p" onclick="search()">검색</button></div><div class="chips" id="cats"></div><div class="chips" id="rs"></div><div id="sr"></div></div>
@@ -108,7 +108,7 @@ const HG=(()=>{const CHO='ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍ
  function type(seq){const st={text:'',hist:[]};for(const c of seq){if(c=='\b')back(st);else key(st,c)}return st.text}
  return{key,back,type,commit:st=>{st.hist=[];return st}}})();
 /*HG*/
-// ===== 아이카 스마트 노래방 K5 =====
+// ===== 아이카 스마트 노래방 K6 =====
 const LS=localStorage,K='k1';let st={};try{st=JSON.parse(LS[K]||'{}')}catch(e){}const sv=()=>{try{LS[K]=JSON.stringify(st)}catch(e){}};
 st.q=st.q||[];st.fav=st.fav||[];st.rec=st.rec||[];st.rs=st.rs||[];st.off=st.off||{};st.mr=st.mr||'노래방';st.vol=st.vol??80;st.fz=st.fz||'M';
 const $=id=>document.getElementById(id);
@@ -130,7 +130,7 @@ async function iPage(a,q,n){const j=await jget(a+'/api/v1/search?type=video&page
 async function ytSearch(q){const r=await ytPage(q);return r?r.L:null}
 function row(x,mode,i){const d=document.createElement('div');d.className='it'+(mode=='q'&&i==0&&CUR&&CUR.id==x.id?' cur':'');
  d.innerHTML=(mode=='q'?'<span class="n">'+(i+1)+'</span>':'')+'<img loading="lazy"><div class="t"><b></b><small></small></div>';const im=d.querySelector('img'),yi='https://i.ytimg.com/vi/'+x.id+'/mqdefault.jpg';im.src=x.th||yi;im.onerror=()=>{if(im.src!=yi)im.src=yi};
- d.querySelector('b').textContent=x.t;d.querySelector('small').textContent=[x.c,fmtD(x.d)].filter(Boolean).join(' · ');d.querySelector('.t').onclick=()=>playNow(x);
+ d.querySelector('b').textContent=(isBlk(x.id)?'⛔ ':'')+x.t;if(isBlk(x.id))d.style.opacity='.55';d.querySelector('small').textContent=[x.c,fmtD(x.d)].filter(Boolean).join(' · ');d.querySelector('.t').onclick=()=>playNow(x);
  const B=(t,f,ti)=>{const b=document.createElement('button');b.textContent=t;if(ti)b.title=ti;b.onclick=e=>{e.stopPropagation();f()};d.appendChild(b)};
  const isF=st.fav.some(f=>f.id==x.id);
  if(mode=='q'){B('▲',()=>mv(i,-1),'위로');B('▼',()=>mv(i,1),'아래로');B('✕',()=>{st.q.splice(i,1);sv();rq();toast('예약 취소')},'취소')}
@@ -205,7 +205,7 @@ const SONGS=`차트인기|A2O LITE|NEON
 팝송|Lady Gaga, Bruno Mars|Die With A Smile`.split('\n').map(l=>{const[g,a,t]=l.split('|');return{g,a,t}});
 let HC=JSON.parse(LS.k1r||'{}');
 async function resolve(x){const k=x.a+'|'+x.t,c=HC[k];if(c&&Date.now()-c.ts<864e5)return c.v;
- const L=await ytSearch(x.a+' '+x.t+' '+(st.mr||'노래방'));if(!L)return null;const v=L.find(one)||null;
+ const L=await ytSearch(x.a+' '+x.t+' '+(st.mr||'노래방'));if(!L)return null;const v=await pickOk(rank(L).filter(one));if(v)v.q=x.a+' '+x.t;
  if(v){HC[k]={ts:Date.now(),v:slim(v)};try{LS.k1r=JSON.stringify(HC)}catch(e){}}return v}
 // --- 목록 + 무한 스크롤 ---
 let FEED=null;   // {box, more:async()=>items[]|null, busy}
@@ -213,7 +213,7 @@ function feed(title,first,more){$('sr').innerHTML='';const h=document.createElem
  const ob=document.createElement('button');ob.className='one'+(st.one!==false?' on':'');ob.textContent='1곡만';ob.title='10분 넘는 모음 영상 숨기기';ob.onclick=()=>{st.one=st.one===false;sv();FEED&&FEED.re()};h.appendChild(ob);$('sr').appendChild(h);
  const box=document.createElement('div');$('sr').appendChild(box);const ft=document.createElement('div');ft.className='ft';$('sr').appendChild(ft);
  const seen={},all=[];const F=FEED={box,more,busy:false,
-  add(L){L.forEach(x=>{if(seen[x.id])return;seen[x.id]=1;all.push(x);if(st.one===false||one(x))box.appendChild(row(x,'s'))})},
+  add(L){rank(L,1).forEach(x=>{if(seen[x.id])return;seen[x.id]=1;all.push(x);if(st.one===false||one(x))box.appendChild(row(x,'s'))})},
   re(){box.innerHTML='';all.forEach(x=>{if(st.one===false||one(x))box.appendChild(row(x,'s'))});document.querySelector('#sr .one').classList.toggle('on',st.one!==false)},
   async load(){if(F.busy||!F.more||FEED!==F)return;F.busy=true;ft.innerHTML='<div class="spin"></div>';let L=null;try{L=await F.more()}catch(e){}
    if(FEED!==F)return;F.busy=false;if(L&&L.length)F.add(L);ft.innerHTML='';if(F.more){const b=document.createElement('button');b.textContent='더 보기';b.onclick=()=>F.load();ft.appendChild(b);if(L&&L.length&&box.children.length<6)F.load()}else if(!box.children.length)ft.innerHTML='<div class="empty">결과 없음</div>'}};
@@ -230,7 +230,7 @@ function home(g){g=g||st.cat||'차트인기';st.cat=g;sv();$('cats').hidden=fals
 function rrs(){const c=$('rs');c.innerHTML='';st.rs.forEach(s=>{const b=document.createElement('button');b.textContent='🕘 '+s;b.onclick=()=>search(s);c.appendChild(b)})}
 function mrT(){st.mr=st.mr=='노래방'?'MR':st.mr=='MR'?'':'노래방';sv();$('bmr').textContent=st.mr||'원곡';$('bmr').classList.toggle('on',!!st.mr)}
 // --- 예약 / 즐겨찾기 / 최근 ---
-function slim(x){return{id:x.id,t:x.t,c:x.c,d:x.d,th:x.th}}
+function slim(x){const o={id:x.id,t:x.t,c:x.c,d:x.d,th:x.th};if(x.q)o.q=x.q;return o}
 function reserve(x,top){const s=slim(x);if(!CUR&&!st.q.length){playNow(s);return}if(top)st.q.unshift(s);else st.q.push(s);sv();rq();toast((top?'우선예약: ':'예약: ')+x.t.slice(0,30))}
 function mv(i,d){const j=i+d;if(j<0||j>=st.q.length)return;[st.q[i],st.q[j]]=[st.q[j],st.q[i]];sv();rq()}
 function rq(){$('qn').textContent=st.q.length?'('+st.q.length+')':'';list($('pq'),st.q,'q','예약된 곡이 없어요');
@@ -242,7 +242,7 @@ function tab(t){document.querySelectorAll('.tabs button').forEach(b=>b.classList
 // --- 플레이어 (YouTube IFrame API) ---
 let YP=null,YR=false,CUR=null,PEND=null;
 function onYouTubeIframeAPIReady(){YP=new YT.Player('yt',{width:'100%',height:'100%',playerVars:{autoplay:1,playsinline:1,rel:0,modestbranding:1,fs:0},
- events:{onReady:()=>{YR=true;try{YP.setVolume(st.vol)}catch(e){}if(PEND){const p=PEND;PEND=null;load(p)}},onStateChange:e=>{if(e.data===0)next(true);$('bpp').textContent=e.data===1?'⏸':'▶'},onError:()=>{toast('재생할 수 없는 영상 — 다음 곡으로');setTimeout(()=>next(true),1500)}}})}
+ events:{onReady:()=>{YR=true;try{YP.setVolume(st.vol)}catch(e){}if(PEND){const p=PEND;PEND=null;load(p)}},onStateChange:e=>{if(e.data===0)next(true);$('bpp').textContent=e.data===1?'⏸':'▶'},onError:e=>onYtErr(e&&e.data)}})}
 window.onYouTubeIframeAPIReady=onYouTubeIframeAPIReady;
 (function(){const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';document.head.appendChild(s)})();
 function load(x){$('idle').style.display='none';if(!YR){PEND=x;return}YP.loadVideoById(x.id);try{YP.unMute();YP.setVolume(st.vol)}catch(e){}}
@@ -323,4 +323,38 @@ addEventListener('resize',()=>{if(st.sw)sw(st.sw*innerWidth)});
 window.addEventListener('message',e=>{const d=e.data;if(d&&d.type=='chrome')hbT(!!d.hide,1)});
 
 lyT(!!st.lyoff);
+
+// ===== K6: 퍼가기 차단 영상 자동 교체 =====
+let BANT=0;function banner(h,ms){const b=$('ban');b.innerHTML=h;b.classList.add('on');BANT=Date.now()+(ms||3000);clearTimeout(b._t);b._t=setTimeout(()=>{if(Date.now()>=BANT)b.classList.remove('on')},ms||3000);window.__ban=(window.__ban||[]).concat(b.textContent)}
+function banFit(){const B=$('ban'),W=B.clientWidth*0.92;B.querySelectorAll('.l1,.l2').forEach(e=>{let f=parseFloat(getComputedStyle(e).fontSize);while(e.offsetWidth>W&&f>12){f-=1;e.style.fontSize=f+'px'}})}
+addEventListener('resize',()=>{if($('ban').classList.contains('on'))banFit()});
+function banOff(){const b=$('ban');const w=Math.max(0,BANT-Date.now());clearTimeout(b._t);b._t=setTimeout(()=>b.classList.remove('on'),w)}
+
+st.blk=st.blk||{};st.emb=st.emb||{};
+function isBlk(id){return!!(st.blk&&st.blk[id])}
+function markBlk(id){st.blk[id]=Date.now();const k=Object.keys(st.blk);if(k.length>500)k.sort((a,b)=>st.blk[a]-st.blk[b]).slice(0,k.length-500).forEach(x=>delete st.blk[x]);sv()}
+const BADCH=/\bTJ\b|티제이|ziller|질러|TJ\s*Media|TJ\s*Karaoke|TJ\s*KARAOKE/i,GOODCH=/금영|KY\s*Karaoke|KY\s*KARAOKE|KUMYOUNG|KY\s*노래방|노래방\s*반주|노래방 MR/i;
+function score(x){let s=0;if(isBlk(x.id))s-=100;const E=st.emb||{};if(E[x.id]===0)s-=100;if(E[x.id]===1)s+=5;if(GOODCH.test(x.c+' '+x.t))s+=10;if(BADCH.test(x.c+' '+x.t))s-=8;return s}
+function rank(L,stable){const a=L.map((x,i)=>[x,score(x),i]);a.sort((p,q)=>stable?((p[1]<-50)-(q[1]<-50))||p[2]-q[2]:q[1]-p[1]||p[2]-q[2]);return a.map(z=>z[0])}
+// oEmbed 퍼가기 확인: 401/403/404 → 차단, 네트워크/CORS 실패 → 알 수 없음(통과)
+async function embOk(id){if(st.emb[id]!=null)return st.emb[id]!==0;const c=new AbortController(),t=setTimeout(()=>c.abort(),3000);
+ try{const r=await fetch('https://www.youtube.com/oembed?format=json&url='+encodeURIComponent('https://www.youtube.com/watch?v='+id),{signal:c.signal});st.emb[id]=r.ok?1:(r.status==401||r.status==403||r.status==404)?0:null;
+  if(st.emb[id]==null)delete st.emb[id];const k=Object.keys(st.emb);if(k.length>800)k.slice(0,k.length-800).forEach(x=>delete st.emb[x]);sv();return st.emb[id]!==0}catch(e){return true}finally{clearTimeout(t)}}
+async function pickOk(L,skip){for(const x of L.slice(0,6)){if(isBlk(x.id)||(skip&&skip[x.id]))continue;if(await embOk(x.id))return x;markBlk(x.id)}return null}
+function baseQ(x){if(x.q)return x.q;return(x.t||'').replace(/\[[^\]]*\]|\([^)]*\)|【[^】]*】/g,' ').replace(/\/.*$/,' ').replace(/노래방|karaoke|가라오케|\bMR\b|inst\.?|반주|\bTJ\b|\bKY\b|금영|멜로디\s*제거|official|music video|M\/?V|가사|lyrics?/ig,' ').replace(/[-–|·]+/g,' ').replace(/\s+/g,' ').trim()}
+let FIX=null;
+async function findAlt(x,F){const b=baseQ(x);let pool=[];for(const suf of ['금영 노래방','노래방','karaoke','MR']){const L=await ytSearch(b+' '+suf);if(L)pool=pool.concat(L.filter(v=>one(v)&&!F.tried[v.id]&&!isBlk(v.id)));const v=await pickOk(rank(pool),F.tried);if(v){const y=slim(v);y.q=b;y.orig=F.orig;return y}}return null}
+function failSkip(){FIX=null;clearInterval(($('ban'))._iv);banner('🚫 저작권 문제로 이 곡은 재생할 수 없어<small>다음 곡으로 넘어갑니다</small>',3000);setTimeout(()=>next(true),3000)}
+async function onYtErr(code){const x=CUR;if(!x)return;const blocked=[2,5,100,101,150].includes(code)||code==null;markBlk(x.id);
+ if(!blocked){toast('재생할 수 없는 영상 — 다음 곡으로');return setTimeout(()=>next(true),1200)}
+ if(!FIX||(FIX.orig!==(x.orig||x.id)))FIX={orig:x.orig||x.id,tried:{},n:0};const F=FIX;F.tried[x.id]=1;F.n++;F.x=x;
+ if(F.n>5)return failSkip();
+ F.alt=findAlt(x,F);let n=5;const B=$('ban');clearInterval(B._iv);clearTimeout(B._t);B.classList.add('on');BANT=0;
+ B.innerHTML='<div class="bw"><div class="l1">⚠️ 저작권자 요청으로 여기서는 재생할 수 없어요</div><div class="l2">유튜브로 이동 후 재생해야 합니다</div><small id="bmsg">또는 <b id="bcd">5</b>초 후 다른 노래방 영상으로 바꿔 틀게요</small><div class="bb"><button id="byt">▶ YouTube에서 보기</button><button id="balt" class="p">다른 영상으로 바로</button></div></div>';banFit();
+ window.__ban=(window.__ban||[]).concat(B.textContent);
+ $('byt').onclick=()=>{clearInterval(B._iv);F.paused=1;window.__yto=(window.__yto||[]).concat(x.id);try{window.open('https://www.youtube.com/watch?v='+x.id,'_blank')}catch(e){}$('bmsg').textContent='YouTube에서 여는 중 · 돌아오면 [다른 영상으로 바로]를 누르세요'};
+ $('balt').onclick=()=>doSwap(F);
+ B._iv=setInterval(()=>{if(CUR!==x||FIX!==F)return clearInterval(B._iv);n--;const c=$('bcd');if(c)c.textContent=n;if(n<=0){clearInterval(B._iv);doSwap(F)}},1000)}
+async function doSwap(F){const B=$('ban');clearInterval(B._iv);if(FIX!==F||F.busy)return;F.busy=1;const m=$('bmsg');if(m)m.textContent='다른 영상 찾는 중…';const y=await F.alt;F.busy=0;if(FIX!==F||CUR!==F.x)return;
+ if(!y)return failSkip();CUR=y;st.cur=y;sv();load(y);rq();B.classList.remove('on');toast('재생 불가 영상 → 다른 영상으로 교체');window.__swap=(window.__swap||[]).concat(y.id)}
 </script></body></html>
