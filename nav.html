@@ -1,0 +1,498 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>N1 아이카 내비</title>
+<script src="https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=iSBCMHTI7D2DqUdLdiY5U2aS4XZZEIgl5ATPkc9g"></script>
+<style>
+:root{--bg:#0b0d10;--pn:#14171c;--pn2:#1c2027;--ln:rgba(255,255,255,.08);--tx:#eef1f5;--mu:#8b94a3;--ac:#3d7bff;--ok:#1fbf6a;--rd:#ff4757;--r:14px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font-family:-apple-system,"Pretendard","Noto Sans KR","Apple SD Gothic Neo",system-ui,sans-serif;overflow:hidden}
+#wrap{display:flex;height:100vh}.pane{display:flex;flex-direction:column;min-width:0;height:100%;position:relative}
+#L{flex:0 0 50%}#R{flex:1}
+#bar{width:14px;background:var(--bg);cursor:col-resize;touch-action:none;display:flex;align-items:center;justify-content:center}#bar:after{content:"";width:4px;height:56px;border-radius:2px;background:#3a404a}
+.tb{display:flex;gap:8px;padding:8px;background:var(--pn);align-items:center;border-bottom:1px solid var(--ln)}
+.tb.s{padding:6px 8px;gap:6px}
+input{flex:1 1 0;min-width:0;height:52px;font-size:20px;padding:0 16px;border-radius:var(--r);border:1px solid var(--ln);background:var(--pn2);color:var(--tx);outline:none}
+input::placeholder{color:var(--mu)}input:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(61,123,255,.25)}
+button{flex:none;height:52px;min-width:52px;font-size:19px;font-weight:600;padding:0 18px;border-radius:var(--r);border:0;background:var(--ac);color:#fff;cursor:pointer;white-space:nowrap}
+button:active{transform:scale(.96)}button.g{background:var(--pn2);color:var(--tx);border:1px solid var(--ln)}button.i{padding:0;width:52px}
+.seg{display:flex;background:var(--pn2);border:1px solid var(--ln);border-radius:var(--r);padding:3px;gap:2px}.seg button{height:44px;min-width:64px;font-size:16px;padding:0 12px;background:transparent;color:var(--mu);border-radius:11px}.seg button.on{background:#2c323c;color:var(--tx)}
+.lk{margin-left:auto;height:44px;display:flex;align-items:center;padding:0 14px;border-radius:var(--r);color:#8fb4ff;font-size:16px;text-decoration:none;border:1px solid var(--ln)}
+#mapw{flex:1;position:relative;min-height:150px;overflow:hidden}#mapw #map{position:absolute;left:0;top:0;width:100%;height:100%}
+.glass{background:rgba(18,21,26,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--ln);border-radius:18px;box-shadow:0 8px 28px rgba(0,0,0,.45)}
+.info{position:absolute;z-index:996;left:10px;right:10px;top:10px;padding:10px 12px 10px 16px;font-size:18px;line-height:1.35;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.info[hidden]{display:none}.info.e{border-color:rgba(255,71,87,.6);color:#ffb3ba}
+.info button{margin-left:auto;height:52px;padding:0 22px;font-size:20px;font-weight:700;background:var(--ok);color:#fff}
+#pl{position:absolute;z-index:999;top:10px;left:10px;right:10px;max-height:70%;overflow:auto;padding:4px}
+#pl div{padding:14px 16px;min-height:52px;font-size:18px;border-bottom:1px solid var(--ln);cursor:pointer}#pl div:last-child{border:0}#pl div:first-child{color:var(--mu);font-size:16px;text-align:right}
+#nav{position:absolute;z-index:998;left:10px;right:10px;top:10px;padding:12px 14px;display:none}
+#nav .top{display:flex;align-items:center;gap:14px}#nT{flex:none;width:72px;height:72px;border-radius:16px;background:var(--ac);display:flex;align-items:center;justify-content:center;font-size:44px;font-weight:700;color:#fff}
+#nD{display:block;font-size:34px;font-weight:800;letter-spacing:-.5px;line-height:1.1}#nI{display:block;font-size:20px;font-weight:600;color:#cfd6e0;margin-top:2px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+#nav .bot{display:flex;gap:8px;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--ln)}#nR{flex:1;font-size:17px;color:var(--mu);text-align:right}
+#nav .stop{background:var(--rd);height:48px;font-size:17px}#nav .g{height:48px;width:52px;padding:0}
+#navbtn{display:none;position:absolute;z-index:997;top:10px;left:10px;font-size:22px;background:var(--ok)}
+#yt{flex:1;position:relative;background:#000}#yt iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+#res{position:absolute;inset:0;overflow:auto;background:var(--bg);display:none;padding:8px}
+.it{display:flex;gap:14px;padding:10px;margin-bottom:6px;border-radius:var(--r);background:var(--pn);font-size:18px;align-items:center;cursor:pointer}.it img{width:180px;aspect-ratio:16/9;object-fit:cover;border-radius:10px;flex:none}
+#tg{position:fixed;z-index:1000;left:10px;bottom:28px;width:56px;height:56px;padding:0;font-size:24px;border-radius:18px;background:rgba(18,21,26,.86);border:1px solid var(--ln);backdrop-filter:blur(10px);box-shadow:0 6px 20px rgba(0,0,0,.5)}
+body.hide .tb,body.hide #info,body.hide #pl{display:none!important}
+#ver{position:fixed;z-index:1001;left:10px;bottom:6px;font-size:11px;color:var(--mu);pointer-events:none}
+.fab{position:absolute;z-index:995;display:flex;flex-direction:column;gap:8px}
+.fab button{width:52px;height:52px;min-width:0;padding:0;border-radius:50%;font-size:22px;background:rgba(18,21,26,.86);color:var(--tx);border:1px solid var(--ln);backdrop-filter:blur(10px);box-shadow:0 4px 14px rgba(0,0,0,.45)}
+.fab button.on{background:var(--ac);border-color:var(--ac)}
+#fabR{right:10px;bottom:12px}#fabL{left:10px;bottom:92px}#cmp span{display:inline-block;transition:transform .3s}
+#sett{position:absolute;z-index:1002;right:10px;top:10px;width:min(340px,calc(100% - 20px));max-height:calc(100% - 20px);overflow:auto;padding:14px 16px}
+#sett[hidden]{display:none}#sett h3{margin:0 0 6px;font-size:19px;display:flex;justify-content:space-between;align-items:center}
+#sett h3 button{height:44px;width:44px;padding:0;min-width:0;background:transparent;color:var(--mu);font-size:22px}
+.sr{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--ln);font-size:17px}
+.sw{position:relative;width:64px;height:38px;flex:none;border-radius:19px;background:#2c323c;border:1px solid var(--ln);cursor:pointer;min-width:0;padding:0}
+.sw:after{content:"";position:absolute;top:4px;left:4px;width:28px;height:28px;border-radius:50%;background:#cfd6e0;transition:left .2s}
+.sw.on{background:var(--ok)}.sw.on:after{left:30px;background:#fff}
+#toast{position:absolute;z-index:997;left:76px;bottom:12px;max-width:calc(100% - 150px);display:flex;align-items:center;gap:12px;padding:8px 8px 8px 14px;font-size:19px;font-weight:700;transform:translateY(20px);opacity:0;pointer-events:none;transition:.25s}
+#toast.show{transform:none;opacity:1;pointer-events:auto}#toast .ic{flex:none;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;background:var(--rd)}
+#toast.w .ic{background:#f5a623}#toast.ok .ic{background:var(--ok)}#toast.i .ic{background:var(--ac)}
+#toast button{height:44px;width:44px;min-width:0;padding:0;background:transparent;color:var(--mu);font-size:22px}
+#mapw{background:linear-gradient(#0e1726,#1d2a3d)}#map{transform-origin:50% 55%;transition:transform .5s}
+@media (max-height:600px){.fab{flex-direction:row}#fabL{bottom:76px}#fabR{bottom:12px}#toast{max-width:calc(100% - 262px)}#toast{font-size:16px}}
+.nt{filter:invert(.93) hue-rotate(180deg) brightness(.85) contrast(.92)}
+.chips{display:flex;gap:6px;overflow-x:auto;flex:1;min-width:0;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}
+.chips button{height:44px;font-size:16px;padding:0 14px;border-radius:22px;background:var(--pn2);border:1px solid var(--ln);color:var(--tx);max-width:200px;overflow:hidden;text-overflow:ellipsis}
+.chips button.e{color:var(--mu);border-style:dashed}.lk{margin-left:0;flex:none}
+.hg{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;padding:6px}
+.hh{font-size:18px;font-weight:700;padding:8px 8px 2px;display:flex;align-items:center;justify-content:space-between}
+.vc{cursor:pointer;border-radius:var(--r);overflow:hidden;background:var(--pn)}.vc img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#222}
+.vc .t{font-size:16px;font-weight:600;line-height:1.3;padding:8px 10px 2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.vc .c{font-size:14px;color:var(--mu);padding:0 10px 10px}
+.vc .d{position:relative}.vc .d b{position:absolute;right:6px;bottom:6px;background:rgba(0,0,0,.8);font-size:13px;padding:2px 6px;border-radius:6px}
+/* T5: 초광폭 저높이 기기 */
+.tb{padding:6px 8px;gap:6px}.tb input,.tb button{height:46px}.tb input{font-size:18px}input.ki{cursor:pointer;caret-color:transparent}input.ki.act{border-color:var(--ac);box-shadow:0 0 0 3px rgba(61,123,255,.3)}
+#from{flex:.7 1 0}
+#tg{left:10px;bottom:10px;width:52px;height:52px}#ver{left:66px;bottom:2px}
+.fab button{width:48px;height:48px}
+#fabL{left:70px;bottom:10px;flex-direction:row!important}#fabR{right:10px;top:10px;bottom:auto!important;flex-direction:column!important}
+#nav,.info,#pl{right:68px!important}#sett{right:68px}
+#toast{left:10px!important;bottom:70px!important;max-width:calc(100% - 20px)!important}
+#kb{position:absolute;z-index:1500;left:0;right:0;bottom:0;display:none;flex-direction:column;gap:5px;padding:6px;background:rgba(14,16,20,.97);border-top:1px solid var(--ln);box-shadow:0 -10px 30px rgba(0,0,0,.6);height:max(52vh,272px);max-height:calc(100% - 4px)}
+#kb.on{display:flex}
+#kbP{display:flex;align-items:center;gap:6px;flex:none;height:44px}
+#kbT{flex:1;min-width:0;height:44px;display:flex;align-items:center;padding:0 12px;border-radius:12px;background:var(--pn2);border:1px solid var(--ac);font-size:20px;white-space:pre;overflow:hidden}
+#kbT i{display:inline-block;width:2px;height:24px;background:var(--ac);margin-left:1px;vertical-align:middle;animation:blk 1s steps(1) infinite}@keyframes blk{50%{opacity:0}}
+#kbL{flex:none;font-size:14px;color:var(--mu);padding:0 4px}
+#kbP button{height:44px;min-width:52px;padding:0 12px;font-size:18px}
+#chips{display:flex;gap:6px;overflow-x:auto;flex:none;height:44px;scrollbar-width:none}#chips:empty{display:none}#chips::-webkit-scrollbar{display:none}
+#chips button{height:44px;font-size:15px;padding:0 12px;border-radius:22px;background:var(--pn2);border:1px solid var(--ln);color:var(--tx);max-width:220px;overflow:hidden;text-overflow:ellipsis;flex:none}#chips button.e{color:var(--mu);border-style:dashed}
+.kr{display:flex;gap:5px;flex:1;min-height:44px}
+.kr button{flex:1 1 0;min-width:0;height:auto;padding:0;font-size:22px;font-weight:500;border-radius:10px;background:#2a2f38;color:var(--tx);border:0;box-shadow:0 2px 0 #0006}
+.kr button.f{background:#3a404b;font-size:17px}.kr button.w2{flex:1.6}.kr button.sp{flex:4.5}.kr button.go{flex:2;background:var(--ac)}.kr button.on{background:var(--ac)}
+.kr button:active{background:#55607a}
+#lpc{position:absolute;z-index:1001;width:min(340px,calc(100% - 90px));padding:10px 10px 10px 14px}#lpc[hidden]{display:none}#lpc .ln{font-size:18px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#lpc .la{font-size:14px;color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}#lpc button{height:46px;font-size:16px;padding:0 10px}#lpc .x{width:44px;min-width:0;height:44px;padding:0;background:transparent;color:var(--mu);font-size:20px}
+.eng{position:absolute;left:0;top:0;width:100%;height:100%}
+#fabR button.eb{font-weight:900;font-size:20px;font-family:Arial,sans-serif;opacity:.75}
+#bet b{background:linear-gradient(135deg,#ff2d6f,#7b3dff 55%,#2d8bff);-webkit-background-clip:text;background-clip:text;color:transparent}
+#ben b{color:#03c75a}
+#fabR button.eb.on{opacity:1;background:#fff;border:2px solid #fff;box-shadow:0 0 0 3px rgba(61,123,255,.6),0 4px 14px rgba(0,0,0,.45)}
+#fabR button.eb:disabled{opacity:.25}
+#fabR button.eb.ld{animation:pul 1s infinite}@keyframes pul{50%{opacity:.35}}
+.seg{display:flex;gap:0;padding:6px 8px 0;background:var(--pn)}.seg button{flex:1;height:44px;border-radius:0;border:1px solid var(--ln);background:var(--pn2);color:var(--tx);font-size:16px;font-weight:700}.seg button:first-child{border-radius:12px 0 0 12px}.seg button:last-child{border-radius:0 12px 12px 0}.seg button.on{background:linear-gradient(135deg,#ff3d7f,#7b5cff);border-color:transparent}
+#kw{flex:1;position:relative;background:#000;display:none}#kw iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+#lch{flex:1;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:radial-gradient(circle at 50% 45%,#1b1f2c,#0b0c11 70%)}
+.lt{display:flex;gap:4%;width:62%;height:32%;min-height:150px}.tile{flex:1;height:100%;border:0;border-radius:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#fff;cursor:pointer;box-shadow:0 12px 30px #0008}
+.tile i{font-style:normal;font-size:clamp(40px,6vh,72px);line-height:1}.tile b{font-size:clamp(20px,3.4vh,32px)}.tile:active{transform:scale(.96)}
+.ty{background:linear-gradient(145deg,#ff2d2d,#b40000)}.tk{background:linear-gradient(145deg,#ff3d9a,#7b3cff)}#lhint{color:#8d95a6;font-size:15px;min-height:20px}
+.kbar{display:none;gap:8px;padding:6px 8px;background:var(--pn);align-items:center;border-bottom:1px solid var(--ln)}.kbar span{flex:1;font-weight:700;color:#d9b8ff;white-space:nowrap;overflow:hidden}.kbar button{height:46px}
+body.ml #R>.tb,body.ml #yt,body.ml #kw{display:none}body.ml #lch{display:flex}
+body.mk #R>.tb,body.mk #yt{display:none}body.mk #kw{display:block}body.mk .kbar{display:flex}
+.hbt{position:absolute;z-index:1500;top:0;left:calc(50% - 32px);width:64px;height:44px;min-width:0;padding:0;font-size:20px;border-radius:0 0 14px 14px;background:rgba(18,21,26,.7);border:1px solid var(--ln);border-top:0;color:#fff;opacity:.75}
+.hbt{top:var(--tbh,58px)}body.hl #hl,body.hr #hr{top:0}body.ml #hr,body.mk #hr{display:none}body.hl #L>.tb,body.hl #nav{display:none!important}body.hr #R>.tb,body.hr .kbar{display:none!important}
+#mapw{isolation:isolate}
+#R,#bar,#hr{display:none!important}#toast{left:140px!important;max-width:calc(100% - 300px)!important}#L{flex:1 1 100%!important;max-width:none!important}
+#spd{position:absolute;z-index:1400;left:10px;bottom:76px;width:118px;height:118px;border-radius:50%;background:rgba(14,16,22,.9);border:4px solid #3d7bff;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;box-shadow:0 6px 20px #0008;pointer-events:none}
+#spd b{font-size:46px;line-height:1;font-weight:800;font-variant-numeric:tabular-nums}#spd small{font-size:14px;color:#9aa3b5;margin-top:2px}#spd.stale b{color:#666}#spd.fast{border-color:#ff4757}
+#ori{position:absolute;z-index:1400;right:10px;bottom:84px;height:52px;padding:0 14px;border-radius:16px;background:rgba(18,21,26,.9);border:1px solid rgba(255,255,255,.15);color:#fff;font-size:17px;font-weight:700}
+</style><script>window.NAVONLY=1</script><script src="./loc-relay.js"></script></head><body><div id="ver">N1</div><button id="tg" onclick="tgl()">▲</button><div id="wrap"><div id="kb"><div id="kbP"><span id="kbL">도착지</span><div id="kbT"><span id="kbS"></span><i></i></div><button class="g" onclick="kbClear()">지우기</button><button class="g" onclick="kbClose()">✕</button></div><div id="chips"></div><div id="kbK"></div></div>
+<div class="pane" id="L"><button class="hbt" id="hl" onclick="hT('l')" title="상단 숨기기">⌃</button><div class="tb"><input id="from" class="ki" placeholder="출발: 내 위치" readonly inputmode="none"><input id="q" class="ki" placeholder="도착지 · 장소/주소" readonly inputmode="none"><button class="g" onclick="sp()">검색</button><button onclick="route()">길찾기</button></div>
+<div id="mapw"><div id="map"><div id="tm" class="eng"></div><div id="nm" class="eng"></div></div><div id="info" class="info glass" hidden></div><div id="pl" class="glass" hidden></div><div id="nav" class="glass"><div class="top"><div id="nT">↑</div><div style="min-width:0;flex:1"><span id="nD"></span><span id="nI">-</span></div></div><div class="bot"><button class="stop" onclick="stopNav()">■ 안내 종료</button><button class="g" id="snd" onclick="tSnd()">🔊</button><span id="nR"></span></div></div><div class="fab" id="fabR"><button id="bet" class="eb" onclick="setEng('t')" title="T맵"><b>T</b></button><button id="ben" class="eb" onclick="setEng('n')" title="네이버지도"><b>N</b></button><button id="b3d" onclick="setM('v',M.v=='3d'?'2d':'3d')">3D</button><button id="bth" onclick="setM('th',isNight()?'day':'night')">☀️</button><button id="bly" onclick="sett.hidden=!sett.hidden" title="지도 설정">🗂️</button></div>
+<div class="fab" id="fabL"><button onclick="me()" title="내 위치">📍</button><button onclick="zm(1)">＋</button><button onclick="zm(-1)">－</button><button id="cmp" onclick="recenter()" title="내 위치/북쪽"><span>🧭</span></button></div>
+<div id="toast" class="glass"><span class="ic" id="tI">📷</span><span id="tT"></span><button onclick="hideToast()">✕</button></div>
+<div id="sett" class="glass" hidden><h3>지도 설정<button onclick="sett.hidden=true">✕</button></h3>
+<div class="sr">지도 보기<div class="seg" id="sV"><button data-k="v" data-v="2d">2D</button><button data-k="v" data-v="3d">3D</button></div></div>
+<div class="sr">지도 테마<div class="seg" id="sT"><button data-k="th" data-v="day">주간</button><button data-k="th" data-v="night">야간</button><button data-k="th" data-v="auto">자동</button></div></div>
+<div class="sr">교통정보<button class="sw" id="swT" onclick="setM('tr',!M.tr)"></button></div>
+<div class="sr">북쪽 고정<button class="sw" id="swN" onclick="setM('nu',!M.nu)"></button></div><div class="sr">화면 분할<div class="seg" id="seg"><button onclick="ratio(50)">50:50</button><button onclick="ratio(60)">60:40</button><button onclick="ratio(40)">40:60</button></div></div><div class="sr">소리<span style="display:flex;gap:6px"><button class="g" style="height:44px;font-size:16px" onclick="tSnd();sndLbl()" id="sndS"></button><button style="height:44px;font-size:16px" onclick="sndTest()">소리 테스트</button></span></div><pre id="sdiag" hidden style="margin:6px 0;padding:8px;background:#0008;border-radius:10px;font-size:13px;white-space:pre-wrap;color:#cfd6e0"></pre><div class="sr">지도 엔진<a class="lk" href="./">네이버판 열기</a></div></div>
+<div id="lpc" class="glass" hidden><div style="display:flex;align-items:flex-start;gap:8px"><div style="flex:1;min-width:0"><div id="lpcN" class="ln"></div><div id="lpcA" class="la"></div></div><button class="x" onclick="lpClose()">✕</button></div><div style="display:flex;gap:6px;margin-top:8px"><button onclick="lpGo()" style="flex:1.4">🚗 여기로 길찾기</button><button class="g" onclick="lpFrom()" style="flex:1">여기서 출발</button></div></div><button id="navbtn" onclick="startNav()">▶ 안내 시작</button></div></div>
+<div id="bar"></div>
+<div class="pane" id="R"><button class="hbt" id="hr" onclick="hT('r')" title="상단 숨기기">⌃</button><div id="lch"><div class="lt"><button class="tile ty" onclick="rMode('y')"><i>▶</i><b>유튜브</b></button><button class="tile tk" onclick="rMode('k')"><i>🎤</i><b>노래방</b></button></div><div id="lhint"></div></div><div class="kbar"><button class="g i" onclick="rMode('l')" title="처음 화면">⌂</button><span>🎤 아이카 스마트 노래방</span><button class="g" onclick="rMode('y')">▶ 유튜브로</button></div><div class="tb"><button class="g i" onclick="rMode('l')" title="처음 화면">⌂</button><button class="g i" onclick="home(1)" title="추천">🏠</button><input id="v" class="ki" placeholder="유튜브 검색어 · 링크" readonly inputmode="none"><button onclick="go()">재생/검색</button></div>
+<div id="yt"><div id="res"></div></div><div id="kw"></div></div></div>
+<script>
+const S=localStorage,API=['https://api.piped.private.coffee','https://pipedapi.kavin.rocks','https://pipedapi.adminforge.de'];
+let st=JSON.parse(S.v10t||'{}');const sv=()=>S.v10t=JSON.stringify(st);
+const TK='iSBCMHTI7D2DqUdLdiY5U2aS4XZZEIgl5ATPkc9g',TA='https://apis.openapi.sk.com/tmap';
+// ===== T8: 듀얼 엔진 파사드 (T맵 / 네이버) =====
+const TM=window.Tmapv2||null;let NM=(window.naver&&naver.maps)||null,NLP=null;
+function loadNaver(){if(NM)return Promise.resolve(NM);if(NLP)return NLP;NLP=new Promise((ok,no)=>{let n=0;const go=()=>{const sc=document.createElement('script');sc.src='https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=pjnsybl1fs&_r='+n;let done=false;const to=setTimeout(()=>fail('timeout'),12000);
+ sc.onload=()=>{const t=setInterval(()=>{if(window.naver&&naver.maps&&naver.maps.Map){clearInterval(t);clearTimeout(to);done=true;NM=naver.maps;ok(NM)}},50);setTimeout(()=>clearInterval(t),5000)};sc.onerror=()=>fail('error');
+ function fail(w){if(done)return;done=true;clearTimeout(to);sc.remove();if(++n<3)setTimeout(go,1500);else{NLP=null;no(new Error(w))}}document.head.appendChild(sc)};go()});return NLP}
+const LL=(a,b)=>({_a:+a,_b:+b,lat(){return this._a},lng(){return this._b}});
+const c0=st.c||[35.16,126.85];const WANT=(st.eng=='t'||st.eng=='n')?st.eng:'n';let ENG=WANT;if(ENG=='n'&&!NM)ENG='t';if(ENG=='t'&&!TM&&NM)ENG='n';
+const NAT={t:null,n:null},HND={},OV=new Set();
+function nLL(e,p){return e=='t'?new TM.LatLng(p.lat(),p.lng()):new NM.LatLng(p.lat(),p.lng())}
+function fromN(p){return LL(p.lat(),p.lng())}
+function mkNative(e,c,z){if(NAT[e])return NAT[e];const el=document.getElementById(e=='t'?'tm':'nm');
+ if(e=='t'){NAT.t=new TM.Map('tm',{center:new TM.LatLng(c[0],c[1]),width:'100%',height:'100%',zoom:z,zoomControl:false,scrollwheel:true})}
+ else{NAT.n=new NM.Map('nm',{center:new NM.LatLng(c[0],c[1]),zoom:z,zoomControl:false,scaleControl:false,mapDataControl:false,logoControlOptions:{position:NM.Position&&NM.Position.BOTTOM_RIGHT}})}
+ for(const ev in HND)HND[ev].forEach(cb=>attach(e,ev,cb));return NAT[e]}
+function attach(e,ev,cb){const m=NAT[e];if(!m)return;const w=x=>{if(e!=ENG)return;if(ev=='click'){const l=x&&(x.latLng||x.coord||x._latlng);if(l)cb({latLng:LL(l.lat?l.lat():l._lat,l.lng?l.lng():l._lng)})}else cb(x)};
+ try{e=='t'?m.addListener(ev,w):NM.Event.addListener(m,ev=='zoom_changed'?'zoom_changed':ev,w)}catch(x){}}
+const NMAP=()=>NAT[ENG];
+const map={getCenter(){return fromN(NMAP().getCenter())},setCenter(p){NMAP().setCenter(nLL(ENG,p))},getZoom(){return NMAP().getZoom()},setZoom(z){NMAP().setZoom(z)},
+ zoomIn(){const m=NMAP();m.zoomIn?m.zoomIn():m.setZoom(m.getZoom()+1)},zoomOut(){const m=NMAP();m.zoomOut?m.zoomOut():m.setZoom(m.getZoom()-1)},
+ addListener(ev,cb){(HND[ev]=HND[ev]||[]).push(cb);['t','n'].forEach(e=>attach(e,ev,cb))},
+ resize(W,H){['t','n'].forEach(e=>{const m=NAT[e];if(!m)return;const el=document.getElementById(e=='t'?'tm':'nm');el.style.width=W+'px';el.style.height=H+'px';try{e=='t'?m.resize(W,H):(m.setSize(new NM.Size(W,H)),m.refresh&&m.refresh(true))}catch(x){}})},
+ fitBounds(b,pad){if(!b.p.length)return;if(ENG=='t'){const B=new TM.LatLngBounds();b.p.forEach(p=>B.extend(nLL('t',p)));NMAP().fitBounds(B,pad)}else{let s=b.p[0],n=b.p[0];const la=b.p.map(p=>p.lat()),lo=b.p.map(p=>p.lng());
+  const B=new NM.LatLngBounds(new NM.LatLng(Math.min(...la),Math.min(...lo)),new NM.LatLng(Math.max(...la),Math.max(...lo)));NMAP().fitBounds(B,pad)}}};
+function XBounds(){this.p=[]}XBounds.prototype.extend=function(p){this.p.push(p)};
+function XO(kind,o){this.k=kind;this.o=o;OV.add(this);this.mk()}
+XO.prototype.mk=function(){const o=this.o;this.e=ENG;const m=NMAP();if(!m)return;try{
+ if(this.k=='m'){if(ENG=='t')this.n=new TM.Marker({position:nLL('t',o.position),map:m,title:o.title||'',iconHTML:o.iconHTML,iconSize:o.iconSize?new TM.Size(o.iconSize[0],o.iconSize[1]):undefined});
+  else this.n=new NM.Marker({position:nLL('n',o.position),map:m,title:o.title||'',icon:o.iconHTML?{content:o.iconHTML,anchor:new NM.Point(15,15)}:undefined})}
+ else{const P=o.path.map(p=>nLL(ENG,p));this.n=ENG=='t'?new TM.Polyline({map:m,path:P,strokeColor:o.strokeColor,strokeWeight:o.strokeWeight,strokeOpacity:o.strokeOpacity}):new NM.Polyline({map:m,path:P,strokeColor:o.strokeColor,strokeWeight:o.strokeWeight,strokeOpacity:o.strokeOpacity,strokeLineCap:'round',strokeLineJoin:'round'})}}catch(x){console.log('overlay',x.message)}};
+XO.prototype.kill=function(){try{this.n&&this.n.setMap(null)}catch(x){}this.n=null};
+XO.prototype.setMap=function(m){if(!m){this.kill();OV.delete(this)}};
+XO.prototype.setPosition=function(p){this.o.position=p;try{this.n&&this.n.setPosition(nLL(this.e,p))}catch(x){}};
+const XMarker=function(o){return new XO('m',o)},XLine=function(o){return new XO('l',o)};
+function engBtns(){['t','n'].forEach(e=>{const b=document.getElementById('be'+e);if(b){b.classList.toggle('on',ENG==e);b.disabled=e=='t'&&!TM;b.classList.toggle('ld',e=='n'&&!!NLP&&!NM)}})}
+function setEng(e,why){if(e==ENG&&NAT[e])return engBtns();if(e=='t'&&!TM){toast('T맵 엔진을 불러오지 못했어요','w','🗺️');return}
+ if(e=='n'&&!NM){toast('네이버 지도 불러오는 중…','i','⏳',12000);const p=loadNaver();engBtns();p.then(()=>{engBtns();setEng('n',why)}).catch(()=>{engBtns();toast('네이버 지도 로드 실패 — N을 다시 눌러 재시도','w','🗺️')});return}
+ let c=c0,z=st.z||15;try{if(NAT[ENG]){const g=map.getCenter();c=[g.lat(),g.lng()];z=map.getZoom()}}catch(x){}
+ try{if(TRD)setTraffic(false)}catch(x){}
+ OV.forEach(o=>o.kill());const old=ENG;ENG=e;st.eng=e;sv();mkNative(e,c,z);
+ document.getElementById('tm').style.display=e=='t'?'block':'none';document.getElementById('nm').style.display=e=='n'?'block':'none';
+ try{NMAP().setCenter(nLL(e,LL(c[0],c[1])));NMAP().setZoom(z)}catch(x){}
+ OV.forEach(o=>o.mk());fit();engBtns();if(typeof applyM=='function')applyM();if(why)toast(why,'w','🔁');else if(old!=e&&why!==false)toast((e=='t'?'T맵으로':'네이버 지도로')+' 전환','i','🗺️',2500)}
+mkNative(ENG,c0,st.z||15);document.getElementById(ENG=='t'?'nm':'tm').style.display='none';
+if(WANT=='n'&&!NM)setTimeout(()=>loadNaver().then(()=>{if(st.eng!='t'){setEng('n',false);st.eng='n';sv()}}).catch(()=>toast('네이버 지도를 불러오지 못해 T맵으로 표시 중 — N을 눌러 재시도','w','🗺️')),0);
+
+function fit0(){const w=document.getElementById('mapw'),e=document.getElementById('map');const W=w.clientWidth,H=w.clientHeight;if(!W||!H)return;e.style.width=W+'px';e.style.height=H+'px';try{map.resize(W,H)}catch(x){}}
+function fit(){fit0();requestAnimationFrame(fit0);setTimeout(fit0,300)}
+if(window.ResizeObserver)new ResizeObserver(fit).observe(document.getElementById('mapw'));addEventListener('resize',fit);addEventListener('orientationchange',fit);if(window.visualViewport)visualViewport.addEventListener('resize',fit);addEventListener('load',fit);fit();
+function svc(){try{const c=map.getCenter();st.c=[c.lat(),c.lng()];st.z=map.getZoom();sv()}catch(e){}}map.addListener('dragend',svc);map.addListener('zoom_changed',svc);
+let mk=null,mk2=null,line=null,here=null;
+function rm(o){if(o)o.setMap(null)}
+function pin(a,b,t){rm(mk);mk=XMarker({position:LL(a,b),map,title:t||''});map.setCenter(LL(a,b));map.setZoom(16)}
+let MTO=null;function msg(t,e){clearTimeout(MTO);info.hidden=!t;info.textContent=t||'';info.className='info glass'+(e?' e':'');if(e)MTO=setTimeout(()=>{if(info.className.includes(' e'))info.hidden=true},8000)}
+q.onkeydown=e=>{if(e.key=='Enter')route()};v.onkeydown=e=>{if(e.key=='Enter')go()};
+// ===== T6: 위치 (상시 감시 + 캐시 + 폴백) =====
+let GP=null;try{GP=JSON.parse(localStorage.v10gp||'null')}catch(e){}let MAN=null,GERR=0;
+const GMSG={1:'위치 권한이 거부됨 — 브라우저 설정에서 위치 허용 필요',2:'위치 신호 없음 (GPS 수신 불가)',3:'위치 응답 시간 초과'};
+function gerr(e){return new Error(GMSG[e&&e.code]||('위치 오류: '+(e&&e.message||'')))}
+function gset(p){const c=p.coords;here=[c.latitude,c.longitude];GP={lat:here[0],lng:here[1],t:Date.now(),acc:c.accuracy};try{localStorage.v10gp=JSON.stringify(GP)}catch(x){}return here}
+function gwatch(){if(!navigator.geolocation)return;try{navigator.geolocation.watchPosition(p=>{GERR=0;gset(p);if(mk3&&WID==null){}},e=>{GERR=e.code},{enableHighAccuracy:true,maximumAge:600000,timeout:60000})}catch(x){}}
+function gget(hi,to){return new Promise((ok,no)=>{if(!navigator.geolocation)return no({code:2});navigator.geolocation.getCurrentPosition(p=>ok(gset(p)),no,{enableHighAccuracy:hi,timeout:to,maximumAge:600000})})}
+function myPos(){if(GP&&Date.now()-GP.t<600000){here=[GP.lat,GP.lng];return Promise.resolve(here)}
+ return gget(true,5000).catch(e=>{if(e&&e.code==1)throw gerr(e);return gget(false,3000)}).catch(e=>{throw e instanceof Error?e:gerr(e)})}
+// 경로 출발점: 수동 지정 > 신선한 GPS > GPS 재시도 > 저장된 마지막 위치 > 지도 중심 (절대 실패하지 않음)
+async function startPt(){if(MAN)return MAN;let n=8,ti=null;if(!(GP&&Date.now()-GP.t<600000)){msg('내 위치 확인 중… '+n+'초');ti=setInterval(()=>{n--;if(n>0&&!info.hidden&&info.textContent.startsWith('내 위치 확인'))info.textContent='내 위치 확인 중… '+n+'초'},1000)}
+ try{const r=await myPos();clearInterval(ti);return r}catch(e){clearInterval(ti);
+ if(GP){toast(e.message+' · 마지막 위치에서 출발','w','📍');here=here||[GP.lat,GP.lng];ORG='마지막 위치';return[GP.lat,GP.lng]}
+ const c=map.getCenter();toast(e.message+' · 현재 위치를 못 잡아 지도 중심에서 출발','w','📍');ORG='지도 중심';return[c.lat(),c.lng()]}}
+async function me(){try{const[a,b]=await myPos();MAN=null;pin(a,b,'내 위치');from.value=''}catch(e){toast(e.message,'w','📍')}}
+gwatch();
+// ===== T9: 길게 눌러 목적지 설정 =====
+function px2ll(x,y){try{if(ENG=='t'){const r=NAT.t.screenToReal(new TM.Point(x,y));return LL(r.lat(),r.lng())}
+ const c=NAT.n.getProjection().fromOffsetToCoord(new NM.Point(x,y));return LL(c.lat(),c.lng())}catch(e){return null}}
+// 화면 좌표 → 지도 요소 내부 좌표 (3D 기울기/회전 CSS 변환을 역산)
+function scr2map(cx,cy){const el=document.getElementById('map'),w=document.getElementById('mapw').getBoundingClientRect();const cs=getComputedStyle(el);
+ const ox=parseFloat(cs.transformOrigin.split(' ')[0])||0,oy=parseFloat(cs.transformOrigin.split(' ')[1])||0;
+ if(!cs.transform||cs.transform=='none')return[cx-w.left,cy-w.top];const m=new DOMMatrix(cs.transform);const X=cx-w.left-ox,Y=cy-w.top-oy;
+ const a1=m.m11-X*m.m14,b1=m.m21-X*m.m24,c1=X*m.m44-m.m41,a2=m.m12-Y*m.m14,b2=m.m22-Y*m.m24,c2=Y*m.m44-m.m42,d=a1*b2-a2*b1;if(Math.abs(d)<1e-9)return[cx-w.left,cy-w.top];
+ return[(c1*b2-c2*b1)/d+ox,(a1*c2-a2*c1)/d+oy]}
+let LPT=null,LP0=null,LPN=0,DPIN=null;
+const MW=document.getElementById('map');
+MW.addEventListener('pointerdown',e=>{LPN++;clearTimeout(LPT);if(LPN>1){LP0=null;return}LP0=[e.clientX,e.clientY];LPT=setTimeout(()=>{const p=LP0;LP0=null;if(p)longPress(p[0],p[1])},600)},true);
+MW.addEventListener('pointermove',e=>{if(LP0&&Math.hypot(e.clientX-LP0[0],e.clientY-LP0[1])>10){clearTimeout(LPT);LP0=null}},true);
+['pointerup','pointercancel','pointerleave'].forEach(t=>MW.addEventListener(t,e=>{LPN=Math.max(0,LPN-1);if(t!='pointerleave'){clearTimeout(LPT);LP0=null}},true));
+MW.addEventListener('contextmenu',e=>e.preventDefault());
+const PINH='<div style="width:30px;height:30px;transform:translate(0,-12px)"><svg viewBox="0 0 24 24" width="30" height="30"><path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7z" fill="#ff4757" stroke="#fff" stroke-width="1.5"/><circle cx="12" cy="9" r="2.6" fill="#fff"/></svg></div>';
+async function longPress(cx,cy){const[x,y]=scr2map(cx,cy);const p=px2ll(x,y);if(!p)return;try{navigator.vibrate&&navigator.vibrate(30)}catch(e){}
+ const la=p.lat(),lo=p.lng();rm(DPIN);DPIN=XMarker({map,position:LL(la,lo),iconHTML:PINH,iconSize:[30,30]});
+ const cd=document.getElementById('lpc'),w=document.getElementById('mapw').getBoundingClientRect();cd.dataset.p=la+','+lo;
+ lpcN.textContent='주소 확인 중…';lpcA.textContent=la.toFixed(5)+', '+lo.toFixed(5);cd.hidden=false;
+ const W=cd.offsetWidth,H=cd.offsetHeight;cd.style.left=Math.max(8,Math.min(w.width-W-70,cx-w.left-W/2))+'px';cd.style.top=Math.max(8,Math.min(w.height-H-70,cy-w.top-H-26))+'px';
+ const nm=await revGeo(la,lo);if(cd.dataset.p!=la+','+lo)return;lpcN.textContent=nm.n;lpcA.textContent=nm.a;cd.dataset.n=nm.n}
+async function revGeo(la,lo){try{const j=await (await fetch(TA+'/geo/reversegeocoding?version=1&format=json&coordType=WGS84GEO&addressType=A10&lat='+la+'&lon='+lo,{headers:{appKey:TK}})).json();const a=j.addressInfo||{};
+ const full=a.fullAddress||'';const parts=full.split(',');const road=parts.find(x=>/로|길/.test(x))||parts[0]||'';const n=a.buildingName||(a.legalDong&&a.bunji?a.legalDong+' '+a.bunji:'')||road.trim();
+ if(n)return{n:n.trim(),a:((road||full).replace(a.buildingName||'@@','').trim())||full}}catch(e){}return{n:'지도 선택 지점 ('+la.toFixed(4)+', '+lo.toFixed(4)+')',a:'주소 정보 없음'}}
+function lpClose(){document.getElementById('lpc').hidden=true;rm(DPIN);DPIN=null}
+async function lpGo(){const cd=document.getElementById('lpc'),[la,lo]=cd.dataset.p.split(',').map(Number),n=cd.dataset.n||('지도 선택 지점');cd.hidden=true;
+ DEST={n,lat:la,lng:lo};q.value=n;addRecent(DEST);rm(DPIN);DPIN=null;try{ORG='';let A;if(MAN&&from.value=='지도 선택 지점'){A=MAN;ORG='지도 선택 지점'}else{MAN=null;A=await startPt()}await drawRoute(A,DEST)}catch(e){msg('오류: '+e.message,1)}}
+function lpFrom(){const cd=document.getElementById('lpc'),[a,c]=cd.dataset.p.split(',').map(Number);cd.hidden=true;rm(DPIN);DPIN=null;MAN=[a,c];from.value='지도 선택 지점';rm(mk);mk=XMarker({position:LL(a,c),map,title:'출발'});toast('출발지 설정: '+(cd.dataset.n||'지도 선택 지점'),'ok','📍')}
+try{map.addListener('click',()=>{if(!document.getElementById('lpc').hidden&&!LP0)lpClose();sett.hidden=true})}catch(x){}
+window.T9={longPress,scr2map,px2ll};
+
+// 장소 찾기: TMAP POI 통합검색 (내 위치 기준 거리순)
+async function find(s){if(!here&&GP)here=[GP.lat,GP.lng];
+ const c=here||[map.getCenter().lat(),map.getCenter().lng()];
+ const u=TA+'/pois?version=1&count=15&reqCoordType=WGS84GEO&resCoordType=WGS84GEO&searchKeyword='+encodeURIComponent(s)+'&centerLat='+c[0]+'&centerLon='+c[1];
+ let P=[];try{const r=await fetch(u,{headers:{appKey:TK}});if(r.status!=204){const j=await r.json();P=((j.searchPoiInfo||{}).pois||{}).poi||[]}}catch(e){}
+ const L=P.map(x=>({n:x.name+', '+[x.upperAddrName,x.middleAddrName,x.lowerAddrName,x.roadName&&x.firstBuildNo?x.roadName+' '+x.firstBuildNo:x.detailAddrName].filter(Boolean).join(' '),lat:+(x.frontLat||x.noorLat),lng:+(x.frontLon||x.noorLon)}));
+if(!L.length){try{const g=await (await fetch(TA+'/geo/fullAddrGeo?version=1&format=json&coordType=WGS84GEO&fullAddr='+encodeURIComponent(s),{headers:{appKey:TK}})).json();const C=((g.coordinateInfo||{}).coordinate)||[];C.forEach(x=>{const la=+(x.lat||x.newLat),lo=+(x.lon||x.newLon);if(la&&lo)L.push({n:s+', '+[x.city_do,x.gu_gun,x.eup_myun,x.legalDong,x.adminDong,x.ri,x.bunji,x.newRoadName,x.newBuildingIndex].filter(Boolean).join(' '),lat:la,lng:lo})})}catch(e){}}
+if(!L.length){try{const g=await (await fetch(PROXY+'/geocode?query='+encodeURIComponent(s)+(here?'&coordinate='+here[1]+','+here[0]:''))).json();(g.addresses||[]).forEach(x=>L.push({n:(x.roadAddress||x.jibunAddress)+', '+(x.jibunAddress||''),lat:+x.y,lng:+x.x}))}catch(e){}}
+ if(here)L.sort((a,b)=>km(here[0],here[1],a.lat,a.lng)-km(here[0],here[1],b.lat,b.lng));return L}
+function km(a,b,c,d){const R=6371e3,t=Math.PI/180,x=Math.sin((c-a)*t/2)**2+Math.cos(a*t)*Math.cos(c*t)*Math.sin((d-b)*t/2)**2;return 2*R*Math.asin(Math.sqrt(x))}
+function pick(list){return new Promise(ok=>{pl.innerHTML='<div style="background:#333">후보를 선택하세요 ✕</div>';pl.firstChild.onclick=()=>{pl.hidden=true;msg('취소됨')};list.forEach(x=>{const d=document.createElement('div');d.textContent=x.n+(here?'  ('+(km(here[0],here[1],x.lat,x.lng)/1000).toFixed(1)+'km)':'');d.onclick=()=>{pl.hidden=true;ok(x)};pl.appendChild(d)});pl.hidden=false})}
+async function sp(){try{const s=q.value.trim();if(!s)return;const l=await find(s);if(!l.length)return msg('결과 없음',1);const x=await pick(l);pin(x.lat,x.lng,x.n);msg('')}catch(e){msg('오류: '+e.message,1)}}
+async function route(){try{const s=q.value.trim();if(!s)return msg('도착지를 입력하세요',1);
+ let A;if(MAN&&from.value=='지도 선택 지점'){A=MAN;ORG='지도 선택 지점'}else if(from.value.trim()){MAN=null;const l=await find(from.value.trim());if(!l.length)return msg('출발지 결과 없음',1);const x=await pick(l);A=[x.lat,x.lng];ORG=x.n.split(',')[0]}else{ORG='';MAN=null;A=await startPt()}
+ msg('도착지 찾는 중…');const l=await find(s);if(!l.length)return msg('도착지를 찾지 못했어요: '+s,1);const B=l[0];DEST=B;addRecent(B);
+ await drawRoute(A,B);}catch(e){msg('오류: '+e.message,1)}}
+window.RTdbg=()=>RT;let ORG='',DEST=null,RT=null,WID=null,SND=st.snd!==false,off=0,gi=0,spoken={},rer=false;
+// ===== T8: 경로 공급자 (공통 모델) + 자동 페일오버 =====
+const PROXY='https://dualpage-naver.holhiholl.workers.dev';
+function QErr(m,q){const e=new Error(m);e.quota=!!q;return e}
+async function routeT(A,B){const r=await fetch(TA+'/routes?version=1&format=json',{method:'POST',headers:{appKey:TK,'Content-Type':'application/json'},body:JSON.stringify({startX:''+A[1],startY:''+A[0],endX:''+B.lng,endY:''+B.lat,reqCoordType:'WGS84GEO',resCoordType:'WGS84GEO',searchOption:'0',trafficInfo:'N'})});
+ let j={};try{j=await r.json()}catch(x){}
+ if(!j.features){const m=(j.error&&(j.error.message||j.error.code))||('HTTP '+r.status);throw QErr('T맵 길찾기 실패: '+m,r.status==429||r.status==401||r.status==403||/quota|limit|초과|한도|INVALID_API_KEY|Unauthorized/i.test(m))}
+ const path=[],guide=[],alerts=[];let sm=null;
+ for(const f of j.features){const g=f.geometry,p=f.properties;
+  if(g.type=='LineString'){for(const c of g.coordinates){const l=path[path.length-1];if(!l||l[0]!=c[0]||l[1]!=c[1])path.push(c)}}
+  else if(g.type=='Point'){if(p.pointType=='S'&&p.totalDistance!=null)sm=p;if(!path.length)path.push(g.coordinates);
+   const tt=+p.turnType,ds=p.description||'';if((tt>=191&&tt<=194)||/카메라|단속/.test(ds)){alerts.push({pointIndex:Math.max(0,path.length-1),turn:tt,text:ds})}else if(p.pointType!='S'&&tt!=200)guide.push({pointIndex:Math.max(0,path.length-1),instructions:p.description,turn:p.turnType})}}
+ if(!sm)sm=j.features[0].properties;
+ return{src:'t',path,guide,alerts,dur:sm.totalTime*1000,dist:sm.totalDistance,fare:sm.totalFare||0,taxi:sm.taxiFare||0}}
+const NTURN={1:11,2:12,3:13,4:16,5:19,6:14,7:12,8:13,87:201,88:201};
+async function routeN(A,B){let r;try{r=await fetch(PROXY+'/driving?start='+A[1]+','+A[0]+'&goal='+B.lng+','+B.lat+'&option=traoptimal')}catch(e){throw QErr('네이버 길찾기 연결 실패',true)}
+ let j={};try{j=await r.json()}catch(x){}
+ if(j.code!==0||!j.route){const m=j.message||(j.error&&(j.error.message||j.error.errorCode))||('HTTP '+r.status);
+  throw QErr('네이버 길찾기 실패: '+m,r.status==429||r.status==401||r.status==403||r.status>=500||/quota|limit|초과|한도|Unauthorized|Permission/i.test(m))}
+ const R=j.route.traoptimal[0],sm=R.summary;
+ return{src:'n',path:R.path,guide:(R.guide||[]).map(g=>({pointIndex:g.pointIndex,instructions:g.instructions,turn:NTURN[g.type]||11})),alerts:[],dur:sm.duration,dist:sm.distance,fare:sm.tollFare||0,taxi:sm.taxiFare||0}}
+async function getRoute(A,B){const first=ENG,other=first=='t'?'n':'t';const F={t:routeT,n:routeN};
+ try{return await F[first](A,B)}catch(e){if(!e.quota)throw e;
+  let R;try{R=await F[other](A,B)}catch(e2){throw new Error('T맵·네이버 모두 길찾기 실패 — '+e.message+' / '+e2.message)}setEng(other,'한도 초과로 '+(other=='n'?'네이버로':'T맵으로')+' 전환');return R}}
+async function drawRoute(A,B,nav){if(!nav)msg('경로 검색 중…');let R;
+ try{R=await getRoute(A,B)}catch(e){return msg(e.message,1)}
+ RT={path:R.path,guide:R.guide,alerts:R.alerts,dur:R.dur,dist:R.dist,ci:0,src:R.src};gi=0;spoken={};AL={};
+ rm(line);rm(mk);rm(mk2);
+ const pp=R.path.map(p=>LL(p[1],p[0]));line=XLine({map,path:pp,strokeColor:R.src=='n'?'#03c75a':'#e8303a',strokeWeight:8,strokeOpacity:.9});
+ mk=XMarker({map,position:pp[0]});mk2=XMarker({map,position:pp[pp.length-1]});
+ if(!nav){const b=new XBounds();pp.forEach(p=>b.extend(p));map.fitBounds(b,{top:40,right:80,bottom:70,left:40});}
+ const m=Math.round(R.dur/60000);(nav?()=>{}:msg)((R.src=='n'?'🟢N ':'🔴T ')+'🚗 총 '+(R.dist/1000).toFixed(1)+'km · '+(m>=60?Math.floor(m/60)+'시간 ':'')+m%60+'분 · 통행료 '+(R.fare).toLocaleString()+'원 · 택시비 약 '+(R.taxi).toLocaleString()+'원'+(DEST?' · '+(ORG||'내 위치')+' → '+DEST.n.split(',')[0]:''));if(!nav){const nb=document.createElement('button');nb.textContent='▶ 안내 시작';nb.onclick=startNav;info.appendChild(nb);info.hidden=false}}
+
+// ===== T7: 오디오 (TTS 음성선택/잠금해제/폴백/덕킹) =====
+const SS=window.speechSynthesis||null;let KV=null,ACX=null,UNL=false,SPK=null,KEEP=null,DUCK=null;
+function pickVoice(){if(!SS)return;const V=SS.getVoices()||[];KV=V.find(v=>/^ko(-|_|$)/i.test(v.lang)&&v.localService)||V.find(v=>/^ko/i.test(v.lang))||V.find(v=>/korean|한국/i.test(v.name))||null}
+if(SS){pickVoice();try{SS.addEventListener('voiceschanged',pickVoice)}catch(e){SS.onvoiceschanged=pickVoice}setTimeout(pickVoice,1000);setTimeout(pickVoice,3000)}
+function actx(){try{if(!ACX){const C=window.AudioContext||window.webkitAudioContext;if(C)ACX=new C()}if(ACX&&ACX.state=='suspended')ACX.resume()}catch(e){}return ACX}
+function unlock(){if(UNL)return;UNL=true;actx();try{if(SS){const u=new SpeechSynthesisUtterance(' ');u.volume=0;u.lang='ko-KR';SS.speak(u)}}catch(e){}}
+addEventListener('pointerdown',unlock,{capture:true});addEventListener('keydown',unlock,{capture:true});
+function chime(n){const a=actx();if(!a)return false;try{const t=a.currentTime;[880,1320].slice(0,n||2).forEach((f,i)=>{const o=a.createOscillator(),g=a.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0.0001,t+i*.18);g.gain.exponentialRampToValueAtTime(.35,t+i*.18+.02);g.gain.exponentialRampToValueAtTime(.0001,t+i*.18+.3);o.connect(g).connect(a.destination);o.start(t+i*.18);o.stop(t+i*.18+.32)});return true}catch(e){return false}}
+function duck(on){if(on){kPost({type:'duck',vol:20});if(DUCK==null){DUCK=YTV.vol;ytCmd('setVolume',[Math.max(5,Math.round(DUCK*0.25))])}}else{if(DUCK!=null){ytCmd('setVolume',[DUCK]);DUCK=null}kPost({type:'restore'})}}
+function sayEnd(){clearInterval(KEEP);KEEP=null;clearTimeout(SPK);SPK=null;duck(false)}
+function say(t,force){if(!SND&&!force)return;const fb=()=>{chime(2);toast('🔊 '+t,'i','🔔',5000)};
+ if(!SS||(SS.getVoices&&SS.getVoices().length===0&&UNL&&Date.now()-T7T>4000&&!KV)){fb();return'fallback'}
+ try{SS.cancel();if(SS.paused)SS.resume();const u=new SpeechSynthesisUtterance(t);u.lang='ko-KR';try{if(KV)u.voice=KV}catch(x){};u.rate=1.05;u.volume=1;
+  u.onstart=()=>duck(true);u.onend=sayEnd;u.onerror=e=>{sayEnd();if(e.error!='interrupted'&&e.error!='canceled')fb()};
+  duck(true);SS.speak(u);clearInterval(KEEP);KEEP=setInterval(()=>{if(!SS.speaking)return sayEnd();SS.pause();SS.resume()},10000);clearTimeout(SPK);SPK=setTimeout(sayEnd,Math.max(6000,t.length*400));return'tts'}catch(e){fb();return'fallback'}}
+const T7T=Date.now();
+// 유튜브 IFrame API(postMessage) — 볼륨/음소거 상태 수신, 덕킹
+const YTV={vol:100,muted:null,state:null};
+function ytFrame(){return yt.querySelector('iframe')}
+function ytCmd(f,a){const fr=ytFrame();(window.__yt=window.__yt||[]).push([f,a]);try{fr&&fr.contentWindow.postMessage(JSON.stringify({event:'command',func:f,args:a||[]}),'*')}catch(e){}}
+addEventListener('message',e=>{if(!/youtube(-nocookie)?\.com$/.test((e.origin||'').replace(/^https?:\/\/(www\.)?/,'')))return;let d;try{d=JSON.parse(e.data)}catch(x){return}
+ if(d&&d.info){if(d.info.volume!=null&&DUCK==null)YTV.vol=d.info.volume;if(d.info.muted!=null)YTV.muted=d.info.muted;if(d.info.playerState!=null)YTV.state=d.info.playerState}});
+function ytHook(fr){fr.addEventListener('load',()=>{let n=0;const h=setInterval(()=>{try{fr.contentWindow.postMessage(JSON.stringify({event:'listening',id:'yt1'}),'*')}catch(e){}if(++n>8)clearInterval(h)},500);
+ if(UNL){setTimeout(()=>{ytCmd('unMute');if(YTV.vol<10)ytCmd('setVolume',[100])},1500)}})}
+async function sndTest(){unlock();actx();const c=chime(2);let r='';setTimeout(()=>{r=say('안내 음성 테스트입니다',true)},700);await new Promise(o=>setTimeout(o,900));
+ const V=SS?SS.getVoices():[];const ko=V.filter(v=>/^ko/i.test(v.lang));
+ const L=['speechSynthesis: '+(SS?'있음':'없음 ✗'),'음성 수: '+V.length+' (한국어 '+ko.length+')','한국어 음성: '+(KV?KV.name+' ['+KV.lang+(KV.localService?', 로컬':', 온라인')+']':'없음 ✗'),
+  'AudioContext: '+(ACX?ACX.state:'없음')+(c?' (차임 재생)':''),'출력: '+(r=='tts'?'TTS':'차임+화면표시 폴백'),'안내음성: '+(SND?'켜짐':'꺼짐'),
+  '유튜브: '+(ytFrame()?('볼륨 '+YTV.vol+(YTV.muted==null?' · 상태 미수신':(YTV.muted?' · 음소거 ✗':' · 소리 켜짐'))):'재생 중 아님'),'UA: '+navigator.userAgent.slice(0,90)];
+ const d=document.getElementById('sdiag');d.textContent=L.join('\n');d.hidden=false;return L}
+function tSnd(){SND=!SND;setTimeout(sndLbl,0);if(SND){unlock();chime(1)}else{try{SS&&SS.cancel()}catch(e){}sayEnd()}snd.textContent=SND?'🔊':'🔇';st.snd=SND;sv()}
+function TI(t){t=+t;if(t==12||t==16||t==17)return'↰';if(t==13||t==18||t==19)return'↱';if(t==14)return'↶';if(t==201)return'🏁';if(t>=125&&t<=129)return'⤴';return'↑'}
+function fmt(m){return m>=1000?(m/1000).toFixed(1)+'km':Math.round(m/10)*10+'m'}
+const DOT='<div style="width:22px;height:22px;border-radius:50%;background:#2a7fff;border:4px solid #fff;box-shadow:0 0 6px #000"></div>';
+function startNav(){if(!RT)return;SND=st.snd!==false;snd.textContent=SND?'🔊':'🔇';navbtn.style.display='none';nav.style.display='block';info.hidden=true;setTimeout(fit,50);if(here)map.setCenter(LL(here[0],here[1]));map.setZoom(17);say('경로 안내를 시작합니다');
+ if(!mk3)mk3=XMarker({map,position:map.getCenter(),iconHTML:DOT,iconSize:[30,30]});
+ WID=navigator.geolocation.watchPosition(p=>{gset(p);onPos(p)},e=>{if(e.code==1||!navigator.__gt||Date.now()-navigator.__gt>30000){navigator.__gt=Date.now();toast(gerr(e).message+' · GPS 수신 대기 중','w','📡',5000)}},{enableHighAccuracy:true,maximumAge:2000,timeout:30000})}
+let mk3=null;
+function stopNav(silent){HD=0;PH=null;setTimeout(applyView,0);if(WID!=null)navigator.geolocation.clearWatch(WID);WID=null;nav.style.display='none';if(mk3){mk3.setMap(null);mk3=null}if(RT)info.hidden=false;if(!silent)say('안내를 종료합니다')}
+function near(lat,lng){let bi=0,bd=1e9;const P=RT.path;const a=RT.ci||0,b=Math.min(P.length,a+300);for(let i=a;i<b;i++){const d=km(lat,lng,P[i][1],P[i][0]);if(d<bd){bd=d;bi=i}}if(bd<=50){RT.ci=bi;return[bi,bd]}bd=1e9;for(let i=0;i<P.length;i++){const d=km(lat,lng,P[i][1],P[i][0]);if(d<bd){bd=d;bi=i}}if(bd<=50)RT.ci=bi;return[bi,bd]}
+function along(i,j){let d=0;const P=RT.path;for(let k=i;k<j&&k<P.length-1;k++)d+=km(P[k][1],P[k][0],P[k+1][1],P[k+1][0]);return d}
+async function onPos(p){if(!RT||rer)return;const lat=p.coords.latitude,lng=p.coords.longitude;if(!isFinite(lat)||!isFinite(lng))return;here=[lat,lng];const ll=LL(lat,lng);if(mk3)mk3.setPosition(ll);map.setCenter(ll);
+ if(PH){const dd=km(PH[0],PH[1],lat,lng);if(dd>5){HD=brg(PH,[lat,lng]);PH=[lat,lng]}}else PH=[lat,lng];if(isFinite(p.coords.heading)&&p.coords.heading!=null&&(p.coords.speed||0)>1)HD=p.coords.heading;applyView();
+ const[i,d]=near(lat,lng);
+ if(d>50&&(p.coords.accuracy||0)<60){if(++off>=3){off=0;rer=true;nI.textContent='경로 재탐색 중…';toast('경로를 재탐색합니다','i','🔄');say('경로를 재탐색합니다');try{await drawRoute(here,DEST,1)}catch(e){}rer=false}return}off=0;
+ const P=RT.path,last=P[P.length-1];const rem=Math.min(RT.dist,along(i,P.length-1));
+ if(rem<30||(km(lat,lng,last[1],last[0])<20&&i>=P.length-3)){nT.textContent='🏁';toast('목적지에 도착했습니다','ok','🏁');nI.textContent='🏁 목적지 도착';nD.textContent='';nR.textContent='';say('목적지에 도착했습니다. 안내를 종료합니다');stopNav(1);navbtn.style.display='none';return}
+ chkAlert(i);
+ while(gi<RT.guide.length&&RT.guide[gi].pointIndex<=i)gi++;const g=RT.guide[gi];
+ const remT=Math.round(RT.dur*(rem/RT.dist)/60000);nR.textContent='남은 '+fmt(rem)+' · '+remT+'분';
+ if(g){const dg=along(i,g.pointIndex);nI.textContent=g.instructions;nT.textContent=TI(g.turn);nD.textContent=fmt(dg);
+  if(dg<300&&dg>=100&&!spoken[gi+'a']){spoken[gi+'a']=1;say(fmt(dg)+' 앞에서 '+g.instructions)}
+  if(dg<60&&!spoken[gi+'b']){spoken[gi+'b']=1;say('잠시 후 '+g.instructions)}}
+ else{nT.textContent='↑';nI.textContent='목적지까지 직진';nD.textContent=fmt(rem)}}
+function vid(s){s=s.trim();if(/^[\w-]{11}$/.test(s))return s;const m=s.match(/(?:v=|youtu\.be\/|shorts\/|live\/|embed\/)([\w-]{11})/);return m&&m[1]}
+function play(id){res.style.display='none';yt.querySelectorAll('iframe').forEach(f=>f.remove());const f=document.createElement('iframe');f.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';f.allowFullscreen=true;
+f.src='https://www.youtube-nocookie.com/embed/'+id+'?autoplay=1&playsinline=1&rel=0&enablejsapi=1&origin='+encodeURIComponent(location.origin);ytHook(f);yt.appendChild(f);st.v=id;sv()}
+async function go(){const s=v.value;const id=vid(s);if(id)return play(id);if(!s.trim())return home(1);res.style.display='block';yt.querySelectorAll('iframe').forEach(f=>f.remove());res.innerHTML='<div class="hh">검색 중…</div>';
+const j=await pjson('/search?filter=videos&q='+encodeURIComponent(s));const L=j&&j.items?j.items.filter(x=>x.url&&x.title):[];
+if(!L.length){res.innerHTML='<div class="hh">검색 실패 — 유튜브 링크를 붙여넣어 주세요</div>';return}
+res.innerHTML='<div class="hh"></div><div class="hg"></div>';res.firstChild.textContent='🔎 '+s;const g=res.querySelector('.hg');L.forEach(x=>g.appendChild(card(x)))}
+function ratio(p){Lp.style.flex='0 0 '+p+'%';document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on',b.textContent.startsWith(Math.round(p)+':')));st.r=p;sv();setTimeout(()=>fit(),50)}const Lp=document.getElementById('L');if(st.r)ratio(st.r);
+let dr=false;bar.onpointerdown=e=>{dr=true;bar.setPointerCapture(e.pointerId)};bar.onpointermove=e=>{if(dr)ratio(Math.min(85,Math.max(15,e.clientX/innerWidth*100)))};bar.onpointerup=()=>dr=false;
+function tgl(x){const h=x===undefined?!document.body.classList.contains('hide'):x;document.body.classList.toggle('hide',h);tg.textContent=h?'☰':'▲';st.h=h;sv();setTimeout(()=>fit(),50)}tgl(!!st.h);
+// ===== T3: 지도 설정 / 테마 / 3D / 교통 / 헤딩 / 알림 =====
+const M=Object.assign({v:'2d',th:'auto',tr:false,nu:true},st.m||{});let HD=0,PH=null,TRD=null,TTO=null,AL={};
+function isNight(){if(M.th=='night')return true;if(M.th=='day')return false;const h=new Date().getHours();return h<6||h>=18}
+function setM(k,val){M[k]=val;st.m=M;sv();applyM()}
+function tileEl(){if(ENG!='t')return null;try{return NAT.t._data.mapTileLayerContainer.getElement()}catch(e){return null}}
+function applyM(){const n=isNight(),te=tileEl(),me=document.getElementById(ENG=='t'?'tm':'nm');document.getElementById(ENG=='t'?'nm':'tm').classList.remove('nt');
+ if(te){te.classList.toggle('nt',n);me.classList.remove('nt')}else me.classList.toggle('nt',n);
+ document.body.classList.toggle('night',n);bth.textContent=n?'🌙':'☀️';b3d.classList.toggle('on',M.v=='3d');
+ document.querySelectorAll('#sett .seg button').forEach(b=>b.classList.toggle('on',M[b.dataset.k]==b.dataset.v));
+ swT.classList.toggle('on',!!M.tr);swN.classList.toggle('on',!!M.nu);setTraffic(M.tr);applyView()}
+document.querySelectorAll('#sett .seg button').forEach(b=>b.onclick=()=>setM(b.dataset.k,b.dataset.v));
+function setTraffic(on){try{
+ if(TRD&&(!on||TRD.e!=ENG)){if(TRD.e=='t')TRD.o.autoTraffic(NAT.t,{trafficOnOff:false});else TRD.o.setMap(null);TRD=null}
+ if(on&&!TRD){if(ENG=='t'){if(!TM.extension||!TM.extension.TData)return;const o=new TM.extension.TData();o.autoTraffic(NAT.t,{trafficOnOff:true,trafficType:'AUTO'});TRD={e:'t',o}}
+  else{if(!NM.TrafficLayer)return;const o=new NM.TrafficLayer({interval:300000});o.setMap(NAT.n);TRD={e:'n',o}}}}catch(e){console.log('traffic',e.message)}}
+function applyView(){const me=document.getElementById('map');const rot=(!M.nu&&(WID!=null||window.NAVONLY))?HD:0;let t='';
+ if(M.v=='3d')t+='perspective(900px) rotateX(38deg) ';if(rot)t+='rotate('+(-rot)+'deg) ';
+ if(M.v=='3d'||rot)t+='scale('+(M.v=='3d'?1.55:1.45)+')';me.style.transform=t;cmp.firstChild.style.transform='rotate('+(-rot)+'deg)'}
+function brg(a,b){const r=Math.PI/180,y=Math.sin((b[1]-a[1])*r)*Math.cos(b[0]*r),x=Math.cos(a[0]*r)*Math.sin(b[0]*r)-Math.sin(a[0]*r)*Math.cos(b[0]*r)*Math.cos((b[1]-a[1])*r);return(Math.atan2(y,x)/r+360)%360}
+function zm(d){try{d>0?map.zoomIn():map.zoomOut()}catch(e){map.setZoom(map.getZoom()+d)}svc()}
+function recenter(){if(here)map.setCenter(LL(here[0],here[1]));else me()}
+function toast(t,cls,ic,ms){tT.textContent=t;tI.textContent=ic||'⚠️';toastEl.className='glass show '+(cls||'');clearTimeout(TTO);TTO=setTimeout(hideToast,ms||8000)}
+const toastEl=document.getElementById('toast');function hideToast(){toastEl.classList.remove('show')}
+function alertText(a){const sp=(a.text.match(/(\d{2,3})\s*(?:km|㎞)/i)||[])[1];
+ if(/카메라|단속/.test(a.text)||a.cam)return['전방 과속카메라'+(sp?' '+sp+'km/h':''),'','📷'];
+ if(a.turn==191)return['전방 제한속도'+(sp?' '+sp+'km/h':'')+' 구간','w','🚸'];if(a.turn==192)return['전방 사고다발 지역','w','⚠️'];
+ if(a.turn==193)return['전방 급커브','w','↪'];return['전방 낙석주의','w','🪨']}
+function chkAlert(i){const A=RT.alerts||[];for(let k=0;k<A.length;k++){const a=A[k];if(a.pointIndex<i||AL[k])continue;const d=along(i,a.pointIndex);
+ if(d<=500){AL[k]=1;const[t,c,ic]=alertText(a);toast(t+' · '+fmt(d),c,ic);say(t.replace('km/h','킬로'));break}}}
+window.T3=()=>({M,HD,nightTile:!!tileEl(),traffic:!!TRD,eng:ENG});
+applyM();setInterval(()=>{if(M.th=='auto')applyM()},300000);
+// ===== T4/T5: 빠른 목적지 / 유튜브 홈 =====
+function addRecent(x){if(!x||!isFinite(x.lat))return;const n=x.n.split(',')[0];st.rc=[{n,lat:x.lat,lng:x.lng}].concat((st.rc||[]).filter(r=>r.n!=n)).slice(0,6);sv();chips()}
+async function goDest(x){try{kbClose();DEST={n:x.n,lat:x.lat,lng:x.lng};ORG='';q.value=x.n;const A=await startPt();await drawRoute(A,DEST)}catch(e){msg('오류: '+e.message,1)}}
+function favSet(k,lab){const cur=DEST&&q.value.trim()&&DEST.n.split(',')[0];if(!cur)return toast(lab+': 먼저 도착지를 검색한 뒤 길게 눌러 저장하세요','i','📌');
+ st[k]={n:DEST.n.split(',')[0],lat:DEST.lat,lng:DEST.lng};sv();chips();toast(lab+' 저장: '+st[k].n,'ok','📌')}
+function chips(){const c=document.getElementById('chips');c.innerHTML='';
+ const mk=(t,cls,tap,hold)=>{const b=document.createElement('button');b.textContent=t;if(cls)b.className=cls;let lp=0,tm;
+  b.onpointerdown=()=>{lp=0;tm=setTimeout(()=>{lp=1;hold&&hold()},700)};b.onpointerup=b.onpointerleave=()=>clearTimeout(tm);b.onclick=()=>{if(!lp)tap()};c.appendChild(b)};
+ [['home','🏠 집'],['work','🏢 회사']].forEach(([k,l])=>{const f=st[k];mk(f?l:l+' +',f?'':'e',()=>f?goDest(f):favSet(k,l.slice(3)),()=>favSet(k,l.slice(3)))});
+ (st.rc||[]).forEach(r=>mk('🕘 '+r.n,'',()=>goDest(r),()=>{st.rc=st.rc.filter(x=>x.n!=r.n);sv();chips();toast('최근 목적지 삭제','i','🗑')}))}
+chips();
+function card(x){const d=document.createElement('div');d.className='vc';const id=(x.url||'').split('v=')[1];
+ d.innerHTML='<div class="d"><img loading="lazy"><b></b></div><div class="t"></div><div class="c"></div>';d.querySelector('img').src=x.thumbnail;
+ const du=x.duration>0?Math.floor(x.duration/60)+':'+String(x.duration%60).padStart(2,'0'):'';const b=d.querySelector('b');b.textContent=du;if(!du)b.remove();
+ d.querySelector('.t').textContent=x.title;d.querySelector('.c').textContent=(x.uploaderName||'')+(x.views>0?' · 조회수 '+(x.views>=1e4?Math.round(x.views/1e4)+'만':x.views)+'회':'');d.onclick=()=>id&&play(id);return d}
+async function pjson(path){for(const a of API){try{const r=await fetch(a+path);if(!r.ok)continue;const j=await r.json();if(j&&!j.error)return j}catch(e){}}return null}
+async function home(force){res.style.display='block';yt.querySelectorAll('iframe').forEach(f=>f.remove());
+ const C=JSON.parse(S.v10h||'null');let L=C&&Date.now()-C.t<1800000?C.L:null;
+ if(!L){res.innerHTML='<div class="hh">추천 영상 불러오는 중…</div>';L=[];const j=await pjson('/trending?region=KR');if(Array.isArray(j))L=j;
+  if(L.length<8)for(const k of ['드라이브 음악','오늘 뉴스','인기 동영상']){const s=await pjson('/search?filter=videos&q='+encodeURIComponent(k));if(s&&s.items)L=L.concat(s.items.slice(0,8))}
+  L=L.filter(x=>x.url&&x.url.includes('v=')&&x.title);if(L.length)S.v10h=JSON.stringify({t:Date.now(),L})}
+ if(!L.length){res.innerHTML='<div class="hh">추천 영상을 불러오지 못했어요 — 검색하거나 링크를 붙여넣어 주세요</div>';return}
+ res.innerHTML='<div class="hh"><span>🔥 지금 인기 · 추천</span></div><div class="hg"></div>';const g=res.querySelector('.hg');L.slice(0,40).forEach(x=>g.appendChild(card(x)))}
+
+/*HG*/
+const HG=(()=>{const CHO='ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ',JUNG='ㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ',JONG=' ㄱㄲㄳㄴㄵㄶㄷㄹㄺㄻㄼㄽㄾㄿㅀㅁㅂㅄㅅㅆㅇㅈㅊㅋㅌㅍㅎ';
+ const VC={'ㅗㅏ':'ㅘ','ㅗㅐ':'ㅙ','ㅗㅣ':'ㅚ','ㅜㅓ':'ㅝ','ㅜㅔ':'ㅞ','ㅜㅣ':'ㅟ','ㅡㅣ':'ㅢ'};
+ const JC={'ㄱㅅ':'ㄳ','ㄴㅈ':'ㄵ','ㄴㅎ':'ㄶ','ㄹㄱ':'ㄺ','ㄹㅁ':'ㄻ','ㄹㅂ':'ㄼ','ㄹㅅ':'ㄽ','ㄹㅌ':'ㄾ','ㄹㅍ':'ㄿ','ㄹㅎ':'ㅀ','ㅂㅅ':'ㅄ'};
+ const JS={};for(const k in JC)JS[JC[k]]=[k[0],k[1]];
+ const isV=c=>JUNG.includes(c),isC=c=>CHO.includes(c)||JONG.indexOf(c)>0;
+ const mk=(c,j,t)=>String.fromCharCode(0xAC00+(CHO.indexOf(c)*21+JUNG.indexOf(j))*28+(t?JONG.indexOf(t):0));
+ const dec=ch=>{const n=ch.charCodeAt(0)-0xAC00;if(n<0||n>11171)return null;return[CHO[Math.floor(n/588)],JUNG[Math.floor(n%588/28)],n%28?JONG[n%28]:'']};
+ // st={text, hist:[]}  hist non-empty = composing last char
+ function key(st,k){const t=st.text,last=t.slice(-1),pre=t.slice(0,-1),comp=st.hist.length>0;
+  const push=nt=>{st.hist.push(t);st.text=nt};
+  if(isV(k)){
+   if(comp){const d=dec(last);
+    if(d&&d[2]){let a=d[2],b='';if(JS[a]){[a,b]=JS[a]}else{b=a;a=''}
+     if(CHO.includes(b)){const base=pre+mk(d[0],d[1],a);st.hist=[base,base+b];st.text=base+mk(b,k);return st}}
+    else if(d&&!d[2]&&VC[d[1]+k]){push(pre+mk(d[0],VC[d[1]+k]));return st}
+    else if(!d&&CHO.includes(last)){push(pre+mk(last,k));return st}
+    else if(!d&&VC[last+k]){push(pre+VC[last+k]);return st}}
+   st.hist=[t];st.text=t+k;return st}
+  if(isC(k)){
+   if(comp){const d=dec(last);
+    if(d&&!d[2]&&JONG.indexOf(k)>0){push(pre+mk(d[0],d[1],k));return st}
+    if(d&&d[2]&&JC[d[2]+k]){push(pre+mk(d[0],d[1],JC[d[2]+k]));return st}}
+   st.hist=[t];st.text=t+k;return st}
+  st.hist=[];st.text=t+k;return st}
+ function back(st){if(st.hist.length){st.text=st.hist.pop()}else st.text=st.text.slice(0,-1);return st}
+ function type(seq){const st={text:'',hist:[]};for(const c of seq){if(c=='\b')back(st);else key(st,c)}return st.text}
+ return{key,back,type,commit:st=>{st.hist=[];return st}}})();
+/*HG*/
+// ===== T5: 가상 키보드 =====
+const KB={f:null,st:{text:'',hist:[]},ko:true,sh:false,sym:false};
+const KO=[['ㅂ','ㅈ','ㄷ','ㄱ','ㅅ','ㅛ','ㅕ','ㅑ','ㅐ','ㅔ'],['ㅁ','ㄴ','ㅇ','ㄹ','ㅎ','ㅗ','ㅓ','ㅏ','ㅣ'],['ㅋ','ㅌ','ㅊ','ㅍ','ㅠ','ㅜ','ㅡ']];
+const KS={'ㅂ':'ㅃ','ㅈ':'ㅉ','ㄷ':'ㄸ','ㄱ':'ㄲ','ㅅ':'ㅆ','ㅐ':'ㅒ','ㅔ':'ㅖ'};
+const EN=[['q','w','e','r','t','y','u','i','o','p'],['a','s','d','f','g','h','j','k','l'],['z','x','c','v','b','n','m']];
+const SY=[['1','2','3','4','5','6','7','8','9','0'],['-','/',':','(',')','&','@','.',','],['?','!','\'','#','%','+','=']];
+const KBF={q:['도착지',()=>route()],from:['출발지',()=>kbOpen(q)],v:['유튜브 검색',()=>go()]};
+function kbRender(){const K=document.getElementById('kbK');K.innerHTML='';const L=KB.sym?SY:KB.ko?KO:EN;
+ const row=(keys)=>{const r=document.createElement('div');r.className='kr';keys.forEach(k=>{const b=document.createElement('button');
+  if(typeof k=='string'){let c=k;if(KB.sh&&!KB.sym)c=KB.ko?(KS[k]||k):k.toUpperCase();b.textContent=c;b.dataset.c=c}else{b.textContent=k.t;b.className=k.c||'f';b.dataset.a=k.a}r.appendChild(b)});K.appendChild(r)};
+ row(L[0]);row(L[1]);row([{t:KB.sym?'':'⇧',a:'sh',c:'f w2'+(KB.sh?' on':'')}].concat(L[2]).concat([{t:'⌫',a:'bs',c:'f w2'}]));
+ row([{t:KB.sym?'가':'123',a:'sym',c:'f w2'},{t:KB.ko?'한/영 ▸A':'한/영 ▸한',a:'ko',c:'f w2'},{t:'',a:'sp',c:'sp'},{t:KBF[KB.f.id][0]=='출발지'?'다음':'검색',a:'go',c:'go'}]);
+ document.getElementById("kbS").textContent=KB.st.text;KB.f.value=KB.st.text;const T_=document.getElementById("kbT");T_.scrollLeft=T_.scrollWidth}
+function kbKey(c){HG.key(KB.st,c);if(KB.sh&&!KB.ko){}KB.sh=false;kbRender()}
+function kbAct(a){const S=KB.st;
+ if(a=='bs'){HG.back(S)}else if(a=='sp'){HG.commit(S);S.text+=' '}else if(a=='sh'){if(!KB.sym)KB.sh=!KB.sh}
+ else if(a=='ko'){HG.commit(S);KB.ko=!KB.ko;KB.sym=false;KB.sh=false;st.kbko=KB.ko;sv()}else if(a=='sym'){HG.commit(S);KB.sym=!KB.sym;KB.sh=false}
+ else if(a=='go'){const f=KB.f,run=KBF[f.id][1];f.value=S.text.trim();kbClose();run();return}kbRender()}
+let KBR=null,KBT=null;
+document.getElementById('kbK').addEventListener('pointerdown',e=>{const b=e.target.closest('button');if(!b)return;e.preventDefault();
+ const fire=()=>b.dataset.c?kbKey(b.dataset.c):kbAct(b.dataset.a);fire();
+ if(b.dataset.a=='bs'){clearTimeout(KBT);clearInterval(KBR);KBT=setTimeout(()=>{KBR=setInterval(()=>{HG.back(KB.st);kbRender()},80)},450)}});
+['pointerup','pointercancel','pointerleave'].forEach(ev=>document.getElementById('kbK').addEventListener(ev,()=>{clearTimeout(KBT);clearInterval(KBR)}));
+function kbOpen(f){KB.f=f;KB.st={text:f.value||'',hist:[]};KB.ko=st.kbko!==false;KB.sh=KB.sym=false;
+ document.querySelectorAll('input.ki').forEach(x=>x.classList.toggle('act',x==f));const pane=f.closest('.pane'),kb=document.getElementById('kb');pane.appendChild(kb);kb.classList.add('on');
+ document.getElementById('kbL').textContent=KBF[f.id][0];document.getElementById('chips').style.display=f.id=='q'?'':'none';kbRender()}
+function kbClose(){document.getElementById('kb').classList.remove('on');document.querySelectorAll('input.ki').forEach(x=>x.classList.remove('act'));if(KB.f)KB.f.value=KB.st.text.trim()}
+function kbClear(){KB.st={text:'',hist:[]};kbRender()}
+document.querySelectorAll('input.ki').forEach(f=>{f.addEventListener('pointerdown',e=>{e.preventDefault();kbOpen(f)});f.addEventListener('focus',()=>{f.blur();if(!document.getElementById('kb').classList.contains('on')||KB.f!=f)kbOpen(f)})});
+// 물리 키보드(테스트/PC)용: 영문은 그대로, Enter/Backspace/Escape
+addEventListener('keydown',e=>{if(!document.getElementById('kb').classList.contains('on'))return;if(e.key=='Enter')kbAct('go');else if(e.key=='Backspace')kbAct('bs');else if(e.key=='Escape')kbClose();else if(e.key==' ')kbAct('sp');else return;e.preventDefault()});
+
+engBtns();
+function sndLbl(){sndS.textContent=SND?'🔊 안내음성 켜짐':'🔇 안내음성 꺼짐';snd.textContent=SND?'🔊':'🔇'}sndLbl();
+if(!window.NAVONLY)home();
+
+// ===== T10: 오른쪽 패널 모드 (유튜브 | 노래방) =====
+function kFr(){return document.querySelector('#kw iframe')}
+function kPost(m){const f=kFr();(window.__kp=window.__kp||[]).push(m.type);try{f&&f.contentWindow.postMessage(m,'*')}catch(e){}}
+let YRES=false;function ytStop(){ytCmd('pauseVideo');ytCmd('stopVideo');const had=!!ytFrame();yt.querySelectorAll('iframe').forEach(f=>f.remove());if(had){YRES=true;res.style.display='block'}window.__ytstop=(window.__ytstop||0)+1}
+function rMode(m){if(m!='l')st.rm=m;sv();document.body.classList.toggle('mk',m=='k');document.body.classList.toggle('ml',m=='l');
+ if(typeof kbClose=='function'){try{kbClose()}catch(e){}}
+ if(m!='y')ytStop();
+ if(m=='y'&&!ytFrame()&&st.v&&YRES)play(st.v);
+ if(m=='k'){if(!kFr()){const f=document.createElement('iframe');f.src='./karaoke.html?embed=1';f.allow='autoplay; fullscreen; microphone';f.allowFullscreen=true;f.title='아이카 스마트 노래방';f.onload=()=>kPost({type:'chrome',hide:!!st.hr});document.getElementById('kw').appendChild(f)}}
+ else kPost({type:'pause'});
+ if(m=='l')document.getElementById('lhint').textContent=st.rm?'최근 사용: '+(st.rm=='k'?'🎤 노래방':'▶ 유튜브'):''}
+rMode('l');
+
+// ===== T11: 상단 바 숨기기 =====
+function hT(k,v){const key='h'+k;st[key]=v===undefined?!st[key]:!!v;sv();document.body.classList.toggle(key,st[key]);const b=document.getElementById(key);b.textContent=st[key]?'⌄':'⌃';b.title=st[key]?'상단 보이기':'상단 숨기기';
+ if(k=='r')kPost({type:'chrome',hide:st[key]});setTimeout(()=>dispatchEvent(new Event('resize')),50)}
+['hl','hr'].forEach(i=>{const b=document.getElementById(i);b.parentNode.appendChild(b)});hT('l',!!st.hl);hT('r',!!st.hr);addEventListener('message',e=>{const d=e.data;if(d&&d.type=='kchrome'&&e.source===(kFr()||{}).contentWindow)hT('r',!!d.hide)});requestAnimationFrame(()=>{const t=document.querySelector('#L>.tb');if(t&&t.offsetHeight)document.documentElement.style.setProperty('--tbh',t.offsetHeight+'px')});
+
+// ===== T13: 휴대폰 위치 마커 =====
+let PHM=null;function phPos(p){const c=p.coords;here=[c.latitude,c.longitude];GP={lat:here[0],lng:here[1],t:Date.now(),acc:c.accuracy};try{localStorage.v10gp=JSON.stringify(GP)}catch(x){}
+ if(mk3){if(PHM){rm(PHM);PHM=null}return}const ll=LL(here[0],here[1]);if(PHM)PHM.setPosition(ll);else PHM=XMarker({position:ll,map,title:'내 위치(휴대폰)'});
+ if(!window.__phFirst){window.__phFirst=1;try{map.setCenter(ll)}catch(e){}}window.__phN=(window.__phN||0)+1;window.__phLL=[+here[0].toFixed(4),+here[1].toFixed(4)]}
+if(window.RELAY){RELAY.listeners.push(phPos);if(RELAY.last)phPos({coords:{latitude:RELAY.last.lat,longitude:RELAY.last.lng,accuracy:RELAY.last.acc}})}
+
+// ===== N1: 현재 속도 · 지도 방향 =====
+(()=>{const mw=document.getElementById('mapw');const sp=document.createElement('div');sp.id='spd';sp.className='stale';sp.innerHTML='<b>--</b><small>km/h</small>';mw.appendChild(sp);
+ const ob=document.createElement('button');ob.id='ori';mw.appendChild(ob);
+ const oui=()=>{ob.textContent=M.nu?'🧭 북쪽 고정':'⬆️ 진행방향';ob.title='지도 방향 전환'};ob.onclick=()=>{setM('nu',!M.nu);oui();toast(M.nu?'지도: 북쪽 고정':'지도: 진행방향 위로','i','🧭')};oui();
+ let P0=null,LAST=0,KMH=null;
+ function upd(p){const c=p.coords,t=p.timestamp||Date.now();let v=(c.speed!=null&&isFinite(c.speed)&&c.speed>=0)?c.speed*3.6:null;
+  if(P0){const d=km(P0.lat,P0.lng,c.latitude,c.longitude),dt=(t-P0.t)/1000;if(v==null&&dt>0.5&&dt<30)v=d/dt*3.6;
+   if(d>5){HD=(c.heading!=null&&isFinite(c.heading)&&(c.speed||0)>1)?c.heading:brg([P0.lat,P0.lng],[c.latitude,c.longitude]);if(!M.nu)applyView()}}
+  if(!P0||km(P0.lat,P0.lng,c.latitude,c.longitude)>5||t-P0.t>5000)P0={lat:c.latitude,lng:c.longitude,t};
+  if(v!=null){KMH=KMH==null?v:KMH*0.4+v*0.6;LAST=Date.now();const n=Math.round(KMH<1?0:KMH);sp.querySelector('b').textContent=n;sp.classList.remove('stale');sp.classList.toggle('fast',n>=100)}window.__spd=KMH}
+ setInterval(()=>{if(Date.now()-LAST>10000){sp.classList.add('stale');sp.querySelector('b').textContent='--'}},2000);
+ try{navigator.geolocation.watchPosition(upd,()=>{},{enableHighAccuracy:true,maximumAge:0,timeout:60000})}catch(e){}
+ window.N1={upd}})();
+</script></body></html>

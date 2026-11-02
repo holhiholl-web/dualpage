@@ -1,0 +1,156 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>M1 아이카 미디어 · 유튜브 / 노래방</title>
+<style>
+:root{--bg:#0f0f0f;--pn:#0f0f0f;--pn2:#272727;--ln:rgba(255,255,255,.1);--tx:#f1f1f1;--mu:#aaa;--ac:#ff3d7f;--ac2:#7b5cff;--r:12px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font-family:Roboto,"Noto Sans KR","Apple SD Gothic Neo",system-ui,sans-serif;overflow:hidden;user-select:none}
+button{font-family:inherit;cursor:pointer;color:var(--tx)}[hidden]{display:none!important}#kb button{height:44px;border:1px solid var(--ln);border-radius:10px;background:#2a2d38;color:#fff;font-size:17px;font-weight:600;padding:0 14px}
+#top{height:60px;display:flex;align-items:center;gap:14px;padding:0 16px;background:var(--bg)}
+#logo{display:flex;align-items:center;gap:4px;background:none;border:0;padding:0 6px;height:48px;flex:none}#logo i{width:34px;height:24px;border-radius:7px;background:#f00;position:relative;display:block}#logo i:after{content:'';position:absolute;left:13px;top:6px;border-left:10px solid #fff;border-top:6px solid transparent;border-bottom:6px solid transparent}#logo b{font:700 21px/1 "Roboto",sans-serif;letter-spacing:-1px}#logo sup{font-size:10px;color:var(--mu);margin-left:2px}
+#sbx{flex:1;display:flex;max-width:640px;margin:0 auto;height:44px}#sq{flex:1;min-width:0;height:44px;border:1px solid #303030;border-right:0;border-radius:22px 0 0 22px;background:#121212;color:var(--tx);font-size:17px;padding:0 18px;outline:none;caret-color:transparent}#sq.act{border-color:#1c62b9}
+#sgo{width:72px;height:44px;border:1px solid #303030;border-radius:0 22px 22px 0;background:#222;font-size:20px}
+#bk{flex:none;height:48px;width:56px;padding:0;border:0;background:none;border-radius:12px;overflow:hidden}#bk img{width:100%;height:100%;object-fit:cover;display:block;border-radius:12px}
+#chips{display:flex;gap:10px;padding:6px 16px 10px;overflow-x:auto;scrollbar-width:none}#chips::-webkit-scrollbar{display:none}#chips button{flex:none;height:38px;padding:0 14px;border-radius:10px;border:0;background:var(--pn2);font-size:15px;font-weight:500}#chips button.on{background:#f1f1f1;color:#0f0f0f}
+#home{position:absolute;top:60px;left:0;right:0;bottom:0;display:flex;flex-direction:column}#gs{flex:1;overflow-y:auto;padding:4px 16px 20px}
+#gh{font-size:17px;font-weight:700;margin:4px 0 10px}#gh:empty{display:none}
+#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:22px 16px}
+.cd{cursor:pointer;min-width:0}.tw{position:relative;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#222}.tw img{width:100%;height:100%;object-fit:cover;display:block}.du{position:absolute;right:6px;bottom:6px;background:rgba(0,0,0,.8);font-size:12px;font-weight:600;padding:2px 5px;border-radius:4px}
+.mt{display:flex;gap:10px;margin-top:10px}.av{width:36px;height:36px;border-radius:50%;flex:none;background:#3d3d3d;display:flex;align-items:center;justify-content:center;font-weight:700;overflow:hidden}.av img{width:100%;height:100%}
+.tx{min-width:0;display:flex;flex-direction:column}.tx b{font-size:16px;line-height:1.35;font-weight:600;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.tx .ch,.tx .vw{font-size:13.5px;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tx .ch{margin-top:4px}
+#gft{display:flex;justify-content:center;padding:16px}.more{height:44px;padding:0 28px;border-radius:22px;border:0;background:var(--pn2);font-size:15px}.empty{color:var(--mu);padding:30px}
+.spin{width:34px;height:34px;border:4px solid #333;border-top-color:#f00;border-radius:50%;animation:sp .8s linear infinite;margin:10px auto}@keyframes sp{to{transform:rotate(360deg)}}
+#watch{position:absolute;top:60px;left:0;right:0;bottom:0;display:flex;gap:16px;padding:0 16px 10px}#wl{flex:1;min-width:0;display:flex;flex-direction:column}
+#pw{position:relative;flex:1;min-height:0;background:#000;border-radius:12px;overflow:hidden}#pw iframe,#pw>#yt{position:absolute;inset:0;width:100%;height:100%;border:0}
+#ytx{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:#000d;font-size:20px;text-align:center;padding:20px}#ytx button{height:52px;padding:0 22px;border-radius:26px;border:0;background:#f00;font-size:18px;font-weight:700}
+#wi{flex:none;padding:8px 2px 0;display:flex;gap:10px;align-items:flex-start}#wi .tx{flex:1}#wt{font-size:18px!important;-webkit-line-clamp:1!important}#wback{flex:none;height:44px;padding:0 14px;border-radius:22px;border:0;background:var(--pn2);font-size:15px}
+#rel{width:min(380px,34vw);flex:none;overflow-y:auto;display:flex;flex-direction:column;gap:10px}.rc{display:flex;gap:8px;cursor:pointer}.rc .tw{width:150px;flex:none;border-radius:8px}.rc .tx b{font-size:14px}.rc .tx .ch,.rc .tx .vw{font-size:12px}
+#kw{position:absolute;inset:0;display:none;background:#000}#kw iframe{width:100%;height:100%;border:0}body.mk #kw{display:block}body.mk #top,body.mk #home,body.mk #watch{visibility:hidden}
+#toast{position:fixed;z-index:2000;left:50%;bottom:20px;transform:translate(-50%,20px);opacity:0;transition:.25s;padding:12px 18px;border-radius:12px;background:#323232;font-size:16px;pointer-events:none;max-width:80vw}#toast.show{opacity:1;transform:translate(-50%,0)}
+#kb{position:fixed;z-index:1800;left:0;right:0;bottom:0;display:none;flex-direction:column;gap:5px;padding:6px;background:rgba(14,15,20,.98);border-top:1px solid var(--ln);box-shadow:0 -10px 30px #000a;height:max(52vh,272px)}#kb.on{display:flex}
+#kbP{display:flex;gap:6px;align-items:center;height:44px;flex:none}#kbT{flex:1;min-width:0;height:44px;display:flex;align-items:center;padding:0 12px;border-radius:12px;background:var(--pn2);border:1px solid var(--ac);font-size:20px;white-space:pre;overflow:hidden}
+#kbT i{display:inline-block;width:2px;height:24px;background:var(--ac);margin-left:1px;animation:blk 1s steps(1) infinite}@keyframes blk{50%{opacity:0}}#kbP button{height:44px}
+.kr{display:flex;gap:5px;flex:1;min-height:44px}.kr button{flex:1 1 0;min-width:0;height:auto;padding:0;font-size:22px;font-weight:500;border-radius:10px;background:#2a2d38;border:0}
+.kr button.f{background:#3a3e4b;font-size:17px}.kr button.w2{flex:1.6}.kr button.sp{flex:4.5}.kr button.go{flex:2;background:linear-gradient(135deg,var(--ac),var(--ac2))}.kr button.on{background:var(--ac2)}
+@media (max-height:500px){#top{height:56px}#home,#watch{top:56px}#grid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px 12px}}
+</style></head><body>
+<div id="top"><button id="logo" title="홈"><i></i><b>YouTube</b><sup>KR</sup></button><div id="sbx"><input id="sq" readonly inputmode="none" placeholder="검색"><button id="sgo" title="검색">🔍</button></div><button id="bk" title="노래방으로 전환"><img src="./icon_karaoke.png" alt="노래방"></button></div>
+<div id="home"><div id="chips"></div><div id="gs"><div id="gh"></div><div id="grid"></div><div id="gft"></div></div></div>
+<div id="watch" hidden><div id="wl"><div id="pw"><div id="yt"></div><div id="ytx" hidden>이 영상은 여기서 재생할 수 없어요<button id="wout">▶ YouTube에서 보기</button></div></div><div id="wi"><div class="tx"><b id="wt"></b><span class="ch" id="wc"></span><span class="vw" id="wv"></span></div><button id="wback">← 홈</button></div></div><div id="rel"></div></div>
+<div id="kw"></div>
+<div id="kb"><div id="kbP"><div id="kbT"><span id="kbS"></span><i></i></div><button onclick="kbClear()">지우기</button><button onclick="kbClose()">✕</button></div><div id="kbK" style="display:flex;flex-direction:column;gap:5px;flex:1"></div></div>
+<div id="toast"></div>
+<script>
+/*HG*/
+const HG=(()=>{const CHO='ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ',JUNG='ㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ',JONG=' ㄱㄲㄳㄴㄵㄶㄷㄹㄺㄻㄼㄽㄾㄿㅀㅁㅂㅄㅅㅆㅇㅈㅊㅋㅌㅍㅎ';
+ const VC={'ㅗㅏ':'ㅘ','ㅗㅐ':'ㅙ','ㅗㅣ':'ㅚ','ㅜㅓ':'ㅝ','ㅜㅔ':'ㅞ','ㅜㅣ':'ㅟ','ㅡㅣ':'ㅢ'};
+ const JC={'ㄱㅅ':'ㄳ','ㄴㅈ':'ㄵ','ㄴㅎ':'ㄶ','ㄹㄱ':'ㄺ','ㄹㅁ':'ㄻ','ㄹㅂ':'ㄼ','ㄹㅅ':'ㄽ','ㄹㅌ':'ㄾ','ㄹㅍ':'ㄿ','ㄹㅎ':'ㅀ','ㅂㅅ':'ㅄ'};
+ const JS={};for(const k in JC)JS[JC[k]]=[k[0],k[1]];
+ const isV=c=>JUNG.includes(c),isC=c=>CHO.includes(c)||JONG.indexOf(c)>0;
+ const mk=(c,j,t)=>String.fromCharCode(0xAC00+(CHO.indexOf(c)*21+JUNG.indexOf(j))*28+(t?JONG.indexOf(t):0));
+ const dec=ch=>{const n=ch.charCodeAt(0)-0xAC00;if(n<0||n>11171)return null;return[CHO[Math.floor(n/588)],JUNG[Math.floor(n%588/28)],n%28?JONG[n%28]:'']};
+ // st={text, hist:[]}  hist non-empty = composing last char
+ function key(st,k){const t=st.text,last=t.slice(-1),pre=t.slice(0,-1),comp=st.hist.length>0;
+  const push=nt=>{st.hist.push(t);st.text=nt};
+  if(isV(k)){
+   if(comp){const d=dec(last);
+    if(d&&d[2]){let a=d[2],b='';if(JS[a]){[a,b]=JS[a]}else{b=a;a=''}
+     if(CHO.includes(b)){const base=pre+mk(d[0],d[1],a);st.hist=[base,base+b];st.text=base+mk(b,k);return st}}
+    else if(d&&!d[2]&&VC[d[1]+k]){push(pre+mk(d[0],VC[d[1]+k]));return st}
+    else if(!d&&CHO.includes(last)){push(pre+mk(last,k));return st}
+    else if(!d&&VC[last+k]){push(pre+VC[last+k]);return st}}
+   st.hist=[t];st.text=t+k;return st}
+  if(isC(k)){
+   if(comp){const d=dec(last);
+    if(d&&!d[2]&&JONG.indexOf(k)>0){push(pre+mk(d[0],d[1],k));return st}
+    if(d&&d[2]&&JC[d[2]+k]){push(pre+mk(d[0],d[1],JC[d[2]+k]));return st}}
+   st.hist=[t];st.text=t+k;return st}
+  st.hist=[];st.text=t+k;return st}
+ function back(st){if(st.hist.length){st.text=st.hist.pop()}else st.text=st.text.slice(0,-1);return st}
+ function type(seq){const st={text:'',hist:[]};for(const c of seq){if(c=='\b')back(st);else key(st,c)}return st.text}
+ return{key,back,type,commit:st=>{st.hist=[];return st}}})();
+/*HG*/
+// ===== 아이카 미디어 M1: 유튜브 스타일 홈 + 노래방 =====
+const LS=localStorage;let st={};try{st=JSON.parse(LS.m1||'{}')}catch(e){}const sv=()=>{try{LS.m1=JSON.stringify(st)}catch(e){}};
+const $=id=>document.getElementById(id);const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),2400)}
+const PIPED=['https://api.piped.private.coffee','https://pipedapi.kavin.rocks','https://pipedapi.adminforge.de'],INV=['https://inv.nadeko.net','https://invidious.nerdvpn.de','https://yewtu.be'];
+async function jget(u,ms){const c=new AbortController(),t=setTimeout(()=>c.abort(),ms||8000);try{const r=await fetch(u,{signal:c.signal});if(!r.ok)return null;return await r.json()}catch(e){return null}finally{clearTimeout(t)}}
+const vid=u=>{const m=String(u||'').match(/[?&]v=([\w-]{11})/);return m?m[1]:null};
+const mapP=x=>({id:vid(x.url),t:x.title,c:x.uploaderName||'',av:x.uploaderAvatar||'',v:x.views,d:x.duration,up:x.uploadedDate||'',th:x.thumbnail});
+const mapI=x=>({id:x.videoId,t:x.title,c:x.author||'',av:'',v:x.viewCount,d:x.lengthSeconds,up:x.publishedText||'',th:'https://i.ytimg.com/vi/'+x.videoId+'/mqdefault.jpg'});
+let API=null;
+async function trending(){for(const a of PIPED){const j=await jget(a+'/trending?region=KR');if(Array.isArray(j)&&j.length){API=a;return{L:j.map(mapP).filter(x=>x.id),more:null}}}
+ for(const a of INV){const j=await jget(a+'/api/v1/trending?region=KR');if(Array.isArray(j)&&j.length)return{L:j.map(mapI),more:null}}return null}
+async function search(q){for(const a of PIPED){const j=await jget(a+'/search?filter=videos&q='+encodeURIComponent(q));if(j&&j.items&&j.items.length){API=a;return pn(a,q,j)}}
+ for(const a of INV){const r=await ip(a,q,1);if(r)return r}return null}
+function pn(a,q,j){const tok=j.nextpage;return{L:j.items.map(mapP).filter(x=>x.id),more:tok?async()=>{const k=await jget(a+'/nextpage/search?filter=videos&q='+encodeURIComponent(q)+'&nextpage='+encodeURIComponent(tok));return k&&k.items&&k.items.length?pn(a,q,k):null}:null}}
+async function ip(a,q,n){const j=await jget(a+'/api/v1/search?type=video&page='+n+'&q='+encodeURIComponent(q));if(!Array.isArray(j)||!j.length)return null;return{L:j.filter(x=>x.videoId).map(mapI),more:()=>ip(a,q,n+1)}}
+async function related(id){for(const a of (API?[API]:[]).concat(PIPED)){const j=await jget(a+'/streams/'+id);if(j&&j.relatedStreams)return{info:j,L:j.relatedStreams.filter(x=>x.url&&x.type!='playlist').map(mapP).filter(x=>x.id)}}return null}
+const fmtV=v=>v==null||v<0?'':v>=1e8?(v/1e8).toFixed(1).replace('.0','')+'억회':v>=1e4?Math.round(v/1e4)+'만회':v>=1e3?(v/1e3).toFixed(1).replace('.0','')+'천회':v+'회';
+const fmtD=s=>!s||s<0?'LIVE':(s>=3600?Math.floor(s/3600)+':'+String(Math.floor(s%3600/60)).padStart(2,'0'):Math.floor(s/60))+':'+String(Math.floor(s%60)).padStart(2,'0');
+// --- 칩 ---
+const CHIPS=[['전체',null],['음악','인기 음악'],['드라이브','드라이브 음악'],['발라드','발라드 명곡'],['K-POP','케이팝 신곡'],['트로트','트로트 인기곡'],['라이브','라이브 공연'],['뉴스','뉴스 라이브'],['게임','게임'],['요리','요리'],['여행','여행 브이로그'],['코미디','웃긴 영상']];
+function chips(){const c=$('chips');c.innerHTML='';CHIPS.forEach(([n,q])=>{const b=document.createElement('button');b.textContent=n;b.className=st.chip==n?'on':'';b.onclick=()=>{st.chip=n;sv();chips();q?feed(q,'chip'):homeFeed()};c.appendChild(b)})}
+// --- 카드 ---
+function card(x){const d=document.createElement('div');d.className='cd';const ini=(x.c||'?').trim()[0]||'?';
+ d.innerHTML='<div class="tw"><img loading="lazy" alt=""><span class="du"></span></div><div class="mt"><div class="av"></div><div class="tx"><b></b><span class="ch"></span><span class="vw"></span></div></div>';
+ const im=d.querySelector('img'),yi='https://i.ytimg.com/vi/'+x.id+'/mqdefault.jpg';im.src=x.th||yi;im.onerror=()=>{if(im.src!=yi)im.src=yi};
+ d.querySelector('.du').textContent=fmtD(x.d);const av=d.querySelector('.av');if(x.av){const a=document.createElement('img');a.src=x.av;a.onerror=()=>{a.remove();av.textContent=ini};av.appendChild(a)}else av.textContent=ini;
+ d.querySelector('b').textContent=x.t;d.querySelector('.ch').textContent=x.c;d.querySelector('.vw').textContent=[fmtV(x.v)?'조회수 '+fmtV(x.v):'',x.up].filter(Boolean).join(' · ');
+ d.onclick=()=>watch(x);return d}
+let FEED=null;
+function runFeed(title,loader){const g=$('grid'),ft=$('gft');g.innerHTML='';ft.innerHTML='<div class="spin"></div>';$('gh').textContent=title||'';const F=FEED={more:loader,busy:false,seen:{}};
+ F.load=async()=>{if(F.busy||!F.more||FEED!==F)return;F.busy=true;ft.innerHTML='<div class="spin"></div>';let r=null;try{r=await F.more()}catch(e){}if(FEED!==F)return;F.busy=false;
+  if(!r){F.more=null;ft.innerHTML=g.children.length?'':'<div class="empty">영상을 불러오지 못했어요. 잠시 후 다시 시도하세요.</div>';return}
+  r.L.forEach(x=>{if(F.seen[x.id])return;F.seen[x.id]=1;g.appendChild(card(x))});F.more=r.more;ft.innerHTML=F.more?'<button class="more" onclick="FEED.load()">더 보기</button>':''};
+ IO.disconnect();IO.observe(ft);F.load();return F}
+const IO=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)&&FEED)FEED.load()},{rootMargin:'0px 0px 300px 0px'});
+function homeFeed(){st.chip='전체';sv();chips();showHome();runFeed('',async()=>{const r=await trending();if(r&&r.L.length)return r;return search('인기 급상승 동영상')})}
+function feed(q,from){showHome();if(from!='chip'){st.chip=null;chips();st.rs=[q].concat((st.rs||[]).filter(x=>x!=q)).slice(0,10);sv()}let first=true,pg=null;
+ runFeed(from=='chip'?'':'🔎 '+esc(q),async()=>{const r=first?await search(q):pg&&pg.more?await pg.more():null;first=false;pg=r;if(r&&!r.more)r.more=null;return r})}
+function doSearch(){const q=$('sq').value.trim();if(!q)return homeFeed();feed(q)}
+// --- 플레이어 ---
+let YP=null,YR=false,PEND=null,CUR=null;
+function onYouTubeIframeAPIReady(){YP=new YT.Player('yt',{width:'100%',height:'100%',playerVars:{autoplay:1,playsinline:1,rel:0,modestbranding:1},events:{onReady:()=>{YR=true;if(PEND){const p=PEND;PEND=null;YP.loadVideoById(p)}},onError:e=>{toast('이 영상은 여기서 재생할 수 없어요 — YouTube 앱에서 보세요');$('ytx').hidden=false}}})}
+function loadAPI(){if(window.YT&&YT.Player)return;if(document.getElementById('yts'))return;const s=document.createElement('script');s.id='yts';s.src='https://www.youtube.com/iframe_api';document.head.appendChild(s)}
+function showHome(){$('home').hidden=false;$('watch').hidden=true;pauseYT()}
+function pauseYT(){try{YP&&YR&&YP.pauseVideo()}catch(e){}}
+async function watch(x){CUR=x;$('home').hidden=true;$('watch').hidden=false;$('ytx').hidden=true;$('wt').textContent=x.t;$('wc').textContent=x.c;$('wv').textContent=[fmtV(x.v)?'조회수 '+fmtV(x.v):'',x.up].filter(Boolean).join(' · ');
+ $('wout').onclick=()=>{try{window.open('https://www.youtube.com/watch?v='+x.id,'_blank')}catch(e){}};
+ loadAPI();if(YR)YP.loadVideoById(x.id);else PEND=x.id;window.__played=(window.__played||[]).concat(x.id);
+ const rl=$('rel');rl.innerHTML='<div class="spin"></div>';const r=await related(x.id);if(CUR!==x)return;rl.innerHTML='';
+ if(!r||!r.L.length){const s=await search(x.c||x.t);(s?s.L:[]).filter(v=>v.id!=x.id).slice(0,20).forEach(v=>rl.appendChild(rc(v)));return}r.L.slice(0,24).forEach(v=>rl.appendChild(rc(v)))}
+function rc(x){const d=document.createElement('div');d.className='rc';d.innerHTML='<div class="tw"><img loading="lazy" alt=""><span class="du"></span></div><div class="tx"><b></b><span class="ch"></span><span class="vw"></span></div>';
+ const im=d.querySelector('img');im.src=x.th||('https://i.ytimg.com/vi/'+x.id+'/mqdefault.jpg');d.querySelector('.du').textContent=fmtD(x.d);d.querySelector('b').textContent=x.t;d.querySelector('.ch').textContent=x.c;d.querySelector('.vw').textContent=fmtV(x.v)?'조회수 '+fmtV(x.v):'';d.onclick=()=>watch(x);return d}
+// --- 노래방 전환 ---
+function kFr(){return document.querySelector('#kw iframe')}
+function kPost(m){const f=kFr();try{f&&f.contentWindow.postMessage(m,'*')}catch(e){}(window.__kp=window.__kp||[]).push(m.type)}
+function mode(m){st.mode=m;sv();document.body.classList.toggle('mk',m=='k');
+ if(m=='k'){pauseYT();kbClose();if(!kFr()){const f=document.createElement('iframe');f.src='./karaoke.html?embed=1&from=media';f.allow='autoplay; fullscreen; microphone';f.allowFullscreen=true;f.title='아이카 스마트 노래방';$('kw').appendChild(f)}}
+ else kPost({type:'pause'})}
+addEventListener('message',e=>{const d=e.data;if(d&&d.type=='toYoutube'&&kFr()&&e.source===kFr().contentWindow)mode('y')});
+$('bk').onclick=()=>mode('k');$('logo').onclick=()=>{mode('y');homeFeed()};$('wback').onclick=showHome;
+$('sq').addEventListener('pointerdown',e=>{e.preventDefault();kbOpen($('sq'))});$('sgo').onclick=()=>{kbClose();doSearch()};
+window.M1={watch,mode,homeFeed,feed};
+
+const KB={f:null,st:{text:'',hist:[]},ko:st.kbko!==false,sh:false,sym:false};
+const KO=[['ㅂ','ㅈ','ㄷ','ㄱ','ㅅ','ㅛ','ㅕ','ㅑ','ㅐ','ㅔ'],['ㅁ','ㄴ','ㅇ','ㄹ','ㅎ','ㅗ','ㅓ','ㅏ','ㅣ'],['ㅋ','ㅌ','ㅊ','ㅍ','ㅠ','ㅜ','ㅡ']],KS={'ㅂ':'ㅃ','ㅈ':'ㅉ','ㄷ':'ㄸ','ㄱ':'ㄲ','ㅅ':'ㅆ','ㅐ':'ㅒ','ㅔ':'ㅖ'};
+const EN=[['q','w','e','r','t','y','u','i','o','p'],['a','s','d','f','g','h','j','k','l'],['z','x','c','v','b','n','m']],SY=[['1','2','3','4','5','6','7','8','9','0'],['-','/',':','(',')','&','@','.',','],['?','!','\'','#','%','+','=']];
+function kbRender(){const Kk=$('kbK');Kk.innerHTML='';const L=KB.sym?SY:KB.ko?KO:EN;
+ const row=keys=>{const r=document.createElement('div');r.className='kr';keys.forEach(k=>{const b=document.createElement('button');if(typeof k=='string'){let c=k;if(KB.sh&&!KB.sym)c=KB.ko?(KS[k]||k):k.toUpperCase();b.textContent=c;b.dataset.c=c}else{b.textContent=k.t;b.className=k.c||'f';b.dataset.a=k.a}r.appendChild(b)});Kk.appendChild(r)};
+ row(L[0]);row(L[1]);row([{t:KB.sym?'':'⇧',a:'sh',c:'f w2'+(KB.sh?' on':'')}].concat(L[2]).concat([{t:'⌫',a:'bs',c:'f w2'}]));
+ row([{t:KB.sym?'가':'123',a:'sym',c:'f w2'},{t:KB.ko?'한/영 ▸A':'한/영 ▸한',a:'ko',c:'f w2'},{t:'',a:'sp',c:'sp'},{t:'검색',a:'go',c:'go'}]);
+ $('kbS').textContent=KB.st.text;KB.f.value=KB.st.text;const T_=$('kbT');T_.scrollLeft=T_.scrollWidth}
+function kbAct(a){const S=KB.st;if(a=='bs')HG.back(S);else if(a=='sp'){HG.commit(S);S.text+=' '}else if(a=='sh'){if(!KB.sym)KB.sh=!KB.sh}
+ else if(a=='ko'){HG.commit(S);KB.ko=!KB.ko;KB.sym=KB.sh=false;st.kbko=KB.ko;sv()}else if(a=='sym'){HG.commit(S);KB.sym=!KB.sym;KB.sh=false}
+ else if(a=='go'){KB.f.value=S.text.trim();kbClose();doSearch();return}kbRender()}
+let KBR=null,KBT=null;
+$('kbK').addEventListener('pointerdown',e=>{const b=e.target.closest('button');if(!b)return;e.preventDefault();if(b.dataset.c){HG.key(KB.st,b.dataset.c);KB.sh=false;kbRender()}else kbAct(b.dataset.a);
+ if(b.dataset.a=='bs'){clearTimeout(KBT);clearInterval(KBR);KBT=setTimeout(()=>{KBR=setInterval(()=>{HG.back(KB.st);kbRender()},80)},450)}});
+['pointerup','pointercancel','pointerleave'].forEach(v=>$('kbK').addEventListener(v,()=>{clearTimeout(KBT);clearInterval(KBR)}));
+function kbOpen(f){KB.f=f;KB.st={text:f.value||'',hist:[]};KB.sh=KB.sym=false;f.classList.add('act');$('kb').classList.add('on');kbRender()}
+function kbClose(){$('kb').classList.remove('on');if(KB.f){KB.f.classList.remove('act');KB.f.value=KB.st.text.trim()}}
+function kbClear(){KB.st={text:'',hist:[]};kbRender()}
+addEventListener('keydown',e=>{if(!$('kb').classList.contains('on'))return;if(e.key=='Enter')kbAct('go');else if(e.key=='Backspace')kbAct('bs');else if(e.key=='Escape')kbClose();else return;e.preventDefault()});
+
+chips();if(st.mode=='k')mode('k');homeFeed();
+</script></body></html>
