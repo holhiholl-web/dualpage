@@ -39,7 +39,7 @@
 #rlqr{width:min(42vh,260px);height:min(42vh,260px);background:#fff;border-radius:12px;padding:6px;flex:none}#rlqr svg{width:100%;height:100%}#rlt h3{margin:0 0 6px;font-size:22px}#rlcode{font-size:clamp(34px,8vh,60px);font-weight:800;letter-spacing:4px;color:#ffd84d}#rlt p{margin:6px 0;color:#aab;font-size:15px}#rlst{font-size:17px;margin:8px 0}#rlt button{height:48px;padding:0 16px;margin:6px 6px 0 0;border-radius:14px;border:1px solid rgba(255,255,255,.15);background:#2a2d38;color:#fff;font-size:16px;font-weight:600}`;document.head.appendChild(css);
   const c=document.createElement('button');c.id='rlc';c.onclick=()=>relayModal(true);(document.getElementById('mapw')||document.body).appendChild(c);
   const m=document.createElement('div');m.id='rlm';m.hidden=true;m.innerHTML='<div id="rlb"><div id="rlqr"></div><div id="rlt"><h3>📱 휴대폰 GPS 연결</h3><p>이 기기에는 GPS가 없어요. 휴대폰 카메라로 QR을 찍거나<br>아래 주소에서 코드를 입력하세요.</p><div id="rlcode"></div><p id="rlurl"></p><div id="rlst"></div><button onclick="relayModal(false)">닫기</button><button onclick="RELAY.newCode()">새 코드</button></div></div>';m.onclick=e=>{if(e.target===m)relayModal(false)};document.body.appendChild(m);
-  ui();R.start();setTimeout(()=>{if(!fresh()&&!R.nativeOk&&!sessionStorage.rlShown){sessionStorage.rlShown=1;relayModal(true)}},4000);
+  ui();R.start();setTimeout(()=>{if(!window.NOAUTOQR&&!fresh()&&!R.nativeOk&&!sessionStorage.rlShown){sessionStorage.rlShown=1;relayModal(true)}},4000);
   if(NATIVE)try{NATIVE.getCurrentPosition(()=>{R.nativeOk=1},()=>{},{timeout:3500,maximumAge:600000})}catch(e){}}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
 })();
