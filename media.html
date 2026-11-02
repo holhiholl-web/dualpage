@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>M3 아이카 미디어 · 유튜브 / 노래방</title>
+<title>M4 아이카 미디어 · 유튜브 / 노래방</title>
 <style>
 :root{--bg:#0f0f0f;--pn:#0f0f0f;--pn2:#272727;--ln:rgba(255,255,255,.1);--tx:#f1f1f1;--mu:#aaa;--ac:#ff3d7f;--ac2:#7b5cff;--r:12px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font-family:Roboto,"Noto Sans KR","Apple SD Gothic Neo",system-ui,sans-serif;overflow:hidden;user-select:none}
@@ -36,11 +36,15 @@ button{font-family:inherit;cursor:pointer;color:var(--tx)}[hidden]{display:none!
 #dv{position:fixed;top:0;bottom:0;left:calc(var(--nw,0px) - 6px);width:12px;z-index:1500;cursor:col-resize;touch-action:none}#dv:after{content:'';position:absolute;left:5px;top:0;bottom:0;width:2px;background:#333}
 #nt{position:fixed;z-index:1600;top:50%;left:var(--nw,0px);transform:translateY(-50%);width:30px;height:96px;border:1px solid #444;border-left:0;border-radius:0 14px 14px 0;background:rgba(30,30,36,.92);color:#fff;font-size:18px;padding:0;box-shadow:2px 0 10px #0008}
 body.nh #nv,body.nh #dv{display:none}body.dragging iframe{pointer-events:none}
+#ln{position:absolute;inset:0;z-index:60;background:radial-gradient(circle at 50% 40%,#1c1d26,#0b0b0f);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4vh}
+#ln[hidden]{display:none}#ln h2{margin:0;font-size:clamp(18px,4.5vh,30px);font-weight:700;color:#ddd}#ln .lr{display:flex;gap:min(6vw,60px);flex-wrap:wrap;justify-content:center}
+#ln button{border:0;background:none;color:#fff;display:flex;flex-direction:column;align-items:center;gap:1.6vh;font-size:clamp(16px,4vh,28px);font-weight:800;padding:0;cursor:pointer}
+#ln img{width:clamp(90px,34vh,240px);height:clamp(90px,34vh,240px);border-radius:22%;box-shadow:0 10px 30px #000a;transition:transform .15s}#ln button:active img{transform:scale(.94)}
 </style></head><body>
 <div id="nv"></div><div id="dv"></div><button id="nt" title="내비 숨김/보기">◀</button><div id="mw"><div id="top"><button id="logo" title="홈"><i></i><b>YouTube</b><sup>KR</sup></button><div id="sbx"><input id="sq" readonly inputmode="none" placeholder="검색"><button id="sgo" title="검색">🔍</button></div><button id="bk" title="노래방으로 전환"><img src="./icon_karaoke.png" alt="노래방"></button></div>
 <div id="home"><div id="chips"></div><div id="gs"><div id="gh"></div><div id="grid"></div><div id="gft"></div></div></div>
 <div id="watch" hidden><div id="wl"><div id="pw"><div id="yt"></div><div id="ytx" hidden>이 영상은 여기서 재생할 수 없어요<button id="wout">▶ YouTube에서 보기</button></div></div><div id="wi"><div class="tx"><b id="wt"></b><span class="ch" id="wc"></span><span class="vw" id="wv"></span></div><button id="wback">← 홈</button></div></div><div id="rel"></div></div>
-<div id="kw"></div>
+<div id="kw"></div><div id="ln"><h2>무엇을 할까요?</h2><div class="lr"><button id="lnY"><img src="./icon_youtube.png" alt="">유튜브</button><button id="lnK"><img src="./icon_karaoke.png" alt="">노래방</button></div></div>
 </div><div id="kb"><div id="kbP"><div id="kbT"><span id="kbS"></span><i></i></div><button onclick="kbClear()">지우기</button><button onclick="kbClose()">✕</button></div><div id="kbK" style="display:flex;flex-direction:column;gap:5px;flex:1"></div></div>
 <div id="toast"></div>
 <script>
@@ -157,7 +161,9 @@ function kbClose(){$('kb').classList.remove('on');if(KB.f){KB.f.classList.remove
 function kbClear(){KB.st={text:'',hist:[]};kbRender()}
 addEventListener('keydown',e=>{if(!$('kb').classList.contains('on'))return;if(e.key=='Enter')kbAct('go');else if(e.key=='Backspace')kbAct('bs');else if(e.key=='Escape')kbClose();else return;e.preventDefault()});
 
-chips();if(st.mode=='k')mode('k');homeFeed();
+chips();st.mode='y';homeFeed();
+// M4: 시작 런처 (자동재생 없음)
+$('lnY').onclick=()=>{$('ln').hidden=true;mode('y')};$('lnK').onclick=()=>{$('ln').hidden=true;mode('k')};
 </script><script>
 // ===== M3: 내비 사이드 패널 =====
 (function(){const LK='m3nav';let S={open:1,w:.45};try{Object.assign(S,JSON.parse(localStorage[LK]||'{}'))}catch(e){}
