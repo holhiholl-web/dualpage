@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b0d12">
-<title>아이카 위치 보내기</title>
+<title>P2 아이카 위치 보내기</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;background:#0b0d12;color:#f1f3f8;font-family:-apple-system,"Pretendard","Noto Sans KR",system-ui,sans-serif}
 main{max-width:520px;margin:0 auto;padding:22px 18px 40px;display:flex;flex-direction:column;gap:16px}
@@ -9,6 +9,7 @@ button{height:76px;border:0;border-radius:20px;font-size:26px;font-weight:800;co
 #st{font-size:30px;font-weight:800;text-align:center;padding:18px;border-radius:18px;background:#151821}#st.ok{color:#5dffa0}#st.err{color:#ff7b7b}
 .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:18px;background:#151821;border-radius:16px;padding:14px 16px}.kv b{color:#9aa3b5;font-weight:600}
 .warn{background:#2a1d0c;color:#ffd08a;border-radius:14px;padding:14px;font-size:17px;line-height:1.5}
+#blk{position:fixed;inset:0;z-index:9999;background:#000;display:none;cursor:none;touch-action:manipulation}#blk.on{display:block}#bt{position:absolute;color:#2a2a2a;font-size:14px;font-weight:500;letter-spacing:1px;white-space:nowrap;transition:left 3s,top 3s;user-select:none}
 </style></head><body><main>
 <h1>📱 아이카에 내 위치 보내기</h1>
 <p>차량 화면에 보이는 <b>6자리 코드</b>를 입력하고 시작을 누르세요.</p>
@@ -18,6 +19,7 @@ button{height:76px;border:0;border-radius:20px;font-size:26px;font-weight:800;co
 <div class="kv"><b>정확도</b><span id="acc">-</span><b>속도</b><span id="spd">-</span><b>보낸 횟수</b><span id="cnt">0</span><b>화면 켜짐 유지</b><span id="wl">-</span><b>마지막 전송</b><span id="last">-</span></div>
 <div class="warn">⚠️ 운전하는 동안 <b>이 화면을 켠 채로</b> 두세요. 다른 앱으로 가거나 화면이 꺼지면 위치 전송이 멈춥니다.<br>휴대폰 위치 권한을 <b>허용</b>해 주세요.</div>
 </main>
+<div id="blk"><span id="bt">GPS 수신중</span></div>
 <script>
 const W='https://dualpage-loc.holhiholl.workers.dev';const $=id=>document.getElementById(id);
 const qs=new URLSearchParams(location.search);const C=$('code');C.value=(qs.get('code')||localStorage.phcode||'').replace(/\D/g,'').slice(0,6);
@@ -37,5 +39,17 @@ function start(){const code=C.value.replace(/\D/g,'');if(!/^\d{6}$/.test(code)){
  TIMER=setInterval(()=>{send();if(LASTSENT)$('last').textContent=Math.round((Date.now()-LASTSENT)/1000)+'초 전'},1000)}
 function stop(){RUN=false;if(WID!=null)navigator.geolocation.clearWatch(WID);WID=null;clearInterval(TIMER);try{WL&&WL.release()}catch(e){}WL=null;$('go').textContent='▶ 위치 보내기 시작';$('go').className='';st('멈춤')}
 $('go').onclick=()=>RUN?stop():start();C.addEventListener('input',()=>{C.value=C.value.replace(/\D/g,'').slice(0,6)});
-window.__ph={start,stop,state:()=>({RUN,SENT,FAIL})};
+// ===== P2: 절전용 블랙 화면 =====
+const BLK=$('blk'),BT=$('bt'),TC=document.querySelector('meta[name=theme-color]');let IDLE=null,ARMED=false,MOVE=null;
+function mv(){const w=innerWidth,h=innerHeight;BT.style.left=Math.round(20+Math.random()*Math.max(0,w-140))+'px';BT.style.top=Math.round(40+Math.random()*Math.max(0,h-100))+'px'}
+function black(on){BLK.classList.toggle('on',on);TC.content=on?'#000000':'#0b0d12';clearInterval(MOVE);if(on){mv();MOVE=setInterval(mv,20000)}}
+function arm(ms){clearTimeout(IDLE);if(RUN&&ARMED)IDLE=setTimeout(()=>{if(RUN&&ARMED)black(true)},ms==null?3000:ms)}
+function touch(){if(BLK.classList.contains('on'))black(false);if(RUN&&!WL)wake();arm()}
+['pointerdown','touchstart','keydown'].forEach(ev=>document.addEventListener(ev,touch,{capture:true,passive:true}));
+const _st=st;st=function(t,c){_st(t,c);if(c==='ok'&&!ARMED&&RUN){ARMED=true;arm(3000)}if(c==='err'&&!/재시도/.test(t)){ARMED=false;clearTimeout(IDLE);black(false)}};
+const _stop=stop;stop=function(){ARMED=false;clearTimeout(IDLE);black(false);_stop()};
+// QR(?code=)로 열면 자동 시작 + 바로 블랙 화면
+if(/^\d{6}$/.test(qs.get('code')||'')&&C.value.length===6){ARMED=true;black(true);start();
+ if(navigator.permissions&&navigator.permissions.query)navigator.permissions.query({name:'geolocation'}).then(r=>{if(r.state==='denied'){ARMED=false;black(false)}}).catch(()=>{})}
+window.__ph={start,stop,state:()=>({RUN,SENT,FAIL,ARMED,black:BLK.classList.contains('on')})};
 </script></body></html>
