@@ -40,6 +40,6 @@
   const c=document.createElement('button');c.id='rlc';c.onclick=()=>relayModal(true);(document.getElementById('mapw')||document.body).appendChild(c);
   const m=document.createElement('div');m.id='rlm';m.hidden=true;m.innerHTML='<div id="rlb"><div id="rlqr"></div><div id="rlt"><h3>📱 휴대폰 GPS 연결</h3><p>이 기기에는 GPS가 없어요. 휴대폰 카메라로 QR을 찍거나<br>아래 주소에서 코드를 입력하세요.</p><div id="rlcode"></div><p id="rlurl"></p><div id="rlst"></div><button onclick="relayModal(false)">닫기</button><button onclick="RELAY.newCode()">새 코드</button></div></div>';m.onclick=e=>{if(e.target===m)relayModal(false)};document.body.appendChild(m);
   ui();R.start();setTimeout(()=>{if(!window.NOAUTOQR&&!fresh()&&!R.nativeOk&&!sessionStorage.rlShown){sessionStorage.rlShown=1;relayModal(true)}},4000);
-  if(NATIVE)try{NATIVE.getCurrentPosition(()=>{R.nativeOk=1},()=>{},{timeout:3500,maximumAge:600000})}catch(e){}}
+  if(NATIVE&&!window.NO_NATIVE_PROBE)try{NATIVE.getCurrentPosition(()=>{R.nativeOk=1},()=>{},{timeout:3500,maximumAge:600000})}catch(e){}}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
 })();
