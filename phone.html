@@ -1,37 +1,65 @@
 <!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b0d12">
-<title>P3 아이카 위치 보내기</title>
+<title>P4 아이카 위치 보내기</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;background:#0b0d12;color:#f1f3f8;font-family:-apple-system,"Pretendard","Noto Sans KR",system-ui,sans-serif}
-main{max-width:520px;margin:0 auto;padding:22px 18px 40px;display:flex;flex-direction:column;gap:16px}
-h1{font-size:26px;margin:4px 0}p{margin:0;color:#9aa3b5;font-size:17px;line-height:1.5}
-#code{width:100%;height:84px;font-size:46px;font-weight:800;letter-spacing:12px;text-align:center;border-radius:18px;border:2px solid #333a4a;background:#151821;color:#ffd84d;outline:none}#code:focus{border-color:#7b5cff}
-button{height:76px;border:0;border-radius:20px;font-size:26px;font-weight:800;color:#fff;background:linear-gradient(135deg,#ff3d7f,#7b5cff)}button.stop{background:#2a2d38;border:1px solid #444}
-#st{font-size:30px;font-weight:800;text-align:center;padding:18px;border-radius:18px;background:#151821}#st.ok{color:#5dffa0}#st.err{color:#ff7b7b}
+main{max-width:560px;margin:0 auto;padding:22px 18px 48px;display:flex;flex-direction:column;gap:16px}
+h1{font-size:26px;margin:4px 0}h2{font-size:20px;margin:0 0 8px}p{margin:0;color:#9aa3b5;font-size:17px;line-height:1.5}
+#code{width:100%;height:64px;font-size:22px;font-weight:800;letter-spacing:2px;text-align:center;border-radius:18px;border:2px solid #333a4a;background:#151821;color:#ffd84d;outline:none;text-transform:lowercase}#code:focus{border-color:#7b5cff}
+button{height:76px;border:0;border-radius:20px;font-size:24px;font-weight:800;color:#fff;background:linear-gradient(135deg,#ff3d7f,#7b5cff)}button.stop{background:#2a2d38;border:1px solid #444}
+button.sec{height:52px;font-size:16px;background:#2a2d38;border:1px solid #444}
+#st{font-size:26px;font-weight:800;text-align:center;padding:16px;border-radius:18px;background:#151821}#st.ok{color:#5dffa0}#st.err{color:#ff7b7b}
 .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:18px;background:#151821;border-radius:16px;padding:14px 16px}.kv b{color:#9aa3b5;font-weight:600}
-.warn{background:#2a1d0c;color:#ffd08a;border-radius:14px;padding:14px;font-size:17px;line-height:1.5}
+.warn{background:#2a1d0c;color:#ffd08a;border-radius:14px;padding:14px;font-size:16px;line-height:1.5}
+.card{background:#151821;border-radius:16px;padding:16px}.card ol{margin:8px 0 0 1.2rem;padding:0;color:#d7deea;font-size:16px;line-height:1.5}
+#gurl{font-family:ui-monospace,monospace;font-size:12px;word-break:break-all;background:#0b0d12;padding:10px;border-radius:10px;color:#d7deea;margin:8px 0}
 #blk{position:fixed;inset:0;z-index:9999;background:#000;display:none;cursor:none;touch-action:manipulation}#blk.on{display:block}#bt{position:absolute;color:#2a2a2a;font-size:14px;font-weight:500;letter-spacing:1px;white-space:nowrap;transition:left 3s,top 3s;user-select:none}
+a.dl{display:none;margin-top:10px;color:#9ecbff;font-weight:700}
 </style></head><body><main>
 <h1>📱 아이카에 내 위치 보내기</h1>
-<p>차량 화면에 보이는 <b>6자리 코드</b>를 입력하고 시작을 누르세요.</p>
-<input id="code" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="000000">
+<p>안드로이드 전용입니다. 아이폰은 지원하지 않습니다. 차량 QR을 찍거나 기기 아이디를 입력하세요. <b>한 번만 연결하면</b> 다음에 이 페이지를 열 때 자동으로 이어집니다.</p>
+<input id="code" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="32" placeholder="기기 아이디">
 <button id="go">▶ 위치 보내기 시작</button>
+<button id="forget" class="sec" type="button" hidden>이 기기 연결 해제</button>
 <div id="st">대기 중</div>
 <div class="kv"><b>정확도</b><span id="acc">-</span><b>속도</b><span id="spd">-</span><b>보낸 횟수</b><span id="cnt">0</span><b>화면 켜짐 유지</b><span id="wl">-</span><b>마지막 전송</b><span id="last">-</span></div>
-<div class="warn">⚠️ 운전하는 동안 <b>이 화면을 켠 채로</b> 두세요. 다른 앱으로 가거나 화면이 꺼지면 위치 전송이 멈춥니다.<br>휴대폰 위치 권한을 <b>허용</b>해 주세요.</div>
+<div class="warn">⚠️ 이 웹 방식은 운전하는 동안 <b>이 화면을 켠 채로</b> 두세요. 백그라운드 전송은 아래 GPSLogger(또는 아이카 GPS 앱)를 쓰세요.</div>
+<section class="card" id="appbox">
+<h2>앱으로 연결 (GPSLogger)</h2>
+<p>무료 안드로이드 앱 GPSLogger로 화면이 꺼져 있어도 위치를 보낼 수 있습니다. 차량 화면에 나온 주소를 붙여 넣거나, 연결된 뒤 아래 주소를 쓰세요.</p>
+<div id="gurl">기기 아이디를 연결하면 주소가 표시됩니다.</div>
+<button class="sec" type="button" id="gcopy">주소 복사</button>
+<ol>
+<li>Play 스토어에서 <b>GPSLogger</b>(무료)를 설치합니다.</li>
+<li><b>로그 기록 → Log to custom URL</b>(사용자 지정 URL로 기록)을 켭니다.</li>
+<li>URL에 위 주소를 <b>그대로</b> 붙여 넣습니다.</li>
+<li>HTTP 방법: <b>GET</b> · 기록 주기: <b>1초</b> · 거리: <b>0</b>.</li>
+<li>(선택) 부팅 시 자동 시작, 배터리 최적화에서 GPSLogger를 제외합니다.</li>
+</ol>
+<a class="dl" id="apk" href="./app/icar-gps.apk">아이카 GPS 앱 받기 (APK)</a>
+</section>
 </main>
 <div id="blk"><span id="bt">GPS 수신중</span></div>
 <script>
 const W='https://dualpage-loc.holhiholl.workers.dev';const $=id=>document.getElementById(id);
-const qs=new URLSearchParams(location.search);const C=$('code');C.value=(qs.get('code')||localStorage.phcode||'').replace(/\D/g,'').slice(0,6);
+const ID_LONG=/^[a-z0-9]{12,32}$/,ID_SHORT=/^\d{6}$/;
+const okId=s=>ID_SHORT.test(s)||ID_LONG.test(s);
+function normId(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,32)}
+const qs=new URLSearchParams(location.search);
+const C=$('code');
+C.value=normId(qs.get('id')||qs.get('code')||qs.get('dev')||localStorage.phdev||localStorage.phcode||'');
 let WID=null,LAST=null,SENT=0,TIMER=null,WL=null,RUN=false,FAIL=0,LASTSENT=0,SENDING=0;
 function st(t,c){$('st').textContent=t;$('st').className=c||''}
+function gUrl(id){return W+'/g/'+id+'?lat=%LAT&lon=%LON&spd=%SPD&dir=%DIR&acc=%ACC&t=%TIMESTAMP'}
+function showG(){const id=normId(C.value);const box=$('gurl');if(okId(id)&&ID_LONG.test(id))box.textContent=gUrl(id);else if(okId(id))box.textContent='이 코드는 임시 6자리입니다. 차량 QR(장기 아이디)로 다시 연결하세요.';else box.textContent='기기 아이디를 연결하면 주소가 표시됩니다.';}
+function remember(id){try{localStorage.phdev=id;if(ID_SHORT.test(id))localStorage.phcode=id}catch(e){}$('forget').hidden=false;showG()}
 async function wake(){try{if('wakeLock' in navigator){WL=await navigator.wakeLock.request('screen');$('wl').textContent='✅ 켜짐';WL.addEventListener('release',()=>{$('wl').textContent='꺼짐'})}else $('wl').textContent='지원 안 됨 (화면 자동꺼짐을 꺼 두세요)'}catch(e){$('wl').textContent='실패: '+e.message}}
 document.addEventListener('visibilitychange',()=>{if(RUN&&document.visibilityState==='visible')wake()});
 async function send(){if(!LAST||!RUN||SENDING)return;const p=LAST;if(p.sent)return;if(LASTSENT&&Date.now()-LASTSENT<400)return;p.sent=1;SENDING=1;
- try{const r=await fetch(W+'/loc?code='+C.value,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p.d)});if(!r.ok)throw new Error('HTTP '+r.status);SENT++;FAIL=0;LASTSENT=Date.now();$('cnt').textContent=SENT;st('✅ 전송 중','ok')}
+ const id=normId(C.value);
+ try{const r=await fetch(W+'/loc?id='+encodeURIComponent(id),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p.d)});if(!r.ok)throw new Error('HTTP '+r.status);SENT++;FAIL=0;LASTSENT=Date.now();$('cnt').textContent=SENT;st('✅ 전송 중','ok')}
  catch(e){FAIL++;p.sent=0;st('⚠️ 전송 실패 · 재시도 중 ('+e.message+')','err')}
  finally{SENDING=0;if(LAST&&!LAST.sent)setTimeout(send,400)}}
-function start(){const code=C.value.replace(/\D/g,'');if(!/^\d{6}$/.test(code)){st('코드 6자리를 입력하세요','err');C.focus();return}localStorage.phcode=code;C.blur();
+function start(){const id=normId(C.value);C.value=id;if(!okId(id)){st('차량에 보이는 기기 아이디를 입력하세요','err');C.focus();return}remember(id);C.blur();
  if(!navigator.geolocation){st('이 브라우저는 위치를 지원하지 않아요','err');return}
  RUN=true;$('go').textContent='■ 멈추기';$('go').className='stop';st('📡 GPS 잡는 중…');wake();
  WID=navigator.geolocation.watchPosition(p=>{const c=p.coords;LAST={d:{lat:c.latitude,lng:c.longitude,acc:c.accuracy,heading:(c.heading==null||isNaN(c.heading))?null:c.heading,speed:(c.speed==null||isNaN(c.speed))?null:c.speed,ts:p.timestamp||Date.now()}};
@@ -39,8 +67,11 @@ function start(){const code=C.value.replace(/\D/g,'');if(!/^\d{6}$/.test(code)){
   e=>{st(e.code==1?'❌ 위치 권한이 거부됐어요 — 설정에서 허용해 주세요':'⚠️ GPS 오류: '+e.message,'err')},{enableHighAccuracy:true,maximumAge:0,timeout:20000});
  TIMER=setInterval(()=>{send();if(LASTSENT)$('last').textContent=Math.round((Date.now()-LASTSENT)/1000)+'초 전'},1000)}
 function stop(){RUN=false;if(WID!=null)navigator.geolocation.clearWatch(WID);WID=null;clearInterval(TIMER);try{WL&&WL.release()}catch(e){}WL=null;$('go').textContent='▶ 위치 보내기 시작';$('go').className='';st('멈춤')}
-$('go').onclick=()=>RUN?stop():start();C.addEventListener('input',()=>{C.value=C.value.replace(/\D/g,'').slice(0,6)});
-// ===== P3: 매 GPS 즉시 전송 + 절전용 블랙 화면 =====
+$('go').onclick=()=>RUN?stop():start();
+C.addEventListener('input',()=>{C.value=normId(C.value);showG()});
+$('forget').onclick=()=>{try{localStorage.removeItem('phdev');localStorage.removeItem('phcode')}catch(e){}if(RUN)stop();C.value='';$('forget').hidden=true;showG();st('연결을 해제했습니다.')};
+$('gcopy').onclick=()=>{const t=$('gurl').textContent;try{navigator.clipboard.writeText(t)}catch(e){}st('주소를 복사했습니다.')};
+// P4: 자동 재연결 + 절전 블랙 화면
 const BLK=$('blk'),BT=$('bt'),TC=document.querySelector('meta[name=theme-color]');let IDLE=null,ARMED=false,MOVE=null;
 function mv(){const w=innerWidth,h=innerHeight;BT.style.left=Math.round(20+Math.random()*Math.max(0,w-140))+'px';BT.style.top=Math.round(40+Math.random()*Math.max(0,h-100))+'px'}
 function black(on){BLK.classList.toggle('on',on);TC.content=on?'#000000':'#0b0d12';clearInterval(MOVE);if(on){mv();MOVE=setInterval(mv,20000)}}
@@ -49,8 +80,10 @@ function touch(){if(BLK.classList.contains('on'))black(false);if(RUN&&!WL)wake()
 ['pointerdown','touchstart','keydown'].forEach(ev=>document.addEventListener(ev,touch,{capture:true,passive:true}));
 const _st=st;st=function(t,c){_st(t,c);if(c==='ok'&&!ARMED&&RUN){ARMED=true;arm(3000)}if(c==='err'&&!/재시도/.test(t)){ARMED=false;clearTimeout(IDLE);black(false)}};
 const _stop=stop;stop=function(){ARMED=false;clearTimeout(IDLE);black(false);_stop()};
-// QR(?code=)로 열면 자동 시작 + 바로 블랙 화면
-if(/^\d{6}$/.test(qs.get('code')||'')&&C.value.length===6){ARMED=true;black(true);start();
+showG();
+const auto=okId(normId(C.value));
+if(auto){$('forget').hidden=false;const fromQr=okId(normId(qs.get('id')||qs.get('code')||''));ARMED=!!fromQr;if(fromQr)black(true);start();
  if(navigator.permissions&&navigator.permissions.query)navigator.permissions.query({name:'geolocation'}).then(r=>{if(r.state==='denied'){ARMED=false;black(false)}}).catch(()=>{})}
-window.__ph={start,stop,state:()=>({RUN,SENT,FAIL,ARMED,black:BLK.classList.contains('on')})};
+fetch('./app/icar-gps.apk',{method:'HEAD'}).then(r=>{if(r.ok)$('apk').style.display='inline'}).catch(()=>{});
+window.__ph={start,stop,state:()=>({RUN,SENT,FAIL,ARMED,black:BLK.classList.contains('on'),id:normId(C.value)})};
 </script></body></html>
