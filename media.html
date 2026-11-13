@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>M4 아이카 미디어 · 유튜브 / 노래방</title>
+<title>M5 아이카 미디어 · 유튜브 / 노래방</title>
 <style>
 :root{--bg:#0f0f0f;--pn:#0f0f0f;--pn2:#272727;--ln:rgba(255,255,255,.1);--tx:#f1f1f1;--mu:#aaa;--ac:#ff3d7f;--ac2:#7b5cff;--r:12px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font-family:Roboto,"Noto Sans KR","Apple SD Gothic Neo",system-ui,sans-serif;overflow:hidden;user-select:none}
@@ -22,7 +22,12 @@ button{font-family:inherit;cursor:pointer;color:var(--tx)}[hidden]{display:none!
 #pw{position:relative;flex:1;min-height:0;background:#000;border-radius:12px;overflow:hidden}#pw iframe,#pw>#yt{position:absolute;inset:0;width:100%;height:100%;border:0}
 #ytx{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:#000d;font-size:20px;text-align:center;padding:20px}#ytx button{height:52px;padding:0 22px;border-radius:26px;border:0;background:#f00;font-size:18px;font-weight:700}
 #wi{flex:none;padding:8px 2px 0;display:flex;gap:10px;align-items:flex-start}#wi .tx{flex:1}#wt{font-size:18px!important;-webkit-line-clamp:1!important}#wback{flex:none;height:44px;padding:0 14px;border-radius:22px;border:0;background:var(--pn2);font-size:15px}
-#rel{width:min(380px,34vw);flex:none;overflow-y:auto;display:flex;flex-direction:column;gap:10px}.rc{display:flex;gap:8px;cursor:pointer}.rc .tw{width:150px;flex:none;border-radius:8px}.rc .tx b{font-size:14px}.rc .tx .ch,.rc .tx .vw{font-size:12px}
+#rel{width:min(380px,34vw);flex:none;overflow-y:auto;display:flex;flex-direction:column;gap:10px;min-width:0}.rc{display:flex;gap:8px;cursor:pointer}.rc .tw{width:150px;flex:none;border-radius:8px}.rc .tx b{font-size:14px}.rc .tx .ch,.rc .tx .vw{font-size:12px}
+#relFold{flex:none;width:36px;min-width:36px;height:96px;align-self:center;margin:0;padding:0;border:1px solid #444;border-radius:14px;background:rgba(30,30,36,.92);color:#fff;font-size:18px;box-shadow:0 2px 10px #0008;z-index:6}
+#relFold:active{transform:scale(.96)}
+body.rel-hid #rel{display:none!important}
+body.rel-hid #watch{gap:8px}
+@media (max-height:500px){#relFold{height:80px}}
 #kw{position:absolute;inset:0;display:none;background:#000}#kw iframe{width:100%;height:100%;border:0}body.mk #kw{display:block}body.mk #top,body.mk #home,body.mk #watch{visibility:hidden}
 #toast{position:fixed;z-index:2000;left:50%;bottom:20px;transform:translate(-50%,20px);opacity:0;transition:.25s;padding:12px 18px;border-radius:12px;background:#323232;font-size:16px;pointer-events:none;max-width:80vw}#toast.show{opacity:1;transform:translate(-50%,0)}
 #kb{position:fixed;z-index:1800;left:0;right:0;bottom:0;display:none;flex-direction:column;gap:5px;padding:6px;background:rgba(14,15,20,.98);border-top:1px solid var(--ln);box-shadow:0 -10px 30px #000a;height:max(52vh,272px)}#kb.on{display:flex}
@@ -43,7 +48,7 @@ body.nh #nv,body.nh #dv{display:none}body.dragging iframe{pointer-events:none}
 </style></head><body>
 <div id="nv"></div><div id="dv"></div><button id="nt" title="내비 숨김/보기">◀</button><div id="mw"><div id="top"><button id="logo" title="홈"><i></i><b>YouTube</b><sup>KR</sup></button><div id="sbx"><input id="sq" readonly inputmode="none" placeholder="검색"><button id="sgo" title="검색">🔍</button></div><button id="bk" title="노래방으로 전환"><img src="./icon_karaoke.png" alt="노래방"></button></div>
 <div id="home"><div id="chips"></div><div id="gs"><div id="gh"></div><div id="grid"></div><div id="gft"></div></div></div>
-<div id="watch" hidden><div id="wl"><div id="pw"><div id="yt"></div><div id="ytx" hidden>이 영상은 여기서 재생할 수 없어요<button id="wout">▶ YouTube에서 보기</button></div></div><div id="wi"><div class="tx"><b id="wt"></b><span class="ch" id="wc"></span><span class="vw" id="wv"></span></div><button id="wback">← 홈</button></div></div><div id="rel"></div></div>
+<div id="watch" hidden><div id="wl"><div id="pw"><div id="yt"></div><div id="ytx" hidden>이 영상은 여기서 재생할 수 없어요<button id="wout">▶ YouTube에서 보기</button></div></div><div id="wi"><div class="tx"><b id="wt"></b><span class="ch" id="wc"></span><span class="vw" id="wv"></span></div><button id="wback">← 홈</button></div></div><button type="button" id="relFold" aria-label="영상 목록 숨기기" aria-expanded="true">▶</button><div id="rel"></div></div>
 <div id="kw"></div><div id="ln"><h2>무엇을 할까요?</h2><div class="lr"><button id="lnY"><img src="./icon_youtube.png" alt="">유튜브</button><button id="lnK"><img src="./icon_karaoke.png" alt="">노래방</button></div></div>
 </div><div id="kb"><div id="kbP"><div id="kbT"><span id="kbS"></span><i></i></div><button onclick="kbClear()">지우기</button><button onclick="kbClose()">✕</button></div><div id="kbK" style="display:flex;flex-direction:column;gap:5px;flex:1"></div></div>
 <div id="toast"></div>
@@ -121,9 +126,12 @@ function doSearch(){const q=$('sq').value.trim();if(!q)return homeFeed();feed(q)
 let YP=null,YR=false,PEND=null,CUR=null;
 function onYouTubeIframeAPIReady(){YP=new YT.Player('yt',{width:'100%',height:'100%',playerVars:{autoplay:1,playsinline:1,rel:0,modestbranding:1},events:{onReady:()=>{YR=true;if(PEND){const p=PEND;PEND=null;YP.loadVideoById(p)}},onError:e=>{toast('이 영상은 여기서 재생할 수 없어요 — YouTube 앱에서 보세요');$('ytx').hidden=false}}})}
 function loadAPI(){if(window.YT&&YT.Player)return;if(document.getElementById('yts'))return;const s=document.createElement('script');s.id='yts';s.src='https://www.youtube.com/iframe_api';document.head.appendChild(s)}
+function sizeYT(){const pw=$('pw');if(!pw)return;const b=pw.getBoundingClientRect();if(YP&&YR&&b.width>0&&b.height>0){try{YP.setSize(Math.round(b.width),Math.round(b.height))}catch(e){}}}
+function applyRelFold(){document.body.classList.toggle('rel-hid',!!st.relHid);const b=$('relFold');if(b){b.setAttribute('aria-expanded',st.relHid?'false':'true');b.setAttribute('aria-label',st.relHid?'영상 목록 열기':'영상 목록 숨기기');b.textContent=st.relHid?'◀':'▶'}requestAnimationFrame(()=>{sizeYT();setTimeout(sizeYT,200)})}
+function toggleRelFold(){st.relHid=!st.relHid;sv();applyRelFold()}
 function showHome(){$('home').hidden=false;$('watch').hidden=true;pauseYT()}
 function pauseYT(){try{YP&&YR&&YP.pauseVideo()}catch(e){}}
-async function watch(x){CUR=x;$('home').hidden=true;$('watch').hidden=false;$('ytx').hidden=true;$('wt').textContent=x.t;$('wc').textContent=x.c;$('wv').textContent=[fmtV(x.v)?'조회수 '+fmtV(x.v):'',x.up].filter(Boolean).join(' · ');
+async function watch(x){CUR=x;$('home').hidden=true;$('watch').hidden=false;$('ytx').hidden=true;applyRelFold();$('wt').textContent=x.t;$('wc').textContent=x.c;$('wv').textContent=[fmtV(x.v)?'조회수 '+fmtV(x.v):'',x.up].filter(Boolean).join(' · ');
  $('wout').onclick=()=>{try{window.open('https://www.youtube.com/watch?v='+x.id,'_blank')}catch(e){}};
  loadAPI();if(YR)YP.loadVideoById(x.id);else PEND=x.id;window.__played=(window.__played||[]).concat(x.id);
  const rl=$('rel');rl.innerHTML='<div class="spin"></div>';const r=await related(x.id);if(CUR!==x)return;rl.innerHTML='';
@@ -161,8 +169,9 @@ function kbClose(){$('kb').classList.remove('on');if(KB.f){KB.f.classList.remove
 function kbClear(){KB.st={text:'',hist:[]};kbRender()}
 addEventListener('keydown',e=>{if(!$('kb').classList.contains('on'))return;if(e.key=='Enter')kbAct('go');else if(e.key=='Backspace')kbAct('bs');else if(e.key=='Escape')kbClose();else return;e.preventDefault()});
 
-chips();st.mode='y';homeFeed();
-// M4: 시작 런처 (자동재생 없음)
+$('relFold').onclick=toggleRelFold;addEventListener('resize',sizeYT);addEventListener('m3resize',sizeYT);
+chips();st.mode='y';homeFeed();applyRelFold();
+// M5: 시작 런처 (자동재생 없음) · 관련 영상 목록 접기
 $('lnY').onclick=()=>{$('ln').hidden=true;mode('y')};$('lnK').onclick=()=>{$('ln').hidden=true;mode('k')};
 </script><script>
 // ===== M3: 내비 사이드 패널 =====
