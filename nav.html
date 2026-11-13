@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>N5 아이카 내비</title>
+<title>N6 아이카 내비</title>
 <style>
 :root{--bg:#0b0d10;--pn:rgba(20,23,28,.94);--pn2:#1f242c;--ln:rgba(255,255,255,.1);--tx:#eef1f5;--mu:#97a0ae;--ac:#3d7bff;--ok:#16a865;--gr:#0f9d58;--rd:#ff4757;--or:#ff9f1a;--r:.8rem;--bbh:clamp(2.9rem,12vh,4.2rem);--spd:clamp(2.6rem,11vw,4.2rem)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -189,7 +189,7 @@ body.hiddenNav *{animation:none!important}
 <div id="toast" class="glass" role="alert"><div class="tx" id="toastT"></div><div id="toastB" style="display:flex;gap:.35rem"></div></div>
 <div id="cf" role="alertdialog" aria-modal="true"><div class="box glass"><p id="cfT"></p><button class="btn" id="cfN">취소</button><button class="btn dan" id="cfY">확인</button></div></div>
 <div id="arr" class="glass" role="alertdialog"><div style="font-size:2.6rem">🏁</div><h3 id="arrT">목적지에 도착했습니다</h3><button class="btn pri" id="arrOk">안내 종료</button></div>
-<div id="ver">N5</div>
+<div id="ver">N6</div>
 <script>
 const HG=(()=>{const CHO='ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ',JUNG='ㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ',JONG=' ㄱㄲㄳㄴㄵㄶㄷㄹㄺㄻㄼㄽㄾㄿㅀㅁㅂㅄㅅㅆㅇㅈㅊㅋㅌㅍㅎ';
  const VC={'ㅗㅏ':'ㅘ','ㅗㅐ':'ㅙ','ㅗㅣ':'ㅚ','ㅜㅓ':'ㅝ','ㅜㅔ':'ㅞ','ㅜㅣ':'ㅟ','ㅡㅣ':'ㅢ'};
@@ -315,6 +315,13 @@ class BaseMap {
   constructor() { this.bearing = 0; this.pitch = 0; this.zoom = ST.zoom || 16; this.center = { lat: 37.5547, lon: 126.9707 }; this.rot = false; }
   onGesture(cb) { const mw = $('mapw'); let sx = 0, sy = 0, down = false; mw.addEventListener('pointerdown', e => { down = true; sx = e.clientX; sy = e.clientY; }, true); mw.addEventListener('pointermove', e => { if (down && Math.hypot(e.clientX - sx, e.clientY - sy) > 10) { down = false; cb('drag'); } }, true); addEventListener('pointerup', () => down = false, true); mw.addEventListener('wheel', () => cb('wheel'), { passive: true, capture: true }); }
   cssXform() { const mi = $('mi'); if (!this.rot) { mi.style.transform = ''; return; } mi.style.transform = (this.pitch ? 'perspective(' + Math.round(innerHeight * 1.6) + 'px) rotateX(' + this.pitch + 'deg) ' : '') + 'rotate(' + (-this.bearing) + 'deg)'; }
+  softCenter(des, force) {
+    if (!des) return true;
+    const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    const jumped = !this.center || C.dist(this.center, des) > 8;
+    if (force || jumped || !this._cenAt || now - this._cenAt > 80) { this.center = des; this._cenAt = now; return true; }
+    return false;
+  }
 }
 class RasterMap extends BaseMap {
   constructor() { super(); this.name = 'TMAP 래스터(JS v2)'; this.real = true; this.caps = { bearing: 'css', pitch: 'css', satellite: true, night: 'css' }; this.lines = []; this.marks = new Map(); }
@@ -324,8 +331,10 @@ class RasterMap extends BaseMap {
     document.body.classList.add('cssnight'); return this;
   }
   ll(p) { return new Tmapv2.LatLng(p.lat, p.lon); }
-  setView(v) { const needRot = !!(v.bearing || v.pitch); if (needRot !== this.rot) { this.rot = needRot; const b = rotBox(needRot); try { this.m.resize(b.w, b.h); } catch (e) { } } this.bearing = v.bearing || 0; this.pitch = v.pitch || 0; this.cssXform();
-    if (C.isNum(v.zoom) && v.zoom !== this.zoom) { this.zoom = v.zoom; this.m.setZoom(v.zoom); } if (v.center) { this.center = v.center; this.m.setCenter(this.ll(v.center)); } }
+  setView(v) { const needRot = !!(v.bearing || v.pitch); if (needRot !== this.rot) { this.rot = needRot; const b = rotBox(needRot); try { this.m.resize(b.w, b.h); } catch (e) { } } this.bearing = v.bearing || 0; this.pitch = v.pitch || 0;
+    if (C.isNum(v.zoom) && v.zoom !== this.zoom) { this.zoom = v.zoom; this.m.setZoom(v.zoom); }
+    if (v.center && this.softCenter(v.center, v.force)) { try { this.m.setCenter(this.ll(v.center)); } catch (e) { } }
+    this.cssXform(); }
   getCenter() { try { const c = this.m.getCenter(); return { lat: c.lat(), lon: c.lng() }; } catch (e) { return this.center; } }
   getZoom() { try { return this.m.getZoom(); } catch (e) { return this.zoom; } }
   zoomBy(d) { this.zoom = Math.max(7, Math.min(19, this.getZoom() + d)); this.m.setZoom(this.zoom); return this.zoom; }
@@ -348,7 +357,7 @@ class VectorMap extends BaseMap {
     document.body.classList.remove('cssnight'); return this;
   }
   ll(p) { return new Tmapv3.LatLng(p.lat, p.lon); }
-  setView(v) { try { if (C.isNum(v.bearing) && Math.abs(C.angDiff(this.bearing, v.bearing)) > .5) { this.bearing = v.bearing; this.m.setBearing(v.bearing); } if (C.isNum(v.pitch) && v.pitch !== this.pitch) { this.pitch = v.pitch; this.m.setPitch(v.pitch); } if (C.isNum(v.zoom) && v.zoom !== this.zoom) { this.zoom = v.zoom; this.m.setZoom(v.zoom); } if (v.center) { this.center = v.center; this.m.setCenter(this.ll(v.center)); } } catch (e) { } }
+  setView(v) { try { if (C.isNum(v.bearing) && (v.force || Math.abs(C.angDiff(this.bearing, v.bearing)) > .12)) { this.bearing = v.bearing; this.m.setBearing(v.bearing); } if (C.isNum(v.pitch) && v.pitch !== this.pitch) { this.pitch = v.pitch; this.m.setPitch(v.pitch); } if (C.isNum(v.zoom) && v.zoom !== this.zoom) { this.zoom = v.zoom; this.m.setZoom(v.zoom); } if (v.center) { this.center = v.center; this.m.setCenter(this.ll(v.center)); } } catch (e) { } }
   getCenter() { try { const c = this.m.getCenter(); return { lat: c.lat(), lon: c.lng() }; } catch (e) { return this.center; } }
   getZoom() { try { return this.m.getZoom(); } catch (e) { return this.zoom; } }
   zoomBy(d) { this.zoom = Math.max(7, Math.min(19, this.getZoom() + d)); this.m.setZoom(this.zoom); return this.zoom; }
@@ -454,21 +463,54 @@ setInterval(() => {
   if (age > (S.guide ? 6000 : 12000) && S.gps !== 'lost') { setGps('lost'); log('GPS 신호 끊김'); if (S.guide && S.nav === 'driving') speak(S.inTunnel ? '터널 구간입니다. GPS 신호가 약합니다.' : 'GPS 신호가 끊겼습니다.'); }
   if (S.gps === 'lost' && S.guide && S.nav === 'driving' && age < 40000) { const v = (S.fix.speed || 10); const along = S.guide.along + v; const p = C.pointAt(S.route.path, S.route.cum, along); S.est = true; S.estPos = { lat: p.lat, lon: p.lon, heading: p.bearing }; S.guide.along = along; tickGuide(S.estPos); camera(); gpsBanner(); }
 }, 1000);
-// ---------- 카메라 ----------
-let lastCam = 0;
+// ---------- 카메라 (rAF 보간, GPS 주기와 분리) ----------
+S.smoother = S.smoother || new C.ViewSmoother();
+function isGuiding() { return !!S.guide && ['driving', 'paused', 'rerouting', 'viaArrived', 'starting'].includes(S.nav); }
+function targetPose() {
+  const p = S.est && S.estPos ? S.estPos : S.fix; if (!p) return null;
+  const guiding = isGuiding();
+  if (guiding && S.gu) {
+    const v = C.guideVisualTarget(S.gu, p, S.smoother.bearing);
+    if (!v) return null;
+    v.along = S.gu.along; v.route = S.route; v.ts = C.isNum(p.ts) ? p.ts : (S.smoother.fixTs || Date.now());
+    S.snapPos = v.onRoute ? { lat: v.lat, lon: v.lon } : null;
+    S.snapHead = v.onRoute ? v.bearing : null;
+    S.onRoute = v.onRoute;
+    return v;
+  }
+  return { lat: p.lat, lon: p.lon, bearing: p.heading, onRoute: false, speed: p.speed || 0, ts: p.ts || Date.now() };
+}
 function camera(force) {
-  const m = S.map; if (!m || window.NAVHIDDEN) return; const now = Date.now(); if (!force && now - lastCam < 90) return; lastCam = now;
-  const p = S.est && S.estPos ? S.estPos : S.fix; const guiding = !!S.guide && ['driving', 'paused', 'rerouting', 'viaArrived', 'starting'].includes(S.nav);
-  const mode = guiding ? ST.dirGuide : ST.dirFree; const head = p ? (S.est ? S.estPos.heading : (S.snapHead != null && guiding ? S.snapHead : p.heading)) : 0;
-  const pos = (guiding && S.snapPos) || p;
-  if (p) m.setCar({ lat: pos.lat, lon: pos.lon, heading: head || 0, est: S.est });
-  $('bDir').innerHTML = (mode === 'heading' ? '▲<small>진행</small>' : '<span style="display:inline-block;transform:rotate(' + (-S.bearing) + 'deg)">N</span><small>북쪽</small>');
-  if (!S.follow || !p) return;
-  const target = mode === 'heading' && C.isNum(head) ? head : 0; S.bearing = mode === 'heading' ? C.lerpAng(S.bearing, target, force ? 1 : 0.5) : 0;
-  const pitch = mode === 'heading' && guiding ? (m.caps.pitch === 'sdk' ? 50 : 38) : 0; const zoom = (S.zoomLock != null) ? S.zoomLock : (guiding ? (S.fix && S.fix.speed > 22 ? 16 : 17) : (m.getZoom() || ST.zoom || 16));
+  if (!S.map || window.NAVHIDDEN) return;
+  const tgt = targetPose();
+  if (tgt) { if (force) S.smoother.jump(tgt, Date.now()); else S.smoother.setTarget(tgt, Date.now()); }
+  applyCamera(!!force);
+  startCamLoop();
+}
+function startCamLoop() {
+  if (S.camRaf) return;
+  const loop = () => { S.camRaf = requestAnimationFrame(loop); if (!S.map || window.NAVHIDDEN) return; applyCamera(false); };
+  S.camRaf = requestAnimationFrame(loop);
+}
+function stopCamLoop() { if (S.camRaf) { cancelAnimationFrame(S.camRaf); S.camRaf = 0; } }
+function applyCamera(force) {
+  const m = S.map; if (!m || window.NAVHIDDEN) return;
+  const tgt = targetPose(); if (tgt) S.smoother.setTarget(tgt, Date.now());
+  const vis = S.smoother.sample(Date.now()); if (!vis) return;
+  const guiding = isGuiding();
+  const mode = guiding ? ST.dirGuide : ST.dirFree;
+  m.setCar({ lat: vis.lat, lon: vis.lon, heading: vis.bearing || 0, est: S.est });
+  if (mode === 'heading') S.bearing = vis.bearing;
+  else if (force) S.bearing = 0;
+  if (force || S._dirMode !== mode) { S._dirMode = mode; $('bDir').innerHTML = (mode === 'heading' ? '▲<small>진행</small>' : '<span style="display:inline-block;transform:rotate(' + (-S.bearing) + 'deg)">N</span><small>북쪽</small>'); }
+  if (!S.follow) return;
+  const pitch = mode === 'heading' && guiding ? (m.caps.pitch === 'sdk' ? 50 : 38) : 0;
+  const zoom = (S.zoomLock != null) ? S.zoomLock : (guiding ? (S.fix && S.fix.speed > 22 ? 16 : 17) : (m.getZoom() || ST.zoom || 16));
+  const pos = { lat: vis.lat, lon: vis.lon };
   let center = pos;
   if (mode === 'heading') { const k = innerHeight * (guiding ? 0.24 : 0.12) * C.mpp(pos.lat, zoom) * (m.caps.pitch === 'sdk' ? 0.55 : 0.8); center = C.offset(pos, S.bearing, k); }
-  m.setView({ center, bearing: S.bearing, pitch, zoom });
+  else S.bearing = 0;
+  m.setView({ center, bearing: S.bearing, pitch, zoom, force: !!force });
 }
 let freeT = null;
 function onMapGesture() { if (!S.fix) return; if (S.overview) setOverview(false); if (S.follow) { S.follow = false; document.body.classList.add('free'); if (S.map.rot) S.map.setView({ bearing: 0, pitch: 0 }); log('사용자 지도 이동 → 따라가기 중지'); } clearTimeout(freeT); if (S.guide && !S.overview) freeT = setTimeout(recenter, 12000); }
@@ -478,7 +520,7 @@ function tickGuide(estPos) {
   if (!S.guide || !['driving', 'viaArrived', 'rerouting'].includes(S.nav)) { S.snapPos = null; S.snapHead = null; return; }
   const p = estPos || S.fix; if (!p) return; const speed = S.fix && S.fix.speed;
   const u = S.guide.update(p, speed); if (!u) return; S.gu = u; S.inTunnel = u.inTunnel || !!(S.demoTunnel && u.along >= S.demoTunnel.from && u.along <= S.demoTunnel.to);
-  S.snapPos = u.off < 25 ? u.snapped : null; S.snapHead = u.off < 25 && (speed == null || speed > 1) ? u.segBearing : null;
+  const pose = C.guideVisualTarget(u, p, S.smoother && S.smoother.bearing); S.snapPos = pose && pose.onRoute ? u.snapped : null; S.snapHead = pose && pose.onRoute ? pose.bearing : null; S.onRoute = !!(pose && pose.onRoute);
   if (!estPos && S.nav === 'driving' && S.off.update(u.off, S.fix.acc, Date.now())) { reroute('이탈'); }
   if (u.viaArrived && S.nav === 'driving') { setNav('viaArrived'); speak('경유지에 도착했습니다.'); log('경유지 통과'); S.via = S.via.slice(1); setTimeout(() => { if (S.nav === 'viaArrived') setNav('driving'); }, 3000); }
   if (u.arrived && (S.nav === 'driving' || S.nav === 'viaArrived')) { arrive(); return; }
@@ -531,7 +573,7 @@ function arrowSvg(kind, tt) {
 function laneOn(n) { const k = n ? n.info.kind : 'right'; const lanes = k.includes('left') ? ['left', 'straight', 'straight', 'straight'] : k.includes('right') ? ['straight', 'straight', 'straight', 'right'] : ['left', 'straight', 'straight', 'right']; const hl = k.includes('left') ? 0 : k.includes('right') ? 3 : 1; const el = $('lanes'); el.innerHTML = lanes.map((l, i) => '<div class="ln' + (i === hl ? ' hl' : '') + '">' + arrowSvg(l) + '</div>').join('') + '<span class="tag demo" style="margin-left:.4rem">차로 데모</span>'; el.classList.add('on'); S.laneFor = n && n.at; }
 function laneOff() { $('lanes').classList.remove('on'); S.laneFor = null; }
 async function reroute(why) {
-  if (Date.now() - S.rerouteAt < 10000 || !S.fix) return; S.rerouteAt = Date.now(); if (!setNav('rerouting')) return; S.off.reset(); speak('경로를 이탈하여 재탐색합니다.'); log('재탐색 시작(' + why + ')');
+  if (Date.now() - S.rerouteAt < 4000 || !S.fix) return; S.rerouteAt = Date.now(); if (!setNav('rerouting')) return; S.off.reset(); if (S.smoother) S.smoother.onRoute = false; toast('경로 재탐색', '이탈을 감지해 새 경로를 찾습니다.', null, false, 4000); speak('경로를 이탈하여 재탐색합니다.'); log('재탐색 시작(' + why + ')');
   try { const r = await API().route(S.fix, S.to.entrance || S.to, S.via, S.route.option, { angle: S.fix.heading, chan: 'rr' }); S.route = r; S.guide = new C.Guidance(r); S.alerts.clear(); redraw(); if (S.sim) { S.sim.along = 0; S.sim.latUntil = 0; } if (S.nav === 'rerouting') setNav('driving'); speak('새 경로로 안내합니다.'); log('재탐색 완료: ' + C.fmtDist(r.distance) + (r.demo ? ' (데모)' : ' (TMAP)'), r.demo); }
   catch (e) { if (S.nav === 'rerouting') setNav('driving'); if (e.code !== 'ABORTED') errToast({ code: 'REROUTE_FAIL' }, () => { S.rerouteAt = 0; reroute('다시 시도'); }); log('재탐색 실패: ' + (e.code || e.message)); }
 }
@@ -657,7 +699,7 @@ function startGuide(sim) {
   if (!sim && !S.fix) { requestNative(); toast('현재 위치를 아직 받지 못했습니다.', '휴대폰 GPS를 연결하거나 모의 주행으로 확인하세요.', [['폰 GPS 연결', () => window.relayModal && relayModal(true), 'pri'], ['모의 주행', () => startGuide(true)]], true, 0); return; }
   if (!sim) requestNative();
   if (!setNav('starting')) forceNav('starting');
-  S.route = r; S.guide = new C.Guidance(r); S.off.reset(); S.alerts.clear(); S.jam = null; S.demoTunnel = null; S.rerouteAt = 0; laneOff(); hideToast();
+  S.route = r; S.guide = new C.Guidance(r); S.off.reset(); if (S.smoother) S.smoother.reset(); S.alerts.clear(); S.jam = null; S.demoTunnel = null; S.rerouteAt = 0; laneOff(); hideToast();
   document.body.classList.remove('rp', 'sp', 'kb'); S.follow = true; document.body.classList.remove('free'); setOverview(false);
   setNav('driving'); redraw(); log('안내 시작' + (sim ? ' (모의 주행)' : '') + ' · ' + C.fmtDist(r.distance), sim || r.demo);
   speak((sim ? '모의 주행을 시작합니다. ' : '') + '경로 안내를 시작합니다. 총 ' + C.fmtDistSpeech(r.distance) + ', ' + C.fmtDur(r.time) + ' 걸립니다.');
@@ -665,7 +707,7 @@ function startGuide(sim) {
   hud();
 }
 function stopGuide(silent) {
-  if (S.sim) simStop(); S.guide = null; S.route = null; S.gu = null; S.alerts.clear(); S.jam = null; laneOff(); $('arr').classList.remove('on'); document.body.classList.remove('free'); S.follow = true; S.snapPos = null; S.snapHead = null; setOverview(false);
+  if (S.sim) simStop(); S.guide = null; S.route = null; S.gu = null; S.alerts.clear(); S.jam = null; laneOff(); $('arr').classList.remove('on'); document.body.classList.remove('free'); S.follow = true; S.snapPos = null; S.snapHead = null; if (S.smoother) S.smoother.reset(); setOverview(false);
   forceNav('ended'); log('안내 종료'); if (!silent) speak('안내를 종료합니다.'); S.routes = []; S.to = null; S.via = []; S.from = null; S.poiMarks = null;
   $('alerts').innerHTML = ''; $('lim').style.display = 'none'; $('bPause').textContent = '⏸';
   if (S.fix && S.fix.source === 'sim') { S.fix = null; S.filter.reset(); setGps(S.nativeWatch !== null ? 'wait' : 'none'); S.map && S.map.setCar(null); }
@@ -683,10 +725,16 @@ function simTick() {
   if (!s.playing || S.nav === 'paused' || S.nav === 'arrived') return;
   s.along = Math.min(S.route.length, s.along + s.v * s.mult * dt);
   const p = C.pointAt(S.route.path, S.route.cum, s.along); let pos = { lat: p.lat, lon: p.lon };
-  if (now < s.latUntil) { if (!isFinite(s.latBear)) s.latBear = isFinite(p.bearing) ? p.bearing : 0; pos = C.offset(pos, s.latBear + 90, s.lat * Math.min(1, (now - (s.latStart || 0)) / 2500)); } // 경로 밖으로 서서히 이탈
+  if (now < s.latUntil) { if (s.latBear == null || !isFinite(s.latBear)) s.latBear = (p.bearing != null && isFinite(p.bearing)) ? p.bearing : 0; pos = C.offset(pos, s.latBear + 90, s.lat * Math.min(1, (now - (s.latStart || 0)) / 2500)); } // 경로 밖으로 서서히 이탈 (도로 수직, latBear=null은 동쪽으로 잘못 오프셋되던 버그 수정)
+  let heading = now < s.latUntil ? null : p.bearing;
+  if (s.jitter && now >= (s.latUntil || 0)) {
+    const sec = now / 1000;
+    if (s.jitter.pos) pos = C.offset(pos, (p.bearing || 0) + 90, Math.sin(sec * 2.1) * s.jitter.pos);
+    if (s.jitter.head && heading != null) heading = C.normDeg(heading + Math.sin(sec * 3.7) * s.jitter.head);
+  }
   const inT = S.route.tunnels.some(t => s.along >= t.from && s.along <= t.to) || (S.demoTunnel && s.along >= S.demoTunnel.from && s.along <= S.demoTunnel.to);
   if (now < s.drop || inT) return; // GPS 수신 없음(시뮬레이션)
-  onFix({ lat: pos.lat, lon: pos.lon, acc: 8, speed: s.v * s.mult, heading: now < s.latUntil ? null : p.bearing, ts: now }, 'sim');
+  onFix({ lat: pos.lat, lon: pos.lon, acc: s.jitter ? 12 : 8, speed: s.v * s.mult, heading: heading, ts: now }, 'sim');
 }
 function simPlay(on) { if (!S.sim) return; S.sim.playing = on === undefined ? !S.sim.playing : on; S.sim.last = Date.now(); simUI(); log(S.sim.playing ? '모의 주행 재생' : '모의 주행 일시정지', true); }
 function simJump(along) { const s = S.sim; s.along = Math.max(0, Math.min(S.route.length - 1, along)); S.guide = new C.Guidance(S.route); S.guide.along = s.along; S.guide.hint = C.pointAt(S.route.path, S.route.cum, s.along).idx; S.filter.reset(); S.off.reset(); s.last = Date.now(); s.drop = 0; simTick(); }
@@ -733,7 +781,7 @@ function featTable() { const m = S.map, real = S.src === 'real'; const rows = [
   ['장소 검색·주소', real ? '실제 · TMAP POI/Geocoding(프록시)' : '데모 검색'], ['자동차 경로·후보', real ? '실제 · TMAP 경로 API(추천/무료/최단 등)' : '데모 경로'], ['통행료', real ? '실제 · totalFare' : '데모'], ['유류비', '미제공(API 응답 없음)'],
   ['실시간 교통 구간', real ? 'trafficInfo=Y 요청 · 응답에 있을 때만 표시' : '데모(정체 이벤트)'], ['턴바이턴 안내', real ? '실제 · turnType/description' : '데모 경로 기반'], ['터널 구간', real ? '실제 · facilityType=2' : '데모'],
   ['제한속도·사고다발·급커브', real ? '실제 · turnType 191~194 (있을 때만)' : '-'], ['차로 안내', '데모만 (웹 API 미제공)'], ['과속단속 카메라', '데모만 (웹 API 미제공)'], ['사고/공사 제보', '데모만 (전송 안 함)'],
-  ['GPS·속도', '휴대폰 중계(1순위) + 브라우저 위치(사용자 요청 시)'], ['맵매칭', '경로 위 투영(웹 자체 구현)'], ['재탐색', real ? '실제 · 이탈 3회·4초 판정 후 TMAP 재요청' : '데모 경로 재생성'], ['음성 안내', VOICE.ok ? '브라우저 한국어 음성 합성' : '미지원 → 텍스트'], ['백그라운드 추적', '미지원 (화면이 켜져 있어야 함)']];
+  ['GPS·속도', '휴대폰 중계(1순위) + 브라우저 위치(사용자 요청 시)'], ['맵매칭', '경로 위 투영(웹 자체 구현)'], ['재탐색', real ? '실제 · 이탈 2회·2초 판정 후 TMAP 재요청' : '데모 경로 재생성'], ['음성 안내', VOICE.ok ? '브라우저 한국어 음성 합성' : '미지원 → 텍스트'], ['백그라운드 추적', '미지원 (화면이 켜져 있어야 함)']];
   return '<table class="fa"><tr><th>기능</th><th>현재 상태</th></tr>' + rows.map(r => '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td></tr>').join('') + '</table>'; }
 async function aroundSearch(cat) { closeAll(); const p = S.fix || (S.map && S.map.getCenter()); if (!p) return; try { const res = await API().around(cat, p); S.poiMarks = res; redraw(); if (!res.length) return toast(cat + ' 검색 결과가 없습니다.'); openSearch('to'); kbClose(); const R = $('spR'); R.innerHTML = '<div class="msg" style="padding:.4rem .3rem">' + (S.src === 'demo' ? '<span class="tag demo">데모</span> ' : '<span class="tag real">TMAP</span> ') + '주변 ' + esc(cat) + ' ' + res.length + '건</div>'; res.forEach(x => R.appendChild(resRow(x))); } catch (e) { errToast(e, () => aroundSearch(cat)); } }
 function closeAll() { document.querySelectorAll('.sheet').forEach(x => x.classList.remove('on')); }
@@ -771,7 +819,7 @@ addEventListener('keydown', e => { if (e.key === 'Escape') { if ($('cf').classLi
 function ui() { const g = !!S.guide; document.body.classList.toggle('guiding', g); $('home').style.display = g || document.body.classList.contains('sp') || document.body.classList.contains('rp') ? 'none' : 'flex'; $('bDir').setAttribute('aria-label', '지도 방향: ' + ((g ? ST.dirGuide : ST.dirFree) === 'heading' ? '진행방향 위' : '북쪽 위')); }
 // ---------- 임베드(media.html) API: ?embed=1&hidden=1, 메시지 navShown / navHidden / resize ----------
 function shown() { document.body.classList.remove('hiddenNav'); initMap().then(() => { scale(); camera(true); redraw(); }); }
-if (window.NAVEMBED) addEventListener('message', e => { const d = e.data || {}; if (d.type === 'navHidden') { window.NAVHIDDEN = 1; document.body.classList.add('hiddenNav'); try { relayModal(false); } catch (x) { } hideToast(); gpsBanner(); }
+if (window.NAVEMBED) addEventListener('message', e => { const d = e.data || {}; if (d.type === 'navHidden') { window.NAVHIDDEN = 1; document.body.classList.add('hiddenNav'); try { stopCamLoop(); } catch (x) { } try { relayModal(false); } catch (x) { } hideToast(); gpsBanner(); }
   else if (d.type === 'navShown') { window.NAVHIDDEN = 0; shown(); clearTimeout(window.__qrT); window.__qrT = setTimeout(() => { const R = window.RELAY; const ok = R && R.last && Date.now() - R.lastRx < 20000; if (!window.NAVHIDDEN && !ok && !S.sim) relayModal(true); }, d.wait == null ? 2500 : d.wait); gpsBanner(); }
   else if (d.type === 'resize') { scale(); camera(true); } });
 window.addEventListener('error', e => { LOG.push({ t: Date.now(), text: 'JS오류: ' + C.redact(e.message, [S.jsKey]) }); });

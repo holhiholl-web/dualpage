@@ -240,7 +240,7 @@
   }
   // ---------- 경로 이탈 판정 ----------
   class OffRoute {
-    constructor(o) { o = o || {}; this.minDist = o.minDist || 35; this.count = o.count || 3; this.minMs = o.minMs || 4000; this.reset(); }
+    constructor(o) { o = o || {}; this.minDist = o.minDist || 32; this.count = o.count || 2; this.minMs = o.minMs || 2000; this.reset(); }
     reset() { this.n = 0; this.since = null; }
     update(off, acc, now) {
       const th = Math.max(this.minDist, (isNum(acc) ? acc : 20) * 1.5);
@@ -364,12 +364,91 @@
     BAD_REQUEST: ['입력값을 확인해 주세요.', '출발지·목적지를 다시 선택하세요.'], EMPTY_ROUTE: ['경로를 찾지 못했습니다.', '목적지나 경로 옵션을 바꿔 보세요.'], NO_RESULT: ['검색 결과가 없습니다.', '다른 이름이나 주소로 검색하세요.'],
     BAD_RESPONSE: ['응답 형식이 올바르지 않습니다.', '다시 시도하세요.'], UPSTREAM: ['TMAP 서버 오류입니다.', '잠시 후 다시 시도하세요.'], ABORTED: ['요청이 취소되었습니다.', ''], VIA_LIMIT: ['경유지는 최대 5개입니다.', '기존 경유지를 삭제하세요.'], BAD_PLACE: ['장소 좌표가 올바르지 않습니다.', '다른 장소를 선택하세요.'], REROUTE_FAIL: ['재탐색에 실패했습니다.', '기존 경로로 계속 안내합니다. 다시 시도할 수 있습니다.']
   };
-  function errHelp(code) { const h = ERR_HELP[code] || ['알 수 없는 오류입니다.', '다시 시도하세요.']; return { title: h[0], action: h[1] }; }
+
+  // ---------- 안내 중 시각 타깃(경로 스냅·저속 방위 유지) ----------
+  const HOLD_SPEED = 5 / 3.6; // 5 km/h
+  const onRouteTh = acc => Math.max(40, (isNum(acc) ? acc : 20) * 1.2);
+  function guideVisualTarget(u, fix, lastBearing) {
+    if (!fix || !isNum(fix.lat)) return null;
+    const acc = isNum(fix.acc) ? fix.acc : 20;
+    const speed = isNum(fix.speed) ? fix.speed : null;
+    const slow = speed !== null && speed < HOLD_SPEED;
+    const onRoute = !!(u && isNum(u.off) && u.snapped && u.off <= onRouteTh(acc));
+    let lat = fix.lat, lon = fix.lon, bearing = isNum(fix.heading) ? normDeg(fix.heading) : lastBearing;
+    if (onRoute) { lat = u.snapped.lat; lon = u.snapped.lon; if (isNum(u.segBearing)) bearing = u.segBearing; }
+    if (slow && isNum(lastBearing)) bearing = lastBearing;
+    return { lat, lon, bearing, onRoute, speed: speed || 0 };
+  }
+  // 60fps 보간: 경로 위 추측항법 + 최단각 방위 이징 (점프 없음)
+  class ViewSmoother {
+    constructor(o) {
+      o = o || {};
+      this.tauPos = o.tauPos || 0.16;
+      this.tauHead = o.tauHead || 0.2;
+      this.maxDegPerSec = o.maxDegPerSec || 90;
+      this.reset();
+    }
+    reset() {
+      this.lat = this.lon = this.bearing = null;
+      this.tLat = this.tLon = this.tBearing = this.tAlong = null;
+      this.speed = 0; this.onRoute = false; this.route = null; this.fixTs = 0; this.last = 0;
+    }
+    setTarget(t, now) {
+      if (!t || !isNum(t.lat)) return;
+      now = isNum(now) ? now : Date.now();
+      this.tLat = t.lat; this.tLon = t.lon;
+      if (isNum(t.bearing)) this.tBearing = normDeg(t.bearing);
+      this.speed = isNum(t.speed) ? t.speed : this.speed;
+      this.onRoute = !!t.onRoute;
+      if (t.route) this.route = t.route;
+      if (isNum(t.along)) {
+        if (!(this.tAlong != null && t.onRoute && t.along < this.tAlong - 8)) this.tAlong = t.along;
+      }
+      this.fixTs = isNum(t.ts) ? t.ts : now;
+      if (this.lat == null) { this.lat = t.lat; this.lon = t.lon; this.bearing = isNum(t.bearing) ? normDeg(t.bearing) : 0; this.last = now; }
+    }
+    jump(t, now) {
+      if (!t || !isNum(t.lat)) return;
+      this.setTarget(t, now);
+      this.lat = t.lat; this.lon = t.lon;
+      if (isNum(t.bearing)) this.bearing = normDeg(t.bearing);
+      this.last = isNum(now) ? now : Date.now();
+    }
+    sample(now) {
+      now = isNum(now) ? now : Date.now();
+      const dt = this.last ? Math.min(0.1, Math.max(0, (now - this.last) / 1000)) : 0;
+      this.last = now;
+      if (this.tLat == null) return null;
+      let tgtLat = this.tLat, tgtLon = this.tLon, tgtBrg = this.tBearing;
+      if (this.onRoute && this.route && this.route.path && this.tAlong != null && this.speed > HOLD_SPEED) {
+        const age = Math.min(1.6, Math.max(0, (now - this.fixTs) / 1000));
+        const pred = pointAt(this.route.path, this.route.cum, this.tAlong + this.speed * age);
+        tgtLat = pred.lat; tgtLon = pred.lon;
+        if (isNum(pred.bearing)) tgtBrg = pred.bearing;
+      }
+      if (this.lat == null) { this.lat = tgtLat; this.lon = tgtLon; this.bearing = isNum(tgtBrg) ? tgtBrg : 0; }
+      else {
+        const aPos = dt ? (1 - Math.exp(-dt / this.tauPos)) : 1;
+        this.lat += (tgtLat - this.lat) * aPos;
+        this.lon += (tgtLon - this.lon) * aPos;
+      }
+      if (isNum(tgtBrg)) {
+        const aHead = dt ? (1 - Math.exp(-dt / this.tauHead)) : 1;
+        let step = angDiff(this.bearing, tgtBrg) * aHead;
+        const cap = this.maxDegPerSec * Math.max(dt, 0.001);
+        if (step > cap) step = cap; if (step < -cap) step = -cap;
+        this.bearing = normDeg(this.bearing + step);
+      }
+      return { lat: this.lat, lon: this.lon, bearing: this.bearing, onRoute: this.onRoute };
+    }
+  }
+    function errHelp(code) { const h = ERR_HELP[code] || ['알 수 없는 오류입니다.', '다시 시도하세요.']; return { title: h[0], action: h[1] }; }
   function redact(s, secrets) { s = String(s); for (const k of secrets || []) if (k && k.length > 8) s = s.split(k).join('[REDACTED]'); return s.replace(/appKey=[^&\s"']+/gi, 'appKey=[REDACTED]'); }
   // 지도 미터/픽셀 (웹 메르카토르, 256 타일)
   const mpp = (lat, zoom) => 156543.03392 * Math.cos(lat * RAD) / Math.pow(2, zoom);
   function scaleFor(w, h) { if (!(w > 0 && h > 0)) return 1; if (h > w * 1.1) return Math.max(0.78, Math.min(1.1, w / 430)); return Math.max(0.6, Math.min(1.5, Math.min(w / 1000, h / 470))); }
   return { RAD, isNum, toNum, validLL, inKorea, normDeg, angDiff, lerpAng, dist, bearing, offset, cumulative, project, pointAt, fmtDist, fmtDur, fmtClock, eta, fmtWon, turnInfo, TURN_KINDS, stageFor, STAGE_LABEL, phrase, fmtDistSpeech,
     ApiError, mapPoi, mapPoiResponse, mapGeoResponse, mapRev, mapRoute, dedupeRoutes, OPTION_LABEL, CONGESTION, GpsFilter, OffRoute, Guidance, STATES, STATE_LABEL, canGo, GPS_STATES, latestGuard, MAX_VIA, addVia, removeVia, moveVia,
-    DEMO_PLACES, demoSearch, demoRouteRaw, SIM_EVENTS, findGuide, errHelp, redact, mpp, scaleFor, hash };
+    DEMO_PLACES, demoSearch, demoRouteRaw, SIM_EVENTS, findGuide, errHelp, redact, mpp, scaleFor, hash,
+    HOLD_SPEED, onRouteTh, guideVisualTarget, ViewSmoother };
 });
