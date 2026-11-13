@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b0d12">
-<title>P4 아이카 위치 보내기</title>
+<title>P5 아이카 위치 보내기</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;background:#0b0d12;color:#f1f3f8;font-family:-apple-system,"Pretendard","Noto Sans KR",system-ui,sans-serif}
 main{max-width:560px;margin:0 auto;padding:22px 18px 48px;display:flex;flex-direction:column;gap:16px}
@@ -21,7 +21,7 @@ a.dl{display:none;margin-top:10px;color:#9ecbff;font-weight:700}
 <button id="go">▶ 위치 보내기 시작</button>
 <button id="forget" class="sec" type="button" hidden>이 기기 연결 해제</button>
 <div id="st">대기 중</div>
-<div class="kv"><b>정확도</b><span id="acc">-</span><b>속도</b><span id="spd">-</span><b>보낸 횟수</b><span id="cnt">0</span><b>화면 켜짐 유지</b><span id="wl">-</span><b>마지막 전송</b><span id="last">-</span></div>
+<div class="kv"><b>정확도</b><span id="acc">-</span><b>속도</b><span id="spd">-</span><b>보낸 횟수</b><span id="cnt">0</span><b>화면 켜짐 유지</b><span id="wl">-</span><b>마지막 전송</b><span id="last">-</span><b>차량 화면</b><span id="vw">-</span></div>
 <div class="warn">⚠️ 이 웹 방식은 운전하는 동안 <b>이 화면을 켠 채로</b> 두세요. 백그라운드 전송은 아래 GPSLogger(또는 아이카 GPS 앱)를 쓰세요.</div>
 <section class="card" id="appbox">
 <h2>앱으로 연결 (GPSLogger)</h2>
@@ -48,6 +48,16 @@ const qs=new URLSearchParams(location.search);
 const C=$('code');
 C.value=normId(qs.get('id')||qs.get('code')||qs.get('dev')||localStorage.phdev||localStorage.phcode||'');
 let WID=null,LAST=null,SENT=0,TIMER=null,WL=null,RUN=false,FAIL=0,LASTSENT=0,SENDING=0;
+// P5: 차량(헤드유닛) 웹 연결 감시 — 서버 응답 viewer/viewerAgo 기준. 연결됐다가 60초 넘게 끊기면, 또는 시작 후 3분간 한 번도 연결 안 되면 전송 종료
+const VW={GRACE:60000,WAIT:180000,start:0,seen:false,lastSeen:0,known:false,on:false,lastInfo:0};
+function vwReset(){VW.start=Date.now();VW.seen=false;VW.lastSeen=0;VW.known=false;VW.on=false;VW.lastInfo=0}
+function vwText(){if(!VW.known)return '확인 중';if(VW.on)return '✅ 연결됨';if(!VW.seen)return '연결 대기';return '끊김 '+Math.round((Date.now()-VW.lastSeen)/1000)+'초'}
+function vwFeed(j){if(!RUN||!j||typeof j.viewer!=='boolean')return;const now=Date.now();VW.known=true;VW.on=j.viewer;VW.lastInfo=now;
+ if(j.viewer){VW.seen=true;VW.lastSeen=now}
+ else if(VW.seen){if(typeof j.viewerAgo==='number'){const s=now-j.viewerAgo*1000;if(s>VW.lastSeen&&s<=now)VW.lastSeen=s}if(now-VW.lastSeen>VW.GRACE)return autoStop('기기 연결 끊김 — 전송 종료')}
+ else if(now-VW.start>VW.WAIT)return autoStop('기기 연결 없음(3분) — 전송 종료');
+ $('vw').textContent=vwText()}
+async function vwPoll(){if(!RUN||(LASTSENT&&Date.now()-LASTSENT<12000))return;const id=normId(C.value);if(!okId(id))return;try{const r=await fetch(W+'/s/'+encodeURIComponent(id),{cache:'no-store'});if(r.ok)vwFeed(await r.json())}catch(e){}}
 function st(t,c){$('st').textContent=t;$('st').className=c||''}
 function gUrl(id){return W+'/g/'+id+'?lat=%LAT&lon=%LON&spd=%SPD&dir=%DIR&acc=%ACC&t=%TIMESTAMP'}
 function showG(){const id=normId(C.value);const box=$('gurl');if(okId(id)&&ID_LONG.test(id))box.textContent=gUrl(id);else if(okId(id))box.textContent='이 코드는 임시 6자리입니다. 차량 QR(장기 아이디)로 다시 연결하세요.';else box.textContent='기기 아이디를 연결하면 주소가 표시됩니다.';}
@@ -56,17 +66,17 @@ async function wake(){try{if('wakeLock' in navigator){WL=await navigator.wakeLoc
 document.addEventListener('visibilitychange',()=>{if(RUN&&document.visibilityState==='visible')wake()});
 async function send(){if(!LAST||!RUN||SENDING)return;const p=LAST;if(p.sent)return;if(LASTSENT&&Date.now()-LASTSENT<400)return;p.sent=1;SENDING=1;
  const id=normId(C.value);
- try{const r=await fetch(W+'/loc?id='+encodeURIComponent(id),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p.d)});if(!r.ok)throw new Error('HTTP '+r.status);SENT++;FAIL=0;LASTSENT=Date.now();$('cnt').textContent=SENT;st('✅ 전송 중','ok')}
+ try{const r=await fetch(W+'/loc?id='+encodeURIComponent(id),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p.d)});if(!r.ok)throw new Error('HTTP '+r.status);try{vwFeed(await r.json())}catch(e){}if(!RUN)return;SENT++;FAIL=0;LASTSENT=Date.now();$('cnt').textContent=SENT;st('✅ 전송 중','ok')}
  catch(e){FAIL++;p.sent=0;st('⚠️ 전송 실패 · 재시도 중 ('+e.message+')','err')}
  finally{SENDING=0;if(LAST&&!LAST.sent)setTimeout(send,400)}}
 function start(){const id=normId(C.value);C.value=id;if(!okId(id)){st('차량에 보이는 기기 아이디를 입력하세요','err');C.focus();return}remember(id);C.blur();
  if(!navigator.geolocation){st('이 브라우저는 위치를 지원하지 않아요','err');return}
- RUN=true;$('go').textContent='■ 멈추기';$('go').className='stop';st('📡 GPS 잡는 중…');wake();
+ RUN=true;vwReset();$('vw').textContent='확인 중';$('go').textContent='■ 멈추기';$('go').className='stop';st('📡 GPS 잡는 중…');wake();
  WID=navigator.geolocation.watchPosition(p=>{const c=p.coords;LAST={d:{lat:c.latitude,lng:c.longitude,acc:c.accuracy,heading:(c.heading==null||isNaN(c.heading))?null:c.heading,speed:(c.speed==null||isNaN(c.speed))?null:c.speed,ts:p.timestamp||Date.now()}};
   $('acc').textContent='±'+Math.round(c.accuracy)+' m';$('spd').textContent=c.speed!=null&&!isNaN(c.speed)?Math.round(c.speed*3.6)+' km/h':'-';send();},
   e=>{st(e.code==1?'❌ 위치 권한이 거부됐어요 — 설정에서 허용해 주세요':'⚠️ GPS 오류: '+e.message,'err')},{enableHighAccuracy:true,maximumAge:0,timeout:20000});
- TIMER=setInterval(()=>{send();if(LASTSENT)$('last').textContent=Math.round((Date.now()-LASTSENT)/1000)+'초 전'},1000)}
-function stop(){RUN=false;if(WID!=null)navigator.geolocation.clearWatch(WID);WID=null;clearInterval(TIMER);try{WL&&WL.release()}catch(e){}WL=null;$('go').textContent='▶ 위치 보내기 시작';$('go').className='';st('멈춤')}
+ TIMER=setInterval(()=>{send();if(LASTSENT)$('last').textContent=Math.round((Date.now()-LASTSENT)/1000)+'초 전';if(VW.known&&!VW.on)$('vw').textContent=vwText()},1000);clearInterval(VW.t);VW.t=setInterval(vwPoll,15000)}
+function stop(){RUN=false;if(WID!=null)navigator.geolocation.clearWatch(WID);WID=null;clearInterval(TIMER);clearInterval(VW.t);try{WL&&WL.release()}catch(e){}WL=null;$('go').textContent='▶ 위치 보내기 시작';$('go').className='';st('멈춤')}
 $('go').onclick=()=>RUN?stop():start();
 C.addEventListener('input',()=>{C.value=normId(C.value);showG()});
 $('forget').onclick=()=>{try{localStorage.removeItem('phdev');localStorage.removeItem('phcode')}catch(e){}if(RUN)stop();C.value='';$('forget').hidden=true;showG();st('연결을 해제했습니다.')};
@@ -80,10 +90,11 @@ function touch(){if(BLK.classList.contains('on'))black(false);if(RUN&&!WL)wake()
 ['pointerdown','touchstart','keydown'].forEach(ev=>document.addEventListener(ev,touch,{capture:true,passive:true}));
 const _st=st;st=function(t,c){_st(t,c);if(c==='ok'&&!ARMED&&RUN){ARMED=true;arm(3000)}if(c==='err'&&!/재시도/.test(t)){ARMED=false;clearTimeout(IDLE);black(false)}};
 const _stop=stop;stop=function(){ARMED=false;clearTimeout(IDLE);black(false);_stop()};
+function autoStop(msg){if(!RUN)return;stop();st('🔌 '+msg,'err');$('vw').textContent='끊김';try{navigator.vibrate&&navigator.vibrate(200)}catch(e){}}
 showG();
 const auto=okId(normId(C.value));
 if(auto){$('forget').hidden=false;const fromQr=okId(normId(qs.get('id')||qs.get('code')||''));ARMED=!!fromQr;if(fromQr)black(true);start();
  if(navigator.permissions&&navigator.permissions.query)navigator.permissions.query({name:'geolocation'}).then(r=>{if(r.state==='denied'){ARMED=false;black(false)}}).catch(()=>{})}
 fetch('./app/icar-gps.apk',{method:'HEAD'}).then(r=>{if(r.ok)$('apk').style.display='inline'}).catch(()=>{});
-window.__ph={start,stop,state:()=>({RUN,SENT,FAIL,ARMED,black:BLK.classList.contains('on'),id:normId(C.value)})};
+window.__ph={start,stop,vwFeed,VW,state:()=>({RUN,SENT,FAIL,ARMED,black:BLK.classList.contains('on'),id:normId(C.value),viewer:vwText()})};
 </script></body></html>
