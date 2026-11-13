@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>N6 아이카 내비</title>
+<title>N7 아이카 내비</title>
 <style>
 :root{--bg:#0b0d10;--pn:rgba(20,23,28,.94);--pn2:#1f242c;--ln:rgba(255,255,255,.1);--tx:#eef1f5;--mu:#97a0ae;--ac:#3d7bff;--ok:#16a865;--gr:#0f9d58;--rd:#ff4757;--or:#ff9f1a;--r:.8rem;--bbh:clamp(2.9rem,12vh,4.2rem);--spd:clamp(2.6rem,11vw,4.2rem)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -189,7 +189,7 @@ body.hiddenNav *{animation:none!important}
 <div id="toast" class="glass" role="alert"><div class="tx" id="toastT"></div><div id="toastB" style="display:flex;gap:.35rem"></div></div>
 <div id="cf" role="alertdialog" aria-modal="true"><div class="box glass"><p id="cfT"></p><button class="btn" id="cfN">취소</button><button class="btn dan" id="cfY">확인</button></div></div>
 <div id="arr" class="glass" role="alertdialog"><div style="font-size:2.6rem">🏁</div><h3 id="arrT">목적지에 도착했습니다</h3><button class="btn pri" id="arrOk">안내 종료</button></div>
-<div id="ver">N6</div>
+<div id="ver">N7</div>
 <script>
 const HG=(()=>{const CHO='ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ',JUNG='ㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ',JONG=' ㄱㄲㄳㄴㄵㄶㄷㄹㄺㄻㄼㄽㄾㄿㅀㅁㅂㅄㅅㅆㅇㅈㅊㅋㅌㅍㅎ';
  const VC={'ㅗㅏ':'ㅘ','ㅗㅐ':'ㅙ','ㅗㅣ':'ㅚ','ㅜㅓ':'ㅝ','ㅜㅔ':'ㅞ','ㅜㅣ':'ㅟ','ㅡㅣ':'ㅢ'};
@@ -314,12 +314,26 @@ function rotBox(rot) { const W = innerWidth, H = innerHeight; const mi = $('mi')
 class BaseMap {
   constructor() { this.bearing = 0; this.pitch = 0; this.zoom = ST.zoom || 16; this.center = { lat: 37.5547, lon: 126.9707 }; this.rot = false; }
   onGesture(cb) { const mw = $('mapw'); let sx = 0, sy = 0, down = false; mw.addEventListener('pointerdown', e => { down = true; sx = e.clientX; sy = e.clientY; }, true); mw.addEventListener('pointermove', e => { if (down && Math.hypot(e.clientX - sx, e.clientY - sy) > 10) { down = false; cb('drag'); } }, true); addEventListener('pointerup', () => down = false, true); mw.addEventListener('wheel', () => cb('wheel'), { passive: true, capture: true }); }
-  cssXform() { const mi = $('mi'); if (!this.rot) { mi.style.transform = ''; return; } mi.style.transform = (this.pitch ? 'perspective(' + Math.round(innerHeight * 1.6) + 'px) rotateX(' + this.pitch + 'deg) ' : '') + 'rotate(' + (-this.bearing) + 'deg)'; }
+  cssXform(dx, dy) {
+    const mi = $('mi'); if (mi.classList.contains('tr')) mi.classList.remove('tr');
+    const pan = (dx || dy) ? 'translate(' + (dx || 0).toFixed(1) + 'px,' + (dy || 0).toFixed(1) + 'px)' : '';
+    if (!this.rot && !pan) { mi.style.transform = ''; return; }
+    const pitch = this.pitch ? 'perspective(' + Math.round(innerHeight * 1.6) + 'px) rotateX(' + this.pitch + 'deg) ' : '';
+    const rot = this.rot ? 'rotate(' + (-this.bearing) + 'deg)' : '';
+    mi.style.transform = (pitch + rot + (pan && (pitch || rot) ? ' ' : '') + pan).trim();
+  }
+  residualPx(des) {
+    if (!des || !this.center) return [0, 0];
+    const m = C.mpp(des.lat, this.zoom);
+    const dE = (des.lon - this.center.lon) * 111320 * Math.cos(des.lat * C.RAD);
+    const dN = (des.lat - this.center.lat) * 111320;
+    return [dE / m, -dN / m];
+  }
   softCenter(des, force) {
     if (!des) return true;
     const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
-    const jumped = !this.center || C.dist(this.center, des) > 8;
-    if (force || jumped || !this._cenAt || now - this._cenAt > 80) { this.center = des; this._cenAt = now; return true; }
+    const jumped = !this.center || C.dist(this.center, des) > 35;
+    if (force || jumped || !this._cenAt || now - this._cenAt > 250) { this.center = des; this._cenAt = now; return true; }
     return false;
   }
 }
@@ -333,8 +347,9 @@ class RasterMap extends BaseMap {
   ll(p) { return new Tmapv2.LatLng(p.lat, p.lon); }
   setView(v) { const needRot = !!(v.bearing || v.pitch); if (needRot !== this.rot) { this.rot = needRot; const b = rotBox(needRot); try { this.m.resize(b.w, b.h); } catch (e) { } } this.bearing = v.bearing || 0; this.pitch = v.pitch || 0;
     if (C.isNum(v.zoom) && v.zoom !== this.zoom) { this.zoom = v.zoom; this.m.setZoom(v.zoom); }
-    if (v.center && this.softCenter(v.center, v.force)) { try { this.m.setCenter(this.ll(v.center)); } catch (e) { } }
-    this.cssXform(); }
+    let dx = 0, dy = 0;
+    if (v.center) { if (this.softCenter(v.center, v.force)) { try { this.m.setCenter(this.ll(v.center)); } catch (e) { } } else { const r = this.residualPx(v.center); dx = r[0]; dy = r[1]; } }
+    this.cssXform(dx, dy); }
   getCenter() { try { const c = this.m.getCenter(); return { lat: c.lat(), lon: c.lng() }; } catch (e) { return this.center; } }
   getZoom() { try { return this.m.getZoom(); } catch (e) { return this.zoom; } }
   zoomBy(d) { this.zoom = Math.max(7, Math.min(19, this.getZoom() + d)); this.m.setZoom(this.zoom); return this.zoom; }
@@ -436,7 +451,7 @@ function initMap() {
 }
 // ---------- 위치 ----------
 function onFix(raw, source) {
-  const fix = { lat: raw.lat, lon: raw.lon, acc: raw.acc, speed: raw.speed, heading: raw.heading, ts: raw.ts, source };
+  const recv = Date.now(); const fix = { lat: raw.lat, lon: raw.lon, acc: raw.acc, speed: raw.speed, heading: raw.heading, ts: raw.ts, rawTs: raw.ts, source };
   const r = S.filter.accept(fix, Date.now());
   if (!r.ok) { if (r.reason === 'inaccurate') setGps('poor'); log('위치 무시: ' + r.reason); return false; }
   S.fix = r.fix; S.lastFixAt = Date.now(); S.est = false; setGps(source === 'sim' ? 'demo' : (r.fix.quality === 'poor' ? 'poor' : 'ok'));
@@ -472,13 +487,13 @@ function targetPose() {
   if (guiding && S.gu) {
     const v = C.guideVisualTarget(S.gu, p, S.smoother.bearing);
     if (!v) return null;
-    v.along = S.gu.along; v.route = S.route; v.ts = C.isNum(p.ts) ? p.ts : (S.smoother.fixTs || Date.now());
+    v.along = S.gu.along; v.route = S.route; v.ts = S.lastFixAt || (C.isNum(p.ts) ? p.ts : Date.now());
     S.snapPos = v.onRoute ? { lat: v.lat, lon: v.lon } : null;
     S.snapHead = v.onRoute ? v.bearing : null;
     S.onRoute = v.onRoute;
     return v;
   }
-  return { lat: p.lat, lon: p.lon, bearing: p.heading, onRoute: false, speed: p.speed || 0, ts: p.ts || Date.now() };
+  return { lat: p.lat, lon: p.lon, bearing: p.heading, onRoute: false, speed: p.speed || 0, ts: S.lastFixAt || p.ts || Date.now() };
 }
 function camera(force) {
   if (!S.map || window.NAVHIDDEN) return;
@@ -489,10 +504,11 @@ function camera(force) {
 }
 function startCamLoop() {
   if (S.camRaf) return;
-  const loop = () => { S.camRaf = requestAnimationFrame(loop); if (!S.map || window.NAVHIDDEN) return; applyCamera(false); };
+  const loop = ts => { S.camRaf = requestAnimationFrame(loop); S.camLastRaf = Date.now(); if (!S.map || window.NAVHIDDEN) return; applyCamera(false); };
   S.camRaf = requestAnimationFrame(loop);
+  if (!S.camIv) S.camIv = setInterval(() => { if (window.NAVHIDDEN) return; if (!S.camLastRaf || Date.now() - S.camLastRaf > 50) applyCamera(false); }, 33);
 }
-function stopCamLoop() { if (S.camRaf) { cancelAnimationFrame(S.camRaf); S.camRaf = 0; } }
+function stopCamLoop() { if (S.camRaf) { cancelAnimationFrame(S.camRaf); S.camRaf = 0; } if (S.camIv) { clearInterval(S.camIv); S.camIv = 0; } }
 function applyCamera(force) {
   const m = S.map; if (!m || window.NAVHIDDEN) return;
   const tgt = targetPose(); if (tgt) S.smoother.setTarget(tgt, Date.now());
@@ -717,9 +733,9 @@ function stopGuide(silent) {
 function simStart() {
   simStop(true); const r = S.route; const v = Math.max(8, Math.min(25, r.length / Math.max(60, r.time)));
   S.sim = { playing: true, mult: 1, along: 0, v, drop: 0, lat: 0, latUntil: 0, timer: null, last: Date.now() }; S.filter.reset(); document.body.classList.add('sim'); $('simp').classList.add('on'); $('bSimT').hidden = false; $('simTl').innerHTML = ''; simUI();
-  S.sim.timer = setInterval(simTick, 250); window.__simTimers = (window.__simTimers || 0) + 1; simTick(); camera(true);
+  S.sim.tickMs = 250; simArmTimer(250); window.__simTimers = (window.__simTimers || 0) + 1; simTick(); camera(true);
 }
-function simStop(keep) { if (!S.sim) return; clearInterval(S.sim.timer); window.__simTimers = Math.max(0, (window.__simTimers || 1) - 1); S.sim = null; document.body.classList.remove('sim'); $('simp').classList.remove('on'); $('bSimT').hidden = true; if (!keep) log('모의 주행 종료', true); }
+function simStop(keep) { if (!S.sim) return; clearInterval(S.sim.timer); if (S.sim.to) clearTimeout(S.sim.to); window.__simTimers = Math.max(0, (window.__simTimers || 1) - 1); S.sim = null; document.body.classList.remove('sim'); $('simp').classList.remove('on'); $('bSimT').hidden = true; if (!keep) log('모의 주행 종료', true); }
 function simTick() {
   const s = S.sim; if (!s || !S.route) return; const now = Date.now(), dt = Math.min(1, (now - s.last) / 1000); s.last = now;
   if (!s.playing || S.nav === 'paused' || S.nav === 'arrived') return;
@@ -736,6 +752,14 @@ function simTick() {
   if (now < s.drop || inT) return; // GPS 수신 없음(시뮬레이션)
   onFix({ lat: pos.lat, lon: pos.lon, acc: s.jitter ? 12 : 8, speed: s.v * s.mult, heading: heading, ts: now }, 'sim');
 }
+function simArmTimer(ms) { const s = S.sim; if (!s) return; clearInterval(s.timer); if (s.to) { clearTimeout(s.to); s.to = 0; } s.tickMs = ms || 250; s.timer = setInterval(simTick, s.tickMs); }
+function simSchedule(gaps) {
+  const s = S.sim; if (!s) return; clearInterval(s.timer); s.timer = 0; if (s.to) clearTimeout(s.to);
+  s.gaps = (gaps && gaps.length) ? gaps.slice() : [1000]; s.gi = 0;
+  const step = () => { if (!S.sim) return; simTick(); const g = S.sim.gaps; const d = g[S.sim.gi % g.length]; S.sim.gi++; S.sim.to = setTimeout(step, d); };
+  s.to = setTimeout(step, s.gaps[0]);
+}
+S.simArmTimer = simArmTimer; S.simSchedule = simSchedule; S.simTick = simTick;
 function simPlay(on) { if (!S.sim) return; S.sim.playing = on === undefined ? !S.sim.playing : on; S.sim.last = Date.now(); simUI(); log(S.sim.playing ? '모의 주행 재생' : '모의 주행 일시정지', true); }
 function simJump(along) { const s = S.sim; s.along = Math.max(0, Math.min(S.route.length - 1, along)); S.guide = new C.Guidance(S.route); S.guide.along = s.along; S.guide.hint = C.pointAt(S.route.path, S.route.cum, s.along).idx; S.filter.reset(); S.off.reset(); s.last = Date.now(); s.drop = 0; simTick(); }
 function simEvent(id) {

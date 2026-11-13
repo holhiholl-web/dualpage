@@ -1,4 +1,4 @@
-/* 아이카 위치 중계 (T13) — 휴대폰 GPS → Cloudflare → 헤드유닛.
+/* 아이카 위치 중계 (T13+N7: 폴백 폴링 1초) — 휴대폰 GPS → Cloudflare → 헤드유닛.
    navigator.geolocation 을 감싸서, 휴대폰 위치가 들어오면 그것을 우선 사용하고 없으면 기기 자체 GPS로 대체. */
 (function(){
  const W='https://dualpage-loc.holhiholl.workers.dev',FRESH=20000;
@@ -15,7 +15,7 @@
   R.ws=ws;R.mode='ws…';ws.onopen=()=>{R.mode='ws';ui()};ws.onmessage=e=>{try{const m=JSON.parse(e.data);if(m.type=='pos')feed(m.pos,m.age)}catch(x){}};
   ws.onclose=ws.onerror=()=>{if(R.ws!==ws)return;R.ws=null;R.mode='poll';ui();clearTimeout(R.rc);R.rc=setTimeout(connect,5000)}}
  async function pollOnce(){try{const r=await fetch(W+'/loc?code='+R.code,{cache:'no-store'});const j=await r.json();if(j&&j.pos)feed(j.pos,j.age)}catch(e){}}
- function poll(){clearInterval(R.pi);R.pi=setInterval(()=>{if(!R.ws||R.ws.readyState!==1)pollOnce()},2000)}
+ function poll(){clearInterval(R.pi);R.pi=setInterval(()=>{if(!R.ws||R.ws.readyState!==1)pollOnce()},1000)}
  R.start=()=>{connect();poll();pollOnce();clearInterval(R.ka);R.ka=setInterval(()=>{try{R.ws&&R.ws.readyState===1&&R.ws.send('ping')}catch(e){}ui()},15000)};
  R.newCode=()=>{R.code=S.code=String(Math.floor(100000+Math.random()*900000));try{localStorage[LSK]=JSON.stringify(S)}catch(e){}R.last=null;R.lastRx=0;R.start();ui();if(window.relayModal)relayModal(true)};
  // geolocation 래퍼

@@ -230,6 +230,7 @@
         }
         this.jumps = 0; this.pend = null;
         if (speed === null && dt < 10) speed = v;
+        else if (dt < 10 && speed != null && speed < 0.6 && v > 1.5 && d > 2) speed = v;
         if (head === null && d >= 3) head = bearing(this.last, fix);
       }
       if (head === null) head = this.heading; else if (this.heading !== null && (speed === null || speed > 1.5)) head = lerpAng(this.heading, head, 0.6); else if (speed !== null && speed <= 1.5 && this.heading !== null) head = this.heading;
@@ -377,13 +378,18 @@
     let lat = fix.lat, lon = fix.lon, bearing = isNum(fix.heading) ? normDeg(fix.heading) : lastBearing;
     if (onRoute) { lat = u.snapped.lat; lon = u.snapped.lon; if (isNum(u.segBearing)) bearing = u.segBearing; }
     if (slow && isNum(lastBearing)) bearing = lastBearing;
-    return { lat, lon, bearing, onRoute, speed: speed || 0 };
+    return { lat, lon, bearing, onRoute, speed: isNum(speed) ? speed : null };
   }
-  // 60fps 보간: 경로 위 추측항법 + 최단각 방위 이징 (점프 없음)
+  // N7 연속 운동: 표시 위치는 스무딩된 속도로 경로를 계속 진행.
+  // 새 GPS는 ~1초 동안 오차만 보정(뒤로 점프/정지 없음). 표시는 lead 초 지연해 도래 간격이 비어도 멈추지 않음.
   class ViewSmoother {
     constructor(o) {
       o = o || {};
-      this.tauPos = o.tauPos || 0.16;
+      this.tauPos = o.tauPos || 0.16; // 이탈 시 위치 이징(호환)
+      this.tauV = o.tauV || 0.35;
+      this.tauCorr = o.tauCorr || 1.0;
+      this.lead = o.lead || 0.7;
+      this.maxPred = o.maxPred || 3.5;
       this.tauHead = o.tauHead || 0.2;
       this.maxDegPerSec = o.maxDegPerSec || 90;
       this.reset();
@@ -391,55 +397,143 @@
     reset() {
       this.lat = this.lon = this.bearing = null;
       this.tLat = this.tLon = this.tBearing = this.tAlong = null;
-      this.speed = 0; this.onRoute = false; this.route = null; this.fixTs = 0; this.last = 0;
+      this.speed = 0; this.v = 0; this.cruiseV = 0;
+      this.onRoute = false; this.route = null;
+      this.fixTs = 0; this.fixRecv = null; this.last = 0;
+      this.along = null; this.fixAlong = null; this._fixId = null; this._notedAlong = null;
+    }
+    _isNewFix(t) {
+      if (isNum(t.ts) && t.ts !== this._fixId) return true;
+      if (isNum(t.along) && this._notedAlong != null && Math.abs(t.along - this._notedAlong) > 0.8) return true;
+      if (this.tLat == null) return true;
+      if (!isNum(t.along) && isNum(t.lat) && (Math.abs(t.lat - this.tLat) > 1e-6 || Math.abs(t.lon - this.tLon) > 1e-6)) return true;
+      return false;
     }
     setTarget(t, now) {
       if (!t || !isNum(t.lat)) return;
       now = isNum(now) ? now : Date.now();
-      this.tLat = t.lat; this.tLon = t.lon;
-      if (isNum(t.bearing)) this.tBearing = normDeg(t.bearing);
-      this.speed = isNum(t.speed) ? t.speed : this.speed;
       this.onRoute = !!t.onRoute;
       if (t.route) this.route = t.route;
-      if (isNum(t.along)) {
-        if (!(this.tAlong != null && t.onRoute && t.along < this.tAlong - 8)) this.tAlong = t.along;
+      if (isNum(t.bearing)) this.tBearing = normDeg(t.bearing);
+      if (this._isNewFix(t)) this._noteFix(t, now);
+      else {
+        this.tLat = t.lat; this.tLon = t.lon;
+        if (isNum(t.along) && !(this.tAlong != null && t.onRoute && t.along < this.tAlong - 8)) this.tAlong = t.along;
       }
-      this.fixTs = isNum(t.ts) ? t.ts : now;
       if (this.lat == null) { this.lat = t.lat; this.lon = t.lon; this.bearing = isNum(t.bearing) ? normDeg(t.bearing) : 0; this.last = now; }
+    }
+    _noteFix(t, now) {
+      const recv = now;
+      let measV = null;
+      if (this.fixRecv && isNum(t.along) && this.fixAlong != null) {
+        const dt = (recv - this.fixRecv) / 1000;
+        if (dt > 0.2 && dt < 6) {
+          const da = t.along - this.fixAlong;
+          if (da > -8) measV = Math.max(0, da / dt);
+        }
+      } else if (this.fixRecv && isNum(t.lat) && this.tLat != null) {
+        const dt = (recv - this.fixRecv) / 1000;
+        if (dt > 0.2 && dt < 6) measV = Math.max(0, dist({ lat: this.tLat, lon: this.tLon }, t) / dt);
+      }
+      const gpsV = isNum(t.speed) && t.speed > 0.4 ? t.speed : null;
+      const inst = measV != null ? (gpsV != null ? measV * 0.6 + gpsV * 0.4 : measV) : gpsV;
+      if (inst != null) {
+        if (!this.cruiseV) this.cruiseV = inst;
+        else this.cruiseV += (inst - this.cruiseV) * 0.45;
+        this.cruiseV = Math.max(0, Math.min(50, this.cruiseV));
+      }
+      this.fixRecv = recv;
+      this.fixTs = recv; // 운동 시계는 수신 시각. 폰 GPS ts는 쓰지 않음(기기와 시계 오차)
+      if (isNum(t.ts)) this._fixId = t.ts;
+      if (isNum(t.along)) {
+        if (!(this.fixAlong != null && t.onRoute && t.along < this.fixAlong - 8)) {
+          this.fixAlong = t.along; this.tAlong = t.along; this._notedAlong = t.along;
+        }
+      }
+      this.tLat = t.lat; this.tLon = t.lon;
+      this.onRoute = !!t.onRoute;
+      if (t.route) this.route = t.route;
+      if (isNum(t.bearing)) this.tBearing = normDeg(t.bearing);
+      this.speed = this.cruiseV || (isNum(t.speed) ? Math.max(0, t.speed) : this.speed);
+      if (this.along == null && isNum(t.along)) {
+        const leadM = (this.cruiseV || 0) * this.lead;
+        this.along = Math.max(0, t.along - leadM);
+        const p0 = (this.route && this.route.path) ? pointAt(this.route.path, this.route.cum, this.along) : t;
+        this.lat = p0.lat; this.lon = p0.lon;
+        if (isNum(p0.bearing)) this.bearing = p0.bearing;
+        this.v = this.cruiseV || 0;
+      }
     }
     jump(t, now) {
       if (!t || !isNum(t.lat)) return;
+      this.reset();
+      now = isNum(now) ? now : Date.now();
       this.setTarget(t, now);
       this.lat = t.lat; this.lon = t.lon;
+      if (isNum(t.along)) this.along = t.along;
       if (isNum(t.bearing)) this.bearing = normDeg(t.bearing);
-      this.last = isNum(now) ? now : Date.now();
+      if (isNum(t.speed) && t.speed > 0.4) { this.cruiseV = t.speed; this.v = t.speed; this.speed = t.speed; }
+      this.last = now;
     }
     sample(now) {
       now = isNum(now) ? now : Date.now();
       const dt = this.last ? Math.min(0.1, Math.max(0, (now - this.last) / 1000)) : 0;
       this.last = now;
       if (this.tLat == null) return null;
-      let tgtLat = this.tLat, tgtLon = this.tLon, tgtBrg = this.tBearing;
-      if (this.onRoute && this.route && this.route.path && this.tAlong != null && this.speed > HOLD_SPEED) {
-        const age = Math.min(1.6, Math.max(0, (now - this.fixTs) / 1000));
-        const pred = pointAt(this.route.path, this.route.cum, this.tAlong + this.speed * age);
-        tgtLat = pred.lat; tgtLon = pred.lon;
-        if (isNum(pred.bearing)) tgtBrg = pred.bearing;
+      const age = this.fixRecv != null ? Math.max(0, (now - this.fixRecv) / 1000) : 0;
+      let cruise = this.cruiseV || 0;
+      if (age > this.maxPred) cruise *= Math.max(0, 1 - (age - this.maxPred) / 1.2);
+      let tgtBrg = this.tBearing;
+      if (this.onRoute && this.route && this.route.path && this.along != null && this.fixAlong != null) {
+        const predT = Math.min(age, this.maxPred);
+        const aim = this.fixAlong + cruise * (predT - this.lead);
+        const err = aim - this.along;
+        let vCmd = cruise + err / this.tauCorr;
+        if (vCmd < 0) vCmd = 0;
+        if (cruise >= HOLD_SPEED) vCmd = Math.min(vCmd, cruise * 1.8 + 2);
+        else {
+          if (cruise < HOLD_SPEED && Math.abs(err) < 2.5) vCmd = 0;
+          else vCmd = Math.min(vCmd, Math.max(cruise, HOLD_SPEED));
+        }
+        const aV = dt ? (1 - Math.exp(-dt / this.tauV)) : 1;
+        this.v += (vCmd - this.v) * aV;
+        if (this.v < 0) this.v = 0;
+        this.along += this.v * dt;
+        const p = pointAt(this.route.path, this.route.cum, this.along);
+        this.lat = p.lat; this.lon = p.lon;
+        if (isNum(p.bearing)) tgtBrg = p.bearing;
+      } else {
+        // 이탈: 헤딩 방향 추측항법 + 새 픽스로 완만히 보정
+        let tgtLat = this.tLat, tgtLon = this.tLon;
+        if (cruise > HOLD_SPEED && isNum(this.tBearing)) {
+          const predT = Math.max(0, Math.min(age, this.maxPred) - this.lead);
+          const pred = offset({ lat: this.tLat, lon: this.tLon }, this.tBearing, cruise * predT);
+          tgtLat = pred.lat; tgtLon = pred.lon;
+        }
+        if (this.lat == null) { this.lat = tgtLat; this.lon = tgtLon; }
+        else {
+          const aPos = dt ? (1 - Math.exp(-dt / Math.max(this.tauPos, this.tauCorr))) : 1;
+          // 앞으로만: 새 타깃이 뒤면 속도만 줄임
+          const d = dist({ lat: this.lat, lon: this.lon }, { lat: tgtLat, lon: tgtLon });
+          const aV = dt ? (1 - Math.exp(-dt / this.tauV)) : 1;
+          this.v += ((cruise || 0) - this.v) * aV;
+          if (d > 0.05) {
+            const step = Math.min(d, Math.max(this.v, 0) * dt + d * aPos * 0.35);
+            const br = bearing({ lat: this.lat, lon: this.lon }, { lat: tgtLat, lon: tgtLon });
+            const np = offset({ lat: this.lat, lon: this.lon }, br, step);
+            this.lat = np.lat; this.lon = np.lon;
+          }
+        }
       }
-      if (this.lat == null) { this.lat = tgtLat; this.lon = tgtLon; this.bearing = isNum(tgtBrg) ? tgtBrg : 0; }
-      else {
-        const aPos = dt ? (1 - Math.exp(-dt / this.tauPos)) : 1;
-        this.lat += (tgtLat - this.lat) * aPos;
-        this.lon += (tgtLon - this.lon) * aPos;
-      }
+      this.speed = this.v;
       if (isNum(tgtBrg)) {
         const aHead = dt ? (1 - Math.exp(-dt / this.tauHead)) : 1;
-        let step = angDiff(this.bearing, tgtBrg) * aHead;
+        let step = angDiff(this.bearing == null ? tgtBrg : this.bearing, tgtBrg) * aHead;
         const cap = this.maxDegPerSec * Math.max(dt, 0.001);
         if (step > cap) step = cap; if (step < -cap) step = -cap;
-        this.bearing = normDeg(this.bearing + step);
+        this.bearing = normDeg((this.bearing == null ? tgtBrg : this.bearing) + step);
       }
-      return { lat: this.lat, lon: this.lon, bearing: this.bearing, onRoute: this.onRoute };
+      return { lat: this.lat, lon: this.lon, bearing: this.bearing, onRoute: this.onRoute, along: this.along, speed: this.v };
     }
   }
     function errHelp(code) { const h = ERR_HELP[code] || ['알 수 없는 오류입니다.', '다시 시도하세요.']; return { title: h[0], action: h[1] }; }
