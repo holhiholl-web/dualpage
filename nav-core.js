@@ -158,6 +158,18 @@
   }
   const OPTION_LABEL = { '0': '추천', '1': '무료우선', '2': '최소시간', '4': '고속도로우선', '10': '최단거리' };
   const CONGESTION = { 0: '정보없음', 1: '원활', 2: '서행', 3: '지체', 4: '정체' };
+  // Only explicit legal limits. traffic speed / distance÷time are NOT legal limits.
+  function validLimit(v) { const n = toNum(v); return isNum(n) && n >= 10 && n <= 150 ? n : null; }
+  function explicitLimit(p) { return validLimit(p.speedLimit) || validLimit(p.limitSpeed) || validLimit(p.speed_limit); }
+  function textLimit(text) { const m = /(?:제한(?:속도)?\s*[:：]?\s*(\d{2,3})(?:\s*(?:km|㎞|킬로))?|(?:시속\s*)?(\d{2,3})\s*(?:km\s*\/?\s*h|㎞|킬로미터))/i.exec(text || ''); return m ? validLimit(m[1] || m[2]) : null; }
+  function routeLimit(route, along) {
+    if (!route || !isNum(along)) return null;
+    const segment = route.segments.find(x => x.limit && along >= x.from && along < x.to);
+    if (segment) return { limit: segment.limit, demo: !!route.demo, src: 'TMAP 구간 제한속도', key: 'seg' + segment.from };
+    // A point without an end cannot establish the limit for the entire road.
+    const point = route.guides.find(x => x.limit && along >= x.at - 30 && along <= x.at + 20);
+    return point ? { limit: point.limit, demo: !!route.demo, src: 'TMAP 제한속도 안내지점 부근', key: 'point' + point.at } : null;
+  }
   function mapRoute(data, opt) {
     opt = opt || {};
     if (!data || typeof data !== 'object') throw new ApiError('EMPTY_ROUTE', '경로 응답이 비어 있습니다.');
@@ -180,7 +192,7 @@
         const localIdx = [];
         for (const c of g.coordinates) { if (!Array.isArray(c) || c.length < 2) continue; pushPt(c[0], c[1]); localIdx.push(path.length - 1); }
         const endAlong = cumNow();
-        segments.push({ from: startAlong, to: endAlong, name: p.name || '', facilityType: isNum(toNum(p.facilityType)) ? toNum(p.facilityType) : null, roadType: isNum(toNum(p.roadType)) ? toNum(p.roadType) : null, time: toNum(p.time), distance: toNum(p.distance) });
+        segments.push({ from: startAlong, to: endAlong, name: p.name || '', facilityType: isNum(toNum(p.facilityType)) ? toNum(p.facilityType) : null, roadType: isNum(toNum(p.roadType)) ? toNum(p.roadType) : null, time: toNum(p.time), distance: toNum(p.distance), limit: explicitLimit(p) });
         if (Array.isArray(p.traffic)) { trafficSeen = true; for (const t of p.traffic) { if (!Array.isArray(t) || t.length < 3) continue; const a = localIdx[toNum(t[0])], b = localIdx[toNum(t[1])]; if (a === undefined || b === undefined) continue; traffic.push({ from: segCum[a] || 0, to: segCum[b] || 0, level: toNum(t[2]), label: CONGESTION[toNum(t[2])] || '정보없음', speed: toNum(t[3]) }); } }
       } else if (g.type === 'Point' && Array.isArray(g.coordinates)) {
         if (p.pointType === 'S' || isNum(toNum(p.totalDistance))) summary = summary || p;
@@ -188,7 +200,7 @@
         let tt = toNum(p.turnType); const bm = /^B(\d)$/.exec(p.pointType || ''); // 실제 TMAP: 경유지는 pointType B1~B5, turnType 0/없음
         if (bm && !(tt >= 184 && tt <= 189)) tt = 184 + Number(bm[1]);
         if (bm && guides.some(x => x.pointType === p.pointType)) continue; // 끝에 중복으로 오는 경유지 점 무시
-        guides.push({ lat, lon, at: cumNow(), turnType: tt, pointType: p.pointType || 'N', text: p.description || '', road: p.nextRoadName || '', name: p.name || '' });
+        guides.push({ lat, lon, at: cumNow(), turnType: tt, pointType: p.pointType || 'N', text: p.description || '', road: p.nextRoadName || '', name: p.name || '', limit: explicitLimit(p) || (tt === 191 ? textLimit(p.description) : null), camera: /과속.{0,8}단속|단속.{0,8}카메라|속도.{0,8}카메라/.test((p.description || '') + ' ' + (p.name || '')) });
       }
     }
     if (path.length < 2) throw new ApiError('EMPTY_ROUTE', '경로 좌표가 부족합니다.');
@@ -271,10 +283,10 @@
       return { along: this.along, remain, remainTime, progress: r.length ? this.along / r.length : 0, next, after, dNext, stage, off: pr.off, snapped: pr.point, segBearing: pr.segBearing, viaArrived, arrived, inTunnel, tunnelAhead };
     }
     // 같은 안내점·단계는 1회만 음성 (반복 방지)
-    shouldSpeak(g, stage, d) {
+    shouldSpeak(g, stage, d, consume = true) {
       if (!g) return false; if (stage === 'later' && !(d <= 1100 && d >= 700)) { if (!(d > 1100 && d < 2100 && g.info.kind !== 'safety')) return false; }
-      const band = stage === 'later' ? (d > 1100 ? '2k' : '1k') : stage; const k = g.at + '|' + band;
-      if (this.spoken.has(k)) return false; this.spoken.add(k); return true;
+      const band = stage === 'later' ? (d > 1100 ? '2k' : '1k') : (stage === 'soon' && d <= 100 ? '100m' : stage); const k = g.at + '|' + band;
+      if (this.spoken.has(k)) return false; if (consume) this.spoken.add(k); return true;
     }
   }
   // ---------- 상태 머신 ----------
@@ -541,7 +553,7 @@
   // 지도 미터/픽셀 (웹 메르카토르, 256 타일)
   const mpp = (lat, zoom) => 156543.03392 * Math.cos(lat * RAD) / Math.pow(2, zoom);
   function scaleFor(w, h) { if (!(w > 0 && h > 0)) return 1; if (h > w * 1.1) return Math.max(0.78, Math.min(1.1, w / 430)); return Math.max(0.6, Math.min(1.5, Math.min(w / 1000, h / 470))); }
-  return { RAD, isNum, toNum, validLL, inKorea, normDeg, angDiff, lerpAng, dist, bearing, offset, cumulative, project, pointAt, fmtDist, fmtDur, fmtClock, eta, fmtWon, turnInfo, TURN_KINDS, stageFor, STAGE_LABEL, phrase, fmtDistSpeech,
+  return { explicitLimit, textLimit, routeLimit, RAD, isNum, toNum, validLL, inKorea, normDeg, angDiff, lerpAng, dist, bearing, offset, cumulative, project, pointAt, fmtDist, fmtDur, fmtClock, eta, fmtWon, turnInfo, TURN_KINDS, stageFor, STAGE_LABEL, phrase, fmtDistSpeech,
     ApiError, mapPoi, mapPoiResponse, mapGeoResponse, mapRev, mapRoute, dedupeRoutes, OPTION_LABEL, CONGESTION, GpsFilter, OffRoute, Guidance, STATES, STATE_LABEL, canGo, GPS_STATES, latestGuard, MAX_VIA, addVia, removeVia, moveVia,
     DEMO_PLACES, demoSearch, demoRouteRaw, SIM_EVENTS, findGuide, errHelp, redact, mpp, scaleFor, hash,
     HOLD_SPEED, onRouteTh, guideVisualTarget, ViewSmoother };

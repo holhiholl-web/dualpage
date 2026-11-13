@@ -82,13 +82,19 @@
 #rlgurl{font-family:ui-monospace,monospace;font-size:11px;line-height:1.35;word-break:break-all;background:#0b0d12;padding:8px;border-radius:8px;color:#d7deea}
 #rl-app ol{margin:4px 0 0 1.15rem;padding:0;color:#d7deea;font-size:14px;line-height:1.45}#rl-app li{margin:3px 0}
 #rlb .rl-actions{display:flex;flex-wrap:wrap;gap:6px}#rlb .rl-actions button,a.rl-btn{height:44px;padding:0 14px;border-radius:14px;border:1px solid rgba(255,255,255,.15);background:#2a2d38;color:#fff;font-size:15px;font-weight:600;display:inline-flex;align-items:center;text-decoration:none;cursor:pointer}
-#rlnote{font-size:13px;color:#8a90a0}body.short #rlqr,body.short #rlqr2{width:140px;height:140px}`;
+#rlnote{font-size:13px;color:#8a90a0}body.short #rlqr,body.short #rlqr2{width:140px;height:140px}
+/* N8: QR은 모든 패널 폭에서 가로·세로 가운데 */
+#rlb .rl-pane{flex-direction:column!important;flex-wrap:nowrap!important;align-items:center!important;justify-content:center!important;gap:10px!important;width:100%}
+#rlb .rl-qrbox{width:100%;display:flex!important;align-items:center;justify-content:center;flex:none;margin:0 auto}
+#rlb #rlqr,#rlb #rlqr2{margin:0 auto!important;display:flex;align-items:center;justify-content:center}
+#rlb #rlt,#rlb #rl-app>div:not(.rl-qrbox){width:100%;max-width:640px;text-align:center}#rlb #rl-app ol{text-align:left;display:inline-block}#rlb #rlgurl{text-align:left}
+#rlb #rl-tabs,#rlb .rl-actions{justify-content:center}#rlst{text-align:center}`;
     document.head.appendChild(css);
     const c = document.createElement('button'); c.id = 'rlc'; c.onclick = () => relayModal(true); (document.getElementById('mapw') || document.body).appendChild(c);
     const m = document.createElement('div'); m.id = 'rlm'; m.hidden = true;
     m.innerHTML = '<div id="rlb"><div id="rl-tabs"><button type="button" class="on" data-tab="web">웹으로 연결</button><button type="button" data-tab="app">앱으로 연결</button></div>'
-      + '<div id="rl-web" class="rl-pane"><div id="rlqr"></div><div id="rlt"><h3>📱 휴대폰 브라우저</h3><p>안드로이드 크롬으로 QR을 찍으세요. <b>한 번만</b> 연결하면 다음부터 자동으로 이어집니다. 아이폰은 지원하지 않습니다.</p><div id="rlcode"></div><p id="rlurl"></p></div></div>'
-      + '<div id="rl-app" class="rl-pane" hidden><div id="rlqr2"></div><div><h3>앱으로 연결 (안드로이드)</h3><p>아래 주소를 GPSLogger에 한 번만 넣으면 백그라운드에서 위치가 옵니다. QR을 찍어도 됩니다.</p><div id="rlgurl"></div>'
+      + '<div id="rl-web" class="rl-pane"><div class="rl-qrbox"><div id="rlqr"></div></div><div id="rlt"><h3>📱 휴대폰 브라우저</h3><p>안드로이드 크롬으로 QR을 찍으세요. <b>한 번만</b> 연결하면 다음부터 자동으로 이어집니다. 아이폰은 지원하지 않습니다.</p><div id="rlcode"></div><p id="rlurl"></p></div></div>'
+      + '<div id="rl-app" class="rl-pane" hidden><div class="rl-qrbox"><div id="rlqr2"></div></div><div><h3>앱으로 연결 (안드로이드)</h3><p>아래 주소를 GPSLogger에 한 번만 넣으면 백그라운드에서 위치가 옵니다. QR을 찍어도 됩니다.</p><div id="rlgurl"></div>'
       + '<ol><li>Play 스토어에서 <b>GPSLogger</b>(무료)를 설치합니다.</li><li><b>로그 기록 → Log to custom URL</b>(사용자 지정 URL로 기록)을 켭니다.</li><li>URL에 위 주소를 <b>그대로</b> 붙여 넣습니다.</li><li>HTTP 방법: <b>GET</b> · 주기: <b>1초</b> · 거리: <b>0</b>.</li><li>(선택) 부팅 시 자동 시작, 배터리 최적화 제외.</li></ol>'
       + '<p id="rlnote">또는 <b>아이카 GPS</b> 앱을 설치하세요. 앱에서 이 QR(웹 주소)이나 기기 아이디로 연결하면 백그라운드 전송이 됩니다. 아이폰은 지원하지 않습니다.</p></div></div>'
       + '<div id="rlst"></div><div class="rl-actions"><button type="button" id="rlclose">닫기</button><button type="button" id="rlcopy">주소 복사</button><a class="rl-btn" id="rlapk">아이카 GPS 앱 받기</a><button type="button" id="rlnew">새 기기 연결</button></div></div>';

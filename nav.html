@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>N7 아이카 내비</title>
+<title>N8 아이카 내비</title>
 <style>
 :root{--bg:#0b0d10;--pn:rgba(20,23,28,.94);--pn2:#1f242c;--ln:rgba(255,255,255,.1);--tx:#eef1f5;--mu:#97a0ae;--ac:#3d7bff;--ok:#16a865;--gr:#0f9d58;--rd:#ff4757;--or:#ff9f1a;--r:.8rem;--bbh:clamp(2.9rem,12vh,4.2rem);--spd:clamp(2.6rem,11vw,4.2rem)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -157,9 +157,16 @@ body.narrow #bbI .tag,body.tight #bbI .tag{position:absolute;left:50%;bottom:100
 #simEv .btn{white-space:normal;line-height:1.1;font-size:.82rem}
 body.narrow #simp{right:4.2rem}body.narrow.sim #spd{bottom:calc(var(--simh,0px) + var(--bbh) + .4rem)}body.narrow.sim #alerts{bottom:calc(var(--simh,0px) + var(--bbh) + .35rem)}body.narrow.sim #rail{bottom:calc(var(--bbh) + .45rem)}
 body.hiddenNav *{animation:none!important}
+#spd.over{background:#b81e2b;color:#fff;border-color:#ff737d;animation:overPulse 1s ease-in-out infinite}
+body.narrow.sim #lim{bottom:calc(var(--simh,0px) + var(--bbh) + .7rem)}#spd.over i{color:#ffe1e3}
+@keyframes overPulse{50%{background:#f13a46;box-shadow:0 0 0 .22rem rgba(255,59,70,.3)}}
+@media(prefers-reduced-motion:reduce){#spd.over{animation:none}}
+#lim[data-demo="데모"]::after{content:'데모';position:absolute;bottom:-1rem;background:#654400;color:#fff;font-size:.62rem;border-radius:.2rem;padding:0 .2rem}
+body.guiding #toast{top:auto;bottom:calc(var(--bbh) + .6rem)}
+#kbMic{flex:none;min-width:2.8rem;min-height:2.8rem;font-size:1.1rem}#kbMic.on{background:#b81e2b}
 </style>
 <script>window.NAVONLY=1;window.NO_NATIVE_PROBE=1;window.NOAUTOQR=1;if(/[?&]embed=1/.test(location.search)){window.NAVEMBED=1;window.NOAUTOQR=1;window.NAVHIDDEN=/[?&]hidden=1/.test(location.search)?1:0}</script>
-<style>#rlb{flex-wrap:wrap;justify-content:center;gap:10px 16px!important;padding:12px 14px!important;overflow:auto}#rlqr{width:min(30vh,170px)!important;height:min(30vh,170px)!important}#rlt h3{font-size:18px!important}#rlt p{font-size:13px!important;margin:3px 0!important}#rlcode{font-size:clamp(28px,7vh,48px)!important}#rlst{font-size:15px!important;margin:4px 0!important}#rlt button{height:44px!important}</style>
+<style>#rlb{flex-wrap:nowrap;justify-content:flex-start;gap:10px 16px!important;padding:12px 14px!important;overflow:auto}#rlqr{width:min(30vh,170px)!important;height:min(30vh,170px)!important}#rlt h3{font-size:18px!important}#rlt p{font-size:13px!important;margin:3px 0!important}#rlcode{font-size:clamp(28px,7vh,48px)!important}#rlst{font-size:15px!important;margin:4px 0!important}#rlt button{height:44px!important}</style>
 <script src="./nav-core.js"></script><script src="./loc-relay.js"></script>
 </head><body>
 <div id="mapw"><div id="mi"></div><div id="carDom" class="carDom"></div></div>
@@ -169,7 +176,7 @@ body.hiddenNav *{animation:none!important}
 <div id="rail">
  <button id="recenter" aria-label="현 위치로 돌아가기"><svg viewBox="0 0 24 24" width="1.5rem" height="1.5rem" aria-hidden="true"><circle cx="12" cy="12" r="6.5" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="12" cy="12" r="2.4" fill="currentColor"/><path d="M12 1.5v4M12 18.5v4M1.5 12h4M18.5 12h4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg> 현위치</button>
  <button class="rb hideS" id="bMenu" aria-label="메뉴">⋯</button>
- <button class="rb hideN" id="bVoice" aria-label="안내 음성 켜기/끄기">🔇</button>
+ <button class="rb" id="bVoice" aria-label="안내 음성 켜기/끄기">🔇</button>
  <button class="rb hideN hideS hideG" id="bNight" aria-label="주간/야간 지도">🌙</button>
  <div id="zoomRow"><button class="rb" id="bZi" aria-label="지도 확대">+</button><button class="rb" id="bZo" aria-label="지도 축소">−</button></div>
  <button class="rb" id="bAll" aria-label="전체 경로 보기" disabled>⤢<small>전체</small></button>
@@ -182,14 +189,14 @@ body.hiddenNav *{animation:none!important}
 <div id="gpsBan" class="glass" role="alert"></div>
 <div id="bb"><div id="prog"><i></i></div><button class="btn sm" id="bPause" aria-label="안내 일시정지">⏸</button><div id="bbI"><div><b id="bbT">-</b><span>남은 시간</span></div><div><b id="bbD">-</b><span>남은 거리</span></div><div class="eta"><b id="bbE">-</b><span>도착 예정</span></div></div><button class="btn sm" id="bSimT" aria-label="모의주행 패널" hidden>🧪</button><button class="btn dan" id="bStop" aria-label="안내 종료">종료</button></div>
 <div id="sp" role="dialog" aria-label="장소 검색"><div id="spH"><div id="spF"></div><div style="display:flex;flex-direction:column;gap:.3rem"><button class="btn sm" id="spClose" aria-label="검색 닫기">✕</button><button class="btn sm" id="spSwap" aria-label="출발지와 목적지 바꾸기">⇅</button></div></div><div id="spR" aria-live="polite"></div></div>
-<div id="kb" aria-label="가상 키패드"><div id="kbP"><span id="kbL">목적지</span><div id="kbT"><span id="kbS"></span><i></i></div><button class="btn sm" id="kbClr">지우기</button><button class="btn sm" id="kbX" aria-label="키패드 닫기">⌄</button></div><div id="kbK"></div></div>
+<div id="kb" aria-label="가상 키패드"><div id="kbP"><span id="kbL">목적지</span><div id="kbT"><span id="kbS"></span><i></i></div><button class="btn sm" id="kbMic" aria-label="목적지 음성검색" aria-pressed="false">🎤</button><button class="btn sm" id="kbClr">지우기</button><button class="btn sm" id="kbX" aria-label="키패드 닫기">⌄</button></div><div id="kbK"></div></div>
 <div id="rp" role="dialog" aria-label="경로 후보"><div id="rpH"><button class="btn sm" id="rpBack" aria-label="검색으로 돌아가기">‹</button><div class="t" id="rpT"></div></div><div id="rpO"></div><div id="rpL"></div><div id="rpB"><button class="btn ok" id="bStart">▶ 안내 시작</button><button class="btn" id="bSim">🧪 모의 주행</button></div></div>
 <div id="menu" class="sheet glass" role="dialog" aria-label="메뉴"><div class="hd"><span>메뉴</span><button class="btn sm" data-close="menu" aria-label="메뉴 닫기">✕</button></div><div class="bd" id="menuB"></div></div>
 <div id="simp" class="glass" role="region" aria-label="모의주행 제어"><div class="hd"><span class="tag test">테스트</span><button class="btn sm" id="simPlay" aria-label="재생/일시정지">⏸</button><div class="seg" id="simSpd"></div><button class="btn sm" id="simX" aria-label="패널 닫기" style="margin-left:auto">✕</button></div><div id="simEv"></div><div id="simTl" aria-label="이벤트 타임라인"></div></div>
 <div id="toast" class="glass" role="alert"><div class="tx" id="toastT"></div><div id="toastB" style="display:flex;gap:.35rem"></div></div>
 <div id="cf" role="alertdialog" aria-modal="true"><div class="box glass"><p id="cfT"></p><button class="btn" id="cfN">취소</button><button class="btn dan" id="cfY">확인</button></div></div>
 <div id="arr" class="glass" role="alertdialog"><div style="font-size:2.6rem">🏁</div><h3 id="arrT">목적지에 도착했습니다</h3><button class="btn pri" id="arrOk">안내 종료</button></div>
-<div id="ver">N7</div>
+<div id="ver">N8</div>
 <script>
 const HG=(()=>{const CHO='ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ',JUNG='ㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ',JONG=' ㄱㄲㄳㄴㄵㄶㄷㄹㄺㄻㄼㄽㄾㄿㅀㅁㅂㅄㅅㅆㅇㅈㅊㅋㅌㅍㅎ';
  const VC={'ㅗㅏ':'ㅘ','ㅗㅐ':'ㅙ','ㅗㅣ':'ㅚ','ㅜㅓ':'ㅝ','ㅜㅔ':'ㅞ','ㅜㅣ':'ㅟ','ㅡㅣ':'ㅢ'};
@@ -225,8 +232,10 @@ const W_API = 'https://dualpage-tmap.holhiholl.workers.dev';
 const QS = new URLSearchParams(location.search);
 const LSK = 'n3nav';
 // ---------- 설정 저장 (GPS 궤적은 저장하지 않음) ----------
-const ST = Object.assign({ home: null, work: null, recent: [], voice: false, vol: 1, night: false, opt: '0', carType: '1', engine: 'auto', dirFree: 'north', dirGuide: 'heading', zoom: 16, tbCollapsed: false }, (() => { try { return JSON.parse(localStorage[LSK] || '{}'); } catch (e) { return {}; } })());
+const ST = Object.assign({ home: null, work: null, recent: [], voice: true, vol: 1, night: false, opt: '0', carType: '1', engine: 'auto', dirFree: 'north', dirGuide: 'heading', zoom: 16, tbCollapsed: false }, (() => { try { return JSON.parse(localStorage[LSK] || '{}'); } catch (e) { return {}; } })());
 const save = () => { try { localStorage[LSK] = JSON.stringify(ST); } catch (e) { } };
+// N8: enable guidance once on upgrade; subsequent explicit mute is retained.
+if (ST.voiceN8 !== 1) { ST.voice = true; ST.voiceN8 = 1; save(); }
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const LOG = window.__n3log = [];
 function log(t, demo) { const e = { t: Date.now(), text: String(t), demo: !!demo }; LOG.push(e); if (LOG.length > 300) LOG.shift(); if (S.sim) simLog(e); }
@@ -260,17 +269,58 @@ function errToast(e, retry) {
 }
 function confirmBox(text, yes) { $('cfT').textContent = text; $('cf').classList.add('on'); $('cfY').focus(); $('cfY').onclick = () => { $('cf').classList.remove('on'); yes(); }; $('cfN').onclick = () => $('cf').classList.remove('on'); }
 function say(t) { $('live').textContent = t; }
-// ---------- 음성 (사용자 선택 뒤에만) ----------
-const VOICE = { ok: 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined', failed: false, last: '', lastAt: 0 };
-function speak(text, force) {
-  say(text); if (!text) return false;
-  if (!ST.voice || !S.voiceGest || !VOICE.ok || VOICE.failed) return false;
+// ---------- N8: Korean speech. Never pause/change media-player audio. ----------
+const VOICE = { ok: 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined', failed: false, last: '', lastAt: 0, busyUntil: 0, priority: 0 };
+function voiceReady() { return ST.voice && S.voiceGest && VOICE.ok && !VOICE.failed; }
+function speak(text, force, priority = 2) {
+  say(text); if (!text || !voiceReady()) return false;
   if (!force && text === VOICE.last && Date.now() - VOICE.lastAt < 4000) return false;
-  VOICE.last = text; VOICE.lastAt = Date.now();
-  try { const u = new SpeechSynthesisUtterance(text); u.lang = 'ko-KR'; u.volume = ST.vol; u.rate = 1.05; const v = speechSynthesis.getVoices().find(v => /ko/i.test(v.lang)); if (v) u.voice = v; u.onerror = ev => { if (ev.error && ev.error !== 'interrupted' && ev.error !== 'canceled') { VOICE.failed = true; toast('음성 합성에 실패했습니다.', '텍스트 안내로 계속합니다.', null, true); } }; speechSynthesis.cancel(); speechSynthesis.speak(u); return true; }
-  catch (e) { VOICE.failed = true; return false; }
+  // Drop low-priority safety chatter during a turn. Turn prompts may replace an old prompt.
+  if (!force && speechSynthesis.speaking && Date.now() < VOICE.busyUntil && priority < VOICE.priority) return false;
+  try {
+    const u = new SpeechSynthesisUtterance(text); u.lang = 'ko-KR'; u.volume = ST.vol; u.rate = 1.08;
+    const v = speechSynthesis.getVoices().find(v => /^ko(?:-|_)/i.test(v.lang)); if (v) u.voice = v;
+    u.onerror = ev => { if (ev.error === 'not-allowed') { S.voiceGest = false; VOICE.busyUntil = 0; return; }
+      if (ev.error && !['interrupted', 'canceled'].includes(ev.error)) { VOICE.failed = true; toast('음성 안내를 재생할 수 없습니다.', '화면 안내로 계속합니다. 스피커를 다시 눌러 보세요.', null, true); } };
+    u.onend = () => { if (VOICE.last === text) VOICE.busyUntil = 0; };
+    speechSynthesis.cancel(); if (speechSynthesis.resume) speechSynthesis.resume(); speechSynthesis.speak(u);
+    VOICE.last = text; VOICE.lastAt = Date.now(); VOICE.priority = priority; VOICE.busyUntil = Date.now() + 7000; return true;
+  } catch (e) { VOICE.failed = true; return false; }
 }
-['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, () => { S.voiceGest = true; }, { capture: true, passive: true }));
+function unlockSpeech() {
+  if (S.voiceGest) return; S.voiceGest = true; VOICE.failed = false;
+  if (ST.voice && VOICE.ok) try {
+    // Must invoke speak *inside* the first touch, not merely remember a flag.
+    const u = new SpeechSynthesisUtterance(' '); u.lang = 'ko-KR'; u.volume = 0;
+    if (speechSynthesis.resume) speechSynthesis.resume(); speechSynthesis.speak(u);
+  } catch (e) { }
+}
+['pointerdown', 'touchstart', 'keydown'].forEach(ev => addEventListener(ev, unlockSpeech, { capture: true, passive: true }));
+// Recognition is optional; a failed/unsupported mic leaves the Korean keypad usable.
+let recognition = null, micTimer = null;
+function micUI(on) { $('kbMic').classList.toggle('on', on); $('kbMic').textContent = on ? '⏹' : '🎤'; $('kbMic').setAttribute('aria-pressed', String(on)); $('kbMic').setAttribute('aria-label', on ? '음성검색 중지' : '목적지 음성검색'); }
+function stopRecognition() { clearTimeout(micTimer); if (recognition) { try { recognition.abort(); } catch (e) { } recognition = null; } micUI(false); }
+function voiceSearch() {
+  if (recognition) { stopRecognition(); return; }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { toast('이 기기는 음성검색을 지원하지 않습니다.', '아래 키패드로 입력하세요.'); return; }
+  const field = S.editing, via = S.editVia;
+  try {
+    const r = recognition = new SR(); r.lang = 'ko-KR'; r.continuous = false; r.interimResults = false; r.maxAlternatives = 1;
+    r.onresult = ev => {
+      if (recognition !== r || S.editing !== field || S.editVia !== via || !document.body.classList.contains('kb')) return;
+      const text = ev.results && ev.results[0] && ev.results[0][0] && ev.results[0][0].transcript;
+      if (!text || !text.trim()) return;
+      KB.st = { text: text.trim().slice(0, 120), hist: [] }; kbRender(); liveSearch(KB.st.text, true);
+    };
+    r.onerror = ev => { if (recognition !== r || ev.error === 'aborted') return;
+      toast(ev.error === 'not-allowed' || ev.error === 'service-not-allowed' ? '마이크 권한을 허용해 주세요.' : ev.error === 'no-speech' ? '음성을 듣지 못했습니다.' : '음성검색을 사용할 수 없습니다.', '키패드로도 입력할 수 있습니다.'); };
+    r.onend = () => { if (recognition === r) { recognition = null; clearTimeout(micTimer); micUI(false); } };
+    // Stop only our TTS while listening; do not touch YouTube/karaoke playback.
+    if (VOICE.ok) speechSynthesis.cancel(); r.start(); micUI(true); say('목적지를 말씀하세요.'); micTimer = setTimeout(stopRecognition, 12000);
+  } catch (e) { stopRecognition(); toast('음성검색을 사용할 수 없습니다.', '키패드로 입력하세요.'); }
+}
+$('kbMic').onclick = voiceSearch;
 // ---------- API 어댑터 (실제 TMAP 프록시 / 데모) ----------
 const ctrls = {};
 async function call(chan, path, opt) {
@@ -376,13 +426,17 @@ class VectorMap extends BaseMap {
   getCenter() { try { const c = this.m.getCenter(); return { lat: c.lat(), lon: c.lng() }; } catch (e) { return this.center; } }
   getZoom() { try { return this.m.getZoom(); } catch (e) { return this.zoom; } }
   zoomBy(d) { this.zoom = Math.max(7, Math.min(19, this.getZoom() + d)); this.m.setZoom(this.zoom); return this.zoom; }
-  setRoutes(list) { this.lines.forEach(l => { try { l.setMap(null); } catch (e) { } }); this.lines = []; for (const r of list) { if (!r.path || r.path.length < 2) continue; try { this.lines.push(new Tmapv3.Polyline({ path: r.path.map(p => this.ll(p)), strokeColor: r.color, strokeWeight: r.width, map: this.m })); } catch (e) { } } }
-  setMarkers(list) { const keep = new Set(); for (const k of list) { keep.add(k.id); const pin = PIN[k.kind] || PIN.poi; const ex = this.marks.get(k.id); if (ex && ex.k === k.kind + k.lat + k.lon) continue; if (ex) try { ex.m.setMap(null); } catch (e) { } try { this.marks.set(k.id, { k: k.kind + k.lat + k.lon, m: new Tmapv3.Marker({ position: this.ll(k), icon: svgUrl(SVG.pin(pin[0], pin[1])), iconSize: new Tmapv3.Size(30, 39), map: this.m }) }); } catch (e) { } } for (const [id, v] of this.marks) if (!keep.has(id)) { try { v.m.setMap(null); } catch (e) { } this.marks.delete(id); } }
-  setCar(c) { try { if (!c) { if (this.car) { this.car.setMap(null); this.car = null; } return; } const rot = Math.round(C.normDeg((c.heading || 0) - this.bearing) / 10) * 10, col = c.est ? '#8a93a3' : '#2a8cff', key = rot + col; const icon = svgUrl(SVG.car(col).replace('<path', '<path transform="rotate(' + rot + ' 32 32)"'));
+  setRoutes(list) { this._routes = list; this.lines.forEach(l => { try { l.setMap(null); } catch (e) { } }); this.lines = []; for (const r of list) { if (!r.path || r.path.length < 2) continue; try { this.lines.push(new Tmapv3.Polyline({ path: r.path.map(p => this.ll(p)), strokeColor: r.color, strokeWeight: r.width, map: this.m })); } catch (e) { } } }
+  setMarkers(list) { this._marks = list; const keep = new Set(); for (const k of list) { keep.add(k.id); const pin = PIN[k.kind] || PIN.poi; const ex = this.marks.get(k.id); if (ex && ex.k === k.kind + k.lat + k.lon) continue; if (ex) try { ex.m.setMap(null); } catch (e) { } try { this.marks.set(k.id, { k: k.kind + k.lat + k.lon, m: new Tmapv3.Marker({ position: this.ll(k), icon: svgUrl(SVG.pin(pin[0], pin[1])), iconSize: new Tmapv3.Size(30, 39), map: this.m }) }); } catch (e) { } } for (const [id, v] of this.marks) if (!keep.has(id)) { try { v.m.setMap(null); } catch (e) { } this.marks.delete(id); } }
+  setCar(c) { this._car = c; try { if (!c) { if (this.car) { this.car.setMap(null); this.car = null; } return; } const rot = Math.round(C.normDeg((c.heading || 0) - this.bearing) / 10) * 10, col = c.est ? '#8a93a3' : '#2a8cff', key = rot + col; const icon = svgUrl(SVG.car(col).replace('<path', '<path transform="rotate(' + rot + ' 32 32)"'));
     if (!this.car || this.carKey !== key) { if (this.car) this.car.setMap(null); this.car = new Tmapv3.Marker({ position: this.ll(c), icon, iconSize: new Tmapv3.Size(46, 46), anchor: 'center', map: this.m }); this.carKey = key; } else this.car.setPosition(this.ll(c)); } catch (e) { } }
   fit(paths) { try { const b = new Tmapv3.LatLngBounds(); paths.forEach(p => p.forEach(q => b.extend(this.ll(q)))); this.setView({ bearing: 0, pitch: 0 }); this.m.fitBounds(b, { top: 60, bottom: 60, left: Math.round(innerWidth * 0.46), right: 90 }); this.zoom = this.getZoom(); } catch (e) { } }
-  setNight(on) { document.body.classList.toggle('night', on); try { this.m.setMapType(on ? 'NIGHT' : 'ROAD'); } catch (e) { } }
-  setMapType(t) { try { this.m.setMapType(t === 'hybrid' ? 'HYBRID' : (ST.night ? 'NIGHT' : 'ROAD')); return true; } catch (e) { return false; } }
+  // N8 fix: Tmapv3.setMapType reloads the vector style, which drops Polyline/Marker layers.
+  // Re-create the cached overlays after the style is loaded (event + timed fallback).
+  restyle(type) { this.type = type; try { this.m.setMapType(type); } catch (e) { return false; } const again = () => this.reapply(); try { this.m.on('ConfigLoad', again); } catch (e) { } [250, 900, 2000].forEach(ms => setTimeout(again, ms)); return true; }
+  reapply() { const r = this._routes || [], k = this._marks || [], c = this._car; this.marks.forEach(v => { try { v.m.setMap(null); } catch (e) { } }); this.marks.clear(); this.setRoutes(r); this.setMarkers(k); if (this.car) { try { this.car.setMap(null); } catch (e) { } this.car = null; this.carKey = null; } if (c) this.setCar(c); }
+  setNight(on) { document.body.classList.toggle('night', on); if (this.type === 'HYBRID') return; this.restyle(on ? 'NIGHT' : 'ROAD'); }
+  setMapType(t) { return this.restyle(t === 'hybrid' ? 'HYBRID' : (ST.night ? 'NIGHT' : 'ROAD')); }
   resize() { try { this.m.resize(innerWidth, innerHeight); } catch (e) { } }
 }
 // 데모 지도: 캔버스에 경로·차량·격자를 그리는 시뮬레이션 지도 (실제 지도 아님)
@@ -433,6 +487,17 @@ async function cfg() {
   catch (e) { throw e instanceof C.ApiError ? e : new C.ApiError(ac.signal.aborted ? 'TIMEOUT' : 'NETWORK'); } finally { clearTimeout(t); }
 }
 let mapP = null;
+// N8 fix: the menu engine switch used to reload the page, discarding S.route/S.guide.
+// Swap engines in place while guidance state stays in memory, then redraw everything.
+async function switchEngine(k) {
+  ST.engine = k; save(); if (!mapP) return initMap();
+  const old = await mapP.catch(() => null); if (old && old.engineKey === k && k !== 'auto') return old;
+  try { stopCamLoop(); } catch (e) { }
+  try { old && old.setRoutes([]); old && old.setMarkers([]); old && old.setCar(null); } catch (e) { }
+  S.map = null; window.N3map = null; mapP = null; $('mi').innerHTML = ''; $('mi').style.transform = ''; document.body.classList.remove('cssnight');
+  const m = await initMap(); restoreGuidanceView(true); toast('지도 엔진: ' + m.name, S.guide ? '길안내를 계속합니다.' : '', null, false, 2500); return m;
+}
+function restoreGuidanceView(force = false) { if (!S.map) return; redraw(); if (S.guide && S.route) { try { tickGuide(S.est ? S.estPos : undefined); } catch (e) { } hud(); } ui(); zoomBtnState(); camera(force || !S.guide); }
 function initMap() {
   if (mapP) return mapP;
   mapP = (async () => {
@@ -441,7 +506,7 @@ function initMap() {
     srcUI(); let m = null; const eng = QS.get('map') || ST.engine;
     if (S.jsKey && eng !== 'demo') {
       const order = eng === 'raster' ? ['raster'] : ['vector', 'raster'];
-      for (const k of order) { try { m = await (k === 'vector' ? new VectorMap() : new RasterMap()).init(); break; } catch (e) { log('지도 엔진 실패: ' + k + ' (' + C.redact(e.message, [S.jsKey]) + ')'); $('mi').innerHTML = ''; m = null; } }
+      for (const k of order) { try { m = await (k === 'vector' ? new VectorMap() : new RasterMap()).init(); m.engineKey = k; break; } catch (e) { log('지도 엔진 실패: ' + k + ' (' + C.redact(e.message, [S.jsKey]) + ')'); $('mi').innerHTML = ''; m = null; } }
     }
     if (!m) { m = await new DemoMap().init(); if (S.src === 'real') toast('TMAP 지도를 불러오지 못했습니다.', '데모 지도로 표시합니다. 검색·경로는 TMAP 실데이터입니다.', null, true); }
     S.map = m; window.N3map = m; log('지도: ' + m.name); m.onGesture(onMapGesture); m.setNight(!!ST.night); scale(); redraw(); camera(true); ui();
@@ -540,10 +605,14 @@ function tickGuide(estPos) {
   if (!estPos && S.nav === 'driving' && S.off.update(u.off, S.fix.acc, Date.now())) { reroute('이탈'); }
   if (u.viaArrived && S.nav === 'driving') { setNav('viaArrived'); speak('경유지에 도착했습니다.'); log('경유지 통과'); S.via = S.via.slice(1); setTimeout(() => { if (S.nav === 'viaArrived') setNav('driving'); }, 3000); }
   if (u.arrived && (S.nav === 'driving' || S.nav === 'viaArrived')) { arrive(); return; }
-  if (u.next && S.nav === 'driving' && S.guide.shouldSpeak(u.next, u.stage, u.dNext)) speak(C.phrase(u.next, u.dNext, u.stage));
+  if (u.next && S.nav === 'driving' && voiceReady() && S.guide.shouldSpeak(u.next, u.stage, u.dNext, false)) { const prompt = u.stage === 'soon' ? C.fmtDistSpeech(u.dNext) + ' 앞 ' + u.next.info.text + '입니다.' : C.phrase(u.next, u.dNext, u.stage); if (speak(prompt)) S.guide.shouldSpeak(u.next, u.stage, u.dNext); }
   if (u.tunnelAhead && !S.alerts.has('tun' + u.tunnelAhead.from)) S.alerts.set('tun' + u.tunnelAhead.from, { ic: '🚇', t: '터널 {d} 앞', from: u.tunnelAhead.from, cls: 'gray', at: u.tunnelAhead.to, src: 'TMAP 경로(facilityType=2)' });
-  const sf = S.route.guides.find(g => g.info.kind === 'safety' && g.at > u.along && g.at - u.along < 600);
-  if (sf && !S.alerts.has('sf' + sf.at)) { const m = /(\d{2,3})\s*(km|㎞)/i.exec(sf.text || ''); S.alerts.set('sf' + sf.at, { ic: '⚠️', t: sf.info.text + (m ? ' ' + m[1] + 'km/h' : '') + ' {d} 앞', from: sf.at, at: sf.at, limit: m ? +m[1] : null, src: 'TMAP 경로(turnType ' + sf.turnType + ')' }); speak(C.phrase(sf, sf.at - u.along, 'later')); }
+  const sf = S.route.guides.find(g => (g.info.kind === 'safety' || g.camera) && g.at > u.along && g.at - u.along <= 600);
+  if (sf && !S.alerts.has('sf' + sf.at)) S.alerts.set('sf' + sf.at, { ic: sf.camera ? '📷' : '⚠️', t: (sf.camera ? '과속단속 카메라' : sf.info.text) + (sf.limit ? ' · 제한 ' + sf.limit : '') + ' {d} 앞', from: sf.at, at: sf.at, demo: !!S.route.demo, src: 'TMAP 경로 응답', safety: sf });
+  if (sf && !sf.voiceAnnounced && voiceReady()) {
+    const a = S.alerts.get('sf' + sf.at);
+    if (a && !a.spoken && speak((S.route.demo ? '데모. ' : '') + C.fmtDistSpeech(sf.at - u.along) + ' 앞 ' + (sf.camera ? '과속단속 카메라' : sf.info.text) + (sf.limit ? ', 제한속도 ' + sf.limit + '입니다.' : '입니다.'), false, 1)) a.spoken = true;
+  }
   for (const [k, a] of S.alerts) if (a.at < u.along - 20) S.alerts.delete(k);
   hud();
 }
@@ -571,15 +640,28 @@ function hud() {
   $('bbT').innerHTML = '<span class="v">' + esc(hudDur(remainTime)) + '</span>' + (r.demo || S.jam ? '<span class="tag demo">데모</span>' : ''); $('bbD').textContent = C.fmtDist(u.remain); $('bbE').textContent = hudClock(C.eta(Date.now(), remainTime)); $('prog').firstChild.style.width = (u.progress * 100).toFixed(1) + '%';
   const al = $('alerts'); al.innerHTML = ''; let lim = null;
   for (const [, a] of S.alerts) { const d = Math.max(0, (a.from != null ? a.from : a.at) - u.along); const el = document.createElement('div'); el.className = 'al ' + (a.cls || ''); el.innerHTML = '<span class="ic">' + a.ic + '</span><span>' + esc(a.t.replace('{d}', C.fmtDist(d))) + (a.demo ? ' <span class="tag demo">데모</span>' : '') + '</span>'; el.title = a.src || ''; al.appendChild(el); if (a.limit) lim = a; }
-  if (lim) { $('lim').style.display = 'flex'; $('lim').textContent = lim.limit; $('lim').title = lim.demo ? '데모 제한속도' : '출처: TMAP 응답'; } else $('lim').style.display = 'none';
+  lim = currentLimit();
+  if (lim) { $('lim').style.display = 'flex'; $('lim').textContent = lim.limit; $('lim').dataset.demo = lim.demo ? '데모' : ''; $('lim').title = lim.demo ? '데모 제한속도' : lim.src; } else { $('lim').style.display = 'none'; $('lim').dataset.demo = ''; }
   speedUI(lim);
   if (S.laneFor && S.laneFor !== (n && n.at)) laneOff();
 }
+function currentLimit() {
+  if (!S.guide || !S.gu || S.gu.off > 32 || S.est) return null;
+  const actual = C.routeLimit(S.route, S.gu.along); if (actual) return actual;
+  // Explicit simulator event only; never invent a real speed limit.
+  return S.sim ? [...S.alerts.values()].find(a => a.demo && a.limit && a.at >= S.gu.along) || null : null;
+}
+const OVER = { key: '', at: 0, active: false };
 function speedUI(lim) {
-  const e = $('spd'); const f = S.fix; if (!f || f.speed == null || S.gps === 'lost' || S.gps === 'none') { e.style.display = 'none'; return; }
+  const e = $('spd'); const f = S.fix; if (!f || f.speed == null || S.gps === 'lost' || S.gps === 'none') { e.style.display = 'none'; e.classList.remove('over'); OVER.active = false; return; }
   const kmh = Math.round(f.speed * 3.6); e.style.display = 'flex'; $('spdV').textContent = kmh; const old = e.querySelector('.tag'); if (old) old.remove();
   if (f.source === 'sim') { const t = document.createElement('span'); t.className = 'tag demo'; t.textContent = '데모'; e.appendChild(t); }
-  if (lim === undefined) lim = [...S.alerts.values()].find(a => a.limit); e.classList.toggle('over', !!(lim && lim.limit && kmh > lim.limit)); e.setAttribute('aria-label', '현재 속도 ' + kmh + '킬로미터');
+  if (lim === undefined) lim = currentLimit(); const over = !!(lim && lim.limit && kmh > lim.limit); e.classList.toggle('over', over);
+  if (!over) OVER.active = false;
+  if (over && S.nav === 'driving' && S.gu && S.gu.off <= 32 && !S.est && Date.now() - S.lastFixAt < 6000) {
+    const key = (lim.key || lim.at || '') + ':' + lim.limit;
+    if ((!OVER.active || key !== OVER.key || Date.now() - OVER.at >= 30000) && (key !== OVER.key || Date.now() - OVER.at >= 12000) && speak((lim.demo ? '데모. ' : '') + '제한속도 ' + lim.limit + ', 속도를 줄이세요.', false, 1)) { OVER.active = true; OVER.key = key; OVER.at = Date.now(); }
+  } e.setAttribute('aria-label', '현재 속도 ' + kmh + '킬로미터');
 }
 function arrowSvg(kind, tt) {
   const P = { straight: 'M32 56V14M18 28l14-14 14 14', left: 'M44 56V34q0-10-10-10H16M28 12 16 24l12 12', right: 'M20 56V34q0-10 10-10h18M36 12l12 12-12 12', uturn: 'M22 56V26q0-12 12-12t12 12v14M36 34l10 10 10-10', sharpleft: 'M44 56V30L18 48M18 34v14h14', sharpright: 'M20 56V30l26 18M46 34v14H32', slightleft: 'M38 56V30L22 14M22 28V14h14', slightright: 'M26 56V30l16-16M42 28V14H28', keepleft: 'M40 56V32L26 18M26 30V18h12', keepright: 'M24 56V32l14-14M38 30V18H26', rotary: 'M32 56V40M32 40a10 10 0 1 1 10-10M42 30l8-8M42 20v10h10', tunnel: 'M10 54V30a22 22 0 0 1 44 0v24M32 54V34', via: 'M32 6a14 14 0 0 1 14 14c0 12-14 30-14 30S18 32 18 20A14 14 0 0 1 32 6z', dest: 'M18 58V8M18 10h28l-6 9 6 9H18', rest: 'M14 50h36M20 50V30h24v20M26 22h12', safety: 'M32 8 58 54H6zM32 24v14M32 44v4' };
@@ -642,7 +724,7 @@ function spRender() {
   const go = mk('경로 찾기', '경로 찾기', findRoutes, 'pri'); go.disabled = !S.to; go.id = 'bFind'; ad.append(b, go); F.appendChild(ad);
 }
 function openSearch(field) { if (S.guide) return; closeAll(); document.body.classList.remove('rp'); if (['ready', 'ended', 'candidates', 'preview', 'error'].includes(S.nav)) forceNav('search'); S.editing = field || 'to'; S.editVia = undefined; document.body.classList.add('sp'); spRender(); kbOpen(FIELD[S.editing] || '목적지', ''); showRecent(); ui(); }
-function closeSearch() { document.body.classList.remove('sp', 'kb'); sg.next(); if (S.nav === 'search') forceNav(S.routes.length ? 'preview' : 'ready'); if (S.routes.length) document.body.classList.add('rp'); ui(); }
+function closeSearch() { stopRecognition(); document.body.classList.remove('sp', 'kb'); sg.next(); if (S.nav === 'search') forceNav(S.routes.length ? 'preview' : 'ready'); if (S.routes.length) document.body.classList.add('rp'); ui(); }
 function showRecent() { const R = $('spR'); const items = [];
   if (ST.home) items.push(['🏠 집', ST.home]); if (ST.work) items.push(['🏢 회사', ST.work]); ST.recent.forEach(p => items.push(['🕘', p]));
   R.innerHTML = items.length ? '<div class="msg" style="padding:.5rem .3rem">즐겨찾기·최근 목적지</div>' : '<div class="msg">장소 이름이나 주소를 입력하세요.<br><b>예:</b> 서울역, 강남역, 테헤란로 152</div>';
@@ -673,7 +755,7 @@ const KS = { 'ㅂ': 'ㅃ', 'ㅈ': 'ㅉ', 'ㄷ': 'ㄸ', 'ㄱ': 'ㄲ', 'ㅅ': 'ㅆ
 const EN = [['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'], ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'], ['z', 'x', 'c', 'v', 'b', 'n', 'm']];
 const SY = [['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'], ['-', '/', ':', '(', ')', '&', '@', '.', ','], ['?', '!', "'", '#', '%', '+', '=']];
 function kbOpen(label, text) { KB.label = label; KB.st = { text: text || '', hist: [] }; KB.sh = KB.sym = false; $('kbL').textContent = label; document.body.classList.add('kb'); kbRender(); }
-function kbClose() { document.body.classList.remove('kb'); }
+function kbClose() { stopRecognition(); document.body.classList.remove('kb'); }
 function kbRender() { const K = $('kbK'); K.innerHTML = ''; const L = KB.sym ? SY : KB.ko ? KO : EN;
   const row = keys => { const r = document.createElement('div'); r.className = 'kr'; keys.forEach(k => { const b = document.createElement('button'); if (typeof k === 'string') { let c = k; if (KB.sh && !KB.sym) c = KB.ko ? (KS[k] || k) : k.toUpperCase(); b.textContent = c; b.dataset.c = c; b.setAttribute('aria-label', c); } else { b.textContent = k.t; b.className = k.c || 'f'; b.dataset.a = k.a; b.setAttribute('aria-label', k.l || k.t); } r.appendChild(b); }); K.appendChild(r); };
   row(L[0]); row(L[1]); row([{ t: KB.sym ? '' : '⇧', a: 'sh', c: 'f w2' + (KB.sh ? ' on' : ''), l: 'Shift' }].concat(L[2]).concat([{ t: '⌫', a: 'bs', c: 'f w2', l: '한 글자 지우기' }]));
@@ -725,7 +807,7 @@ function startGuide(sim) {
 function stopGuide(silent) {
   if (S.sim) simStop(); S.guide = null; S.route = null; S.gu = null; S.alerts.clear(); S.jam = null; laneOff(); $('arr').classList.remove('on'); document.body.classList.remove('free'); S.follow = true; S.snapPos = null; S.snapHead = null; if (S.smoother) S.smoother.reset(); setOverview(false);
   forceNav('ended'); log('안내 종료'); if (!silent) speak('안내를 종료합니다.'); S.routes = []; S.to = null; S.via = []; S.from = null; S.poiMarks = null;
-  $('alerts').innerHTML = ''; $('lim').style.display = 'none'; $('bPause').textContent = '⏸';
+  OVER.active = false; OVER.key = ''; $('spd').classList.remove('over'); $('alerts').innerHTML = ''; $('lim').style.display = 'none'; $('bPause').textContent = '⏸';
   if (S.fix && S.fix.source === 'sim') { S.fix = null; S.filter.reset(); setGps(S.nativeWatch !== null ? 'wait' : 'none'); S.map && S.map.setCar(null); }
   redraw(); forceNav('ready'); speedUI(); camera(true); ui();
 }
@@ -769,7 +851,7 @@ function simEvent(id) {
   switch (id) {
     case 'left': case 'right': { const x = g(id === 'left' ? ['left', 'sharpleft', 'slightleft', 'keepleft'] : ['right', 'sharpright', 'slightright', 'keepright']); if (!x) { toast('이 경로에 ' + ev.label + ' 지점이 없습니다.'); return false; } simJump(x.at - 270); break; }
     case 'lane': { const x = g([...C.TURN_KINDS]); if (x) simJump(x.at - 450); laneOn(S.gu && S.gu.next); speak('차로 안내는 데모입니다.'); break; }
-    case 'camera': { const at = s.along + 600; S.alerts.set('cam', { ic: '📷', t: '과속단속 {d} 앞 · 제한 60', from: at, at, limit: 60, demo: true, cls: 'red', src: '데모 — TMAP 웹 API는 단속 카메라를 제공하지 않음' }); speak('600미터 앞 과속단속 구간입니다. 데모 안내입니다.'); hud(); break; }
+    case 'camera': { const at = s.along + 600; S.alerts.set('cam', { ic: '📷', t: '과속단속 {d} 앞 · 제한 60', from: at, at, limit: 60, demo: true, cls: 'red', src: '데모 카메라 이벤트 · 실제 단속정보 아님' }); speak('600미터 앞 과속단속 구간입니다. 데모 안내입니다.'); hud(); break; }
     case 'jam': { S.jam = { from: s.along + 250, to: Math.min(r.length, s.along + 1600), extra: 240 }; S.alerts.set('jam', { ic: '🚗', t: '전방 정체 {d} 앞 · +4분', from: S.jam.from, at: S.jam.to, demo: true, src: '데모 교통' }); speak('전방에 정체 구간이 있습니다. 데모 안내입니다.'); redraw(); hud(); break; }
     case 'tunnel': { const t = r.tunnels.find(t => t.to > s.along + 50) || r.tunnels[0]; if (t) simJump(t.from - 120); else { S.demoTunnel = { from: s.along + 120, to: Math.min(r.length - 50, s.along + 720) }; S.alerts.set('dtun', { ic: '🚇', t: '터널 {d} 앞', from: S.demoTunnel.from, at: S.demoTunnel.to, demo: true, cls: 'gray' }); hud(); } break; }
     case 'offroute': s.lat = 95; s.latStart = Date.now(); s.latBear = null; s.latUntil = Date.now() + 10000; S.rerouteAt = 0; break;
@@ -790,9 +872,9 @@ function menu() {
   add('mV', ST.voice ? '🔊 음성 켜짐' : '🔇 음성 꺼짐', () => { toggleVoice(); menu(); }, ST.voice); [['작게', .35], ['보통', .7], ['크게', 1]].forEach(([t, v]) => add('mV', '음량 ' + t, () => { ST.vol = v; save(); menu(); }, ST.vol === v));
   add('mV', '▶ 다음 안내 듣기', () => { const u = S.gu; const t = u && u.next ? C.phrase(u.next, u.dNext, u.stage) : '음성 안내 테스트입니다. 300미터 앞에서 우회전입니다.'; if (!ST.voice) { ST.voice = true; save(); voiceUI(); } speak(t, true); });
   if (!VOICE.ok) $('mV').insertAdjacentHTML('beforeend', '<div style="width:100%;font-size:.75rem;color:#ffb3ba">이 브라우저는 음성 합성을 지원하지 않아 텍스트로만 안내합니다.</div>');
-  add('mM', '일반 지도', () => { m && m.setMapType('road'); }, false, !m); add('mM', '하이브리드(위성)', () => { if (m && !m.setMapType('hybrid')) toast('이 지도에서는 위성 지도를 쓸 수 없습니다.'); }, false, !m || !cap.satellite, m && !cap.satellite ? '데모 지도는 위성 지도 미지원' : '');
+  add('mM', '일반 지도', () => { m && m.setMapType('road'); restoreGuidanceView(); }, false, !m); add('mM', '하이브리드(위성)', () => { if (m && !m.setMapType('hybrid')) toast('이 지도에서는 위성 지도를 쓸 수 없습니다.'); restoreGuidanceView(); }, false, !m || !cap.satellite, m && !cap.satellite ? '데모 지도는 위성 지도 미지원' : '');
   add('mM', ST.night ? '☀ 주간' : '🌙 야간', () => { toggleNight(); menu(); });
-  [['auto', '엔진 자동'], ['vector', '벡터(3D)'], ['raster', '래스터']].forEach(([k, t]) => add('mM', t, () => { ST.engine = k; save(); toast('지도 엔진을 바꿨습니다.', '새로고침하면 적용됩니다.', [['지금 새로고침', () => location.reload(), 'pri']]); }, ST.engine === k, !S.jsKey, !S.jsKey && k === 'raster' ? 'TMAP 키가 연결되면 선택할 수 있습니다' : ''));
+  [['auto', '엔진 자동'], ['vector', '벡터(3D)'], ['raster', '래스터']].forEach(([k, t]) => add('mM', t, () => { closeAll(); switchEngine(k); }, ST.engine === k, !S.jsKey, !S.jsKey && k === 'raster' ? 'TMAP 키가 연결되면 선택할 수 있습니다' : ''));
   ['주유소', '전기차충전소', '주차장', '휴게소'].forEach(c => add('mA', c, () => aroundSearch(c), false, !m));
   add('mR', '사고·공사·단속 제보 (데모)', () => { closeAll(); toast('제보 기능은 데모입니다.', 'TMAP 웹 상품에 제보 API가 없어 외부로 전송하지 않습니다.'); log('제보(데모) — 전송 안 함', true); });
   add('mG', '📱 폰 GPS 연결(QR)', () => { closeAll(); window.relayModal && relayModal(true); }); add('mG', '📍 이 기기 위치 사용', () => { requestNative(); closeAll(); });
@@ -804,16 +886,16 @@ function featTable() { const m = S.map, real = S.src === 'real'; const rows = [
   ['지도 타일·확대·이동', m ? (m.real ? '실제 · ' + m.name : '데모 지도') : '로딩 중'], ['진행방향 회전·3D 기울기', m ? (m.caps.bearing === 'sdk' ? '실제 SDK(setBearing/setPitch)' : '화면 회전 효과(CSS)' + (m.real ? '' : ' · 데모')) : '-'],
   ['장소 검색·주소', real ? '실제 · TMAP POI/Geocoding(프록시)' : '데모 검색'], ['자동차 경로·후보', real ? '실제 · TMAP 경로 API(추천/무료/최단 등)' : '데모 경로'], ['통행료', real ? '실제 · totalFare' : '데모'], ['유류비', '미제공(API 응답 없음)'],
   ['실시간 교통 구간', real ? 'trafficInfo=Y 요청 · 응답에 있을 때만 표시' : '데모(정체 이벤트)'], ['턴바이턴 안내', real ? '실제 · turnType/description' : '데모 경로 기반'], ['터널 구간', real ? '실제 · facilityType=2' : '데모'],
-  ['제한속도·사고다발·급커브', real ? '실제 · turnType 191~194 (있을 때만)' : '-'], ['차로 안내', '데모만 (웹 API 미제공)'], ['과속단속 카메라', '데모만 (웹 API 미제공)'], ['사고/공사 제보', '데모만 (전송 안 함)'],
+  ['제한속도·사고다발·급커브', real ? '실제 · turnType 191~194 (있을 때만)' : '-'], ['차로 안내', '데모만 (웹 API 미제공)'], ['과속단속 카메라', '응답에 명시된 경우만 안내 · 그 외 데모 이벤트'], ['사고/공사 제보', '데모만 (전송 안 함)'],
   ['GPS·속도', '휴대폰 중계(1순위) + 브라우저 위치(사용자 요청 시)'], ['맵매칭', '경로 위 투영(웹 자체 구현)'], ['재탐색', real ? '실제 · 이탈 2회·2초 판정 후 TMAP 재요청' : '데모 경로 재생성'], ['음성 안내', VOICE.ok ? '브라우저 한국어 음성 합성' : '미지원 → 텍스트'], ['백그라운드 추적', '미지원 (화면이 켜져 있어야 함)']];
   return '<table class="fa"><tr><th>기능</th><th>현재 상태</th></tr>' + rows.map(r => '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td></tr>').join('') + '</table>'; }
 async function aroundSearch(cat) { closeAll(); const p = S.fix || (S.map && S.map.getCenter()); if (!p) return; try { const res = await API().around(cat, p); S.poiMarks = res; redraw(); if (!res.length) return toast(cat + ' 검색 결과가 없습니다.'); openSearch('to'); kbClose(); const R = $('spR'); R.innerHTML = '<div class="msg" style="padding:.4rem .3rem">' + (S.src === 'demo' ? '<span class="tag demo">데모</span> ' : '<span class="tag real">TMAP</span> ') + '주변 ' + esc(cat) + ' ' + res.length + '건</div>'; res.forEach(x => R.appendChild(resRow(x))); } catch (e) { errToast(e, () => aroundSearch(cat)); } }
 function closeAll() { document.querySelectorAll('.sheet').forEach(x => x.classList.remove('on')); }
 document.querySelectorAll('[data-close]').forEach(b => b.onclick = () => $(b.dataset.close).classList.remove('on'));
 // ---------- 버튼 ----------
-function toggleVoice() { ST.voice = !ST.voice; save(); voiceUI(); if (ST.voice) speak('음성 안내를 켰습니다.', true); else { try { speechSynthesis.cancel(); } catch (e) { } say('음성 안내 꺼짐'); } }
-function voiceUI() { $('bVoice').textContent = ST.voice ? '🔊' : '🔇'; $('bVoice').classList.toggle('on', ST.voice); $('bVoice').setAttribute('aria-pressed', ST.voice); }
-function toggleNight() { ST.night = !ST.night; save(); S.map && S.map.setNight(ST.night); document.body.classList.toggle('night', ST.night); $('bNight').textContent = ST.night ? '☀' : '🌙'; }
+function toggleVoice() { unlockSpeech(); VOICE.failed = false; ST.voice = !ST.voice; save(); voiceUI(); if (ST.voice) speak('음성 안내를 켰습니다.', true); else { try { speechSynthesis.cancel(); } catch (e) { } say('음성 안내 꺼짐'); } }
+function voiceUI() { $('bVoice').textContent = ST.voice ? '🔊' : '🔇'; $('bVoice').classList.toggle('on', ST.voice); $('bVoice').setAttribute('aria-pressed', ST.voice); $('bVoice').setAttribute('aria-label', ST.voice ? '음성 안내 끄기' : '음성 안내 켜기'); }
+function toggleNight() { ST.night = !ST.night; save(); S.map && S.map.setNight(ST.night); document.body.classList.toggle('night', ST.night); $('bNight').textContent = ST.night ? '☀' : '🌙'; restoreGuidanceView(); }
 function quick() { const q = $('quick'); q.innerHTML = ''; const go = p => { S.to = p; S.editing = 'to'; findRoutes(); };
   q.appendChild(mk(ST.home ? '🏠 집' : '🏠 집 설정', ST.home ? '집으로 경로 찾기' : '집 설정', () => ST.home ? go(ST.home) : (openSearch('to'), toast('검색 결과에서 [집] 버튼으로 저장하세요.')))); q.appendChild(mk(ST.work ? '🏢 회사' : '🏢 회사 설정', ST.work ? '회사로 경로 찾기' : '회사 설정', () => ST.work ? go(ST.work) : (openSearch('to'), toast('검색 결과에서 [회사] 버튼으로 저장하세요.'))));
   ST.recent.slice(0, 4).forEach(p => q.appendChild(mk('🕘 ' + p.name, '최근 목적지 ' + p.name, () => go(p)))); }
@@ -834,7 +916,7 @@ function applyTbFold() {
 function toggleTbFold(ev) { if (ev) ev.stopPropagation(); ST.tbCollapsed = !ST.tbCollapsed; save(); applyTbFold(); }
 $('tbFold').onclick = toggleTbFold;
 $('recenter').onclick = recenter; $('bAll').onclick = () => showAll();
-$('bDir').onclick = () => { const k = S.guide ? 'dirGuide' : 'dirFree'; ST[k] = ST[k] === 'heading' ? 'north' : 'heading'; save(); S.follow = true; document.body.classList.remove('free'); if (ST[k] === 'north') S.bearing = 0; if (S.map && !S.fix) S.map.setView({ bearing: 0, pitch: 0 }); camera(true); toast(ST[k] === 'heading' ? '진행방향이 위로 오도록 지도를 회전합니다.' : '북쪽이 위로 고정됩니다.', S.map && S.map.caps.bearing === 'css' ? '화면 회전 방식(래스터 SDK에는 회전 API 없음)' : '', null, false, 2500); };
+$('bDir').onclick = () => { const k = S.guide ? 'dirGuide' : 'dirFree'; ST[k] = ST[k] === 'heading' ? 'north' : 'heading'; save(); S.follow = true; document.body.classList.remove('free'); if (ST[k] === 'north') S.bearing = 0; if (S.map && !S.fix) S.map.setView({ bearing: 0, pitch: 0 }); camera(true); restoreGuidanceView(); if (!S.guide) toast(ST[k] === 'heading' ? '진행방향이 위로 오도록 지도를 회전합니다.' : '북쪽이 위로 고정됩니다.', S.map && S.map.caps.bearing === 'css' ? '화면 회전 방식(래스터 SDK에는 회전 API 없음)' : '', null, false, 2500); };
 function zoomBtnState() { const z = S.map ? S.map.getZoom() : (S.zoomLock != null ? S.zoomLock : (ST.zoom || 16)); $('bZo').disabled = z <= 7; $('bZi').disabled = z >= 19; }
 function bumpZoom(d) { if (!S.map) return; const z = S.map.zoomBy(d); ST.zoom = z; S.zoomLock = z; save(); zoomBtnState(); if (S.follow && !S.overview) camera(true); }
 $('bZi').onclick = () => bumpZoom(1); $('bZo').onclick = () => bumpZoom(-1);
