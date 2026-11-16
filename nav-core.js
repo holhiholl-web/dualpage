@@ -85,6 +85,7 @@
     150: ['졸음쉼터', 'rest'], 151: ['휴게소', 'rest'], 0: ['휴게소', 'rest'],
     182: ['왼쪽 방향 도착', 'dest'], 183: ['오른쪽 방향 도착', 'dest'], 184: ['경유지', 'via'], 185: ['첫번째 경유지', 'via'], 186: ['두번째 경유지', 'via'], 187: ['세번째 경유지', 'via'], 188: ['네번째 경유지', 'via'], 189: ['다섯번째 경유지', 'via'],
     191: ['제한속도 구간', 'safety'], 192: ['사고다발 구간', 'safety'], 193: ['급커브 구간', 'safety'], 194: ['낙석주의 구간', 'safety'],
+    1008: ['비보호 좌회전', 'left'], 1121: ['톨게이트', 'straight'], 1122: ['하이패스 톨게이트', 'straight'], 1123: ['원톨링 톨게이트', 'straight'], 1048: ['페리항로 진입', 'straight'], 1049: ['페리항로 진출', 'straight'],
     200: ['출발', 'start'], 201: ['목적지', 'dest'], 203: ['목적지 건너편', 'dest'], 233: ['직진', 'straight']
   };
   for (let i = 54; i <= 63; i++) TT[i] = [(i - 53) + '차선', 'lane'];
@@ -219,6 +220,52 @@
       distance, time, fare: isNum(toNum(s.totalFare)) ? toNum(s.totalFare) : null, taxiFare: isNum(toNum(s.taxiFare)) ? toNum(s.taxiFare) : null, fuel: null,
       path, cum, length: total, guides, segments, tunnels, traffic: trafficSeen ? traffic : null, trafficAvailable: trafficSeen,
       fetchedAt: isNum(opt.now) ? opt.now : Date.now(), source: opt.source || 'tmap', demo: !!opt.demo
+    };
+  }
+  // ---------- 네이버 Directions 5 → 공통 경로 형식 ----------
+  // 네이버 분기점 코드(guide.type)를 TMAP turnType으로 바꿔 같은 화살표·음성·음성파일을 쓴다.
+  const NAVER_TT = { 1: 11, 2: 12, 3: 13, 4: 118, 5: 117, 6: 14, 8: 1008, 11: 16, 12: 12, 13: 17, 14: 18, 15: 13, 16: 19,
+    21: 142, 22: 14, 41: 44, 42: 43, 47: 151, 48: 1048, 49: 1049, 50: 103, 51: 106, 52: 113, 53: 116, 54: 51, 55: 120, 56: 119,
+    57: 102, 58: 105, 59: 112, 60: 115, 62: 118, 63: 118, 64: 118, 65: 118, 66: 101, 67: 104, 68: 111, 69: 114, 71: 117, 72: 117, 73: 117, 74: 117,
+    75: 51, 76: 118, 77: 117, 78: 51, 79: 118, 80: 117, 81: 118, 82: 117, 87: 185, 88: 201, 91: 142, 92: 14, 121: 1121, 122: 1122, 123: 1123 };
+  // 로터리/회전교차로 시계 방향: 23(7시)…34(6시), 93…104 → TMAP 131(1시)…142(12시)
+  for (let t = 23; t <= 34; t++) { const h = ((t - 23 + 6) % 12) + 1; NAVER_TT[t] = 130 + h; NAVER_TT[t + 70] = 130 + h; }
+  const NAVER_OPT = { '0': ['traoptimal', '실시간 최적'], '1': ['traavoidtoll', '무료 우선'], '2': ['trafast', '빠른길'], '4': ['trafast', '빠른길'], '10': ['tracomfort', '편한길'] };
+  const NAVER_CONG = { 0: 0, 1: 1, 2: 2, 3: 4 };
+  function naverTurn(type) { const t = toNum(type); return isNum(t) && NAVER_TT[t] !== undefined ? NAVER_TT[t] : 51; }
+  function mapNaverRoute(data, opt) {
+    opt = opt || {};
+    if (!data || typeof data !== 'object') throw new ApiError('EMPTY_ROUTE', '경로 응답이 비어 있습니다.');
+    if (data.code !== 0) throw new ApiError(data.code === 1 || data.code === 2 || data.code === 3 ? 'EMPTY_ROUTE' : 'UPSTREAM', String(data.message || '네이버 경로 오류'));
+    const no = NAVER_OPT[String(opt.option || '0')] || NAVER_OPT['0'];
+    const R = data.route || {}; const r = (R[opt.nkey || no[0]] || R[Object.keys(R)[0]] || [])[0];
+    if (!r || !Array.isArray(r.path) || r.path.length < 2) throw new ApiError('EMPTY_ROUTE', '경로가 없습니다.');
+    const path = [], idx = [];
+    for (const c of r.path) { const lat = toNum(c && c[1]), lon = toNum(c && c[0]); if (!validLL(lat, lon)) { idx.push(Math.max(0, path.length - 1)); continue; } const last = path[path.length - 1]; if (!(last && Math.abs(last.lat - lat) < 1e-7 && Math.abs(last.lon - lon) < 1e-7)) path.push({ lat, lon }); idx.push(path.length - 1); }
+    if (path.length < 2) throw new ApiError('EMPTY_ROUTE', '경로 좌표가 부족합니다.');
+    const cum = cumulative(path), total = cum[cum.length - 1];
+    const at = i => cum[idx[Math.max(0, Math.min(idx.length - 1, toNum(i) || 0))]] || 0;
+    const guides = []; let via = 0;
+    for (const g of (Array.isArray(r.guide) ? r.guide : [])) {
+      const i = idx[Math.max(0, Math.min(idx.length - 1, toNum(g.pointIndex) || 0))]; const p = path[i]; if (!p) continue;
+      let tt = naverTurn(g.type); let pt = 'N'; if (tt === 185) { via++; tt = 184 + Math.min(5, via); pt = 'B' + via; } if (tt === 201) pt = 'E';
+      const ins = String(g.instructions || ''); const q = /'([^']+)'/.exec(ins);
+      guides.push({ lat: p.lat, lon: p.lon, at: cum[i], turnType: tt, pointType: pt, text: ins, road: q ? q[1].split(',')[0].trim() : '', name: '', naverType: toNum(g.type), limit: null, camera: false, info: turnInfo(tt) }); // 네이버엔 제한속도·단속 데이터 없음 → 만들지 않음
+    }
+    if (!guides.some(g => g.info.kind === 'dest')) { const p = path[path.length - 1]; guides.push({ lat: p.lat, lon: p.lon, at: total, turnType: 201, pointType: 'E', text: '목적지', road: '', name: '', limit: null, camera: false, info: turnInfo(201) }); }
+    guides.sort((a, b) => a.at - b.at);
+    const segments = [], traffic = [];
+    for (const sc of (Array.isArray(r.section) ? r.section : [])) {
+      const a = at(sc.pointIndex), b = at(toNum(sc.pointIndex) + Math.max(1, toNum(sc.pointCount) || 1) - 1); if (!(b > a)) continue;
+      segments.push({ from: a, to: b, name: sc.name || '', facilityType: null, roadType: null, time: NaN, distance: toNum(sc.distance), limit: null });
+      const lv = NAVER_CONG[toNum(sc.congestion)]; traffic.push({ from: a, to: b, level: lv == null ? 0 : lv, label: CONGESTION[lv] || '정보없음', speed: toNum(sc.speed) });
+    }
+    const s = r.summary || {}; const distance = isNum(toNum(s.distance)) ? toNum(s.distance) : Math.round(total); const time = isNum(toNum(s.duration)) ? Math.round(toNum(s.duration) / 1000) : Math.round(total / 11);
+    return {
+      id: 'n' + no[0] + '_' + Math.round(distance) + '_' + time, option: String(opt.option || '0'), optionLabel: no[1],
+      distance, time, fare: isNum(toNum(s.tollFare)) ? toNum(s.tollFare) : null, taxiFare: isNum(toNum(s.taxiFare)) ? toNum(s.taxiFare) : null, fuel: isNum(toNum(s.fuelPrice)) ? toNum(s.fuelPrice) : null,
+      path, cum, length: total, guides, segments, tunnels: [], traffic: traffic.length ? traffic : null, trafficAvailable: traffic.length > 0,
+      fetchedAt: isNum(opt.now) ? opt.now : Date.now(), source: 'naver', demo: false
     };
   }
   function dedupeRoutes(rs) { const out = []; for (const r of rs) { if (!r) continue; if (out.some(o => Math.abs(o.distance - r.distance) < 30 && Math.abs(o.time - r.time) < 30)) continue; out.push(r); } return out; }
@@ -553,7 +600,7 @@
   // 지도 미터/픽셀 (웹 메르카토르, 256 타일)
   const mpp = (lat, zoom) => 156543.03392 * Math.cos(lat * RAD) / Math.pow(2, zoom);
   function scaleFor(w, h) { if (!(w > 0 && h > 0)) return 1; if (h > w * 1.1) return Math.max(0.78, Math.min(1.1, w / 430)); return Math.max(0.6, Math.min(1.5, Math.min(w / 1000, h / 470))); }
-  return { explicitLimit, textLimit, routeLimit, RAD, isNum, toNum, validLL, inKorea, normDeg, angDiff, lerpAng, dist, bearing, offset, cumulative, project, pointAt, fmtDist, fmtDur, fmtClock, eta, fmtWon, turnInfo, TURN_KINDS, stageFor, STAGE_LABEL, phrase, fmtDistSpeech,
+  return { mapNaverRoute, NAVER_TT, NAVER_OPT, naverTurn, explicitLimit, textLimit, routeLimit, RAD, isNum, toNum, validLL, inKorea, normDeg, angDiff, lerpAng, dist, bearing, offset, cumulative, project, pointAt, fmtDist, fmtDur, fmtClock, eta, fmtWon, turnInfo, TURN_KINDS, stageFor, STAGE_LABEL, phrase, fmtDistSpeech,
     ApiError, mapPoi, mapPoiResponse, mapGeoResponse, mapRev, mapRoute, dedupeRoutes, OPTION_LABEL, CONGESTION, GpsFilter, OffRoute, Guidance, STATES, STATE_LABEL, canGo, GPS_STATES, latestGuard, MAX_VIA, addVia, removeVia, moveVia,
     DEMO_PLACES, demoSearch, demoRouteRaw, SIM_EVENTS, findGuide, errHelp, redact, mpp, scaleFor, hash,
     HOLD_SPEED, onRouteTh, guideVisualTarget, ViewSmoother };

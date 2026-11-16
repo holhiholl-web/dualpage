@@ -167,7 +167,7 @@ body.guiding #toast{top:auto;bottom:calc(var(--bbh) + .6rem)}
 </style>
 <script>window.NAVONLY=1;window.NO_NATIVE_PROBE=1;window.NOAUTOQR=1;if(/[?&]embed=1/.test(location.search)){window.NAVEMBED=1;window.NOAUTOQR=1;window.NAVHIDDEN=/[?&]hidden=1/.test(location.search)?1:0}</script>
 <style>#rlb{flex-wrap:nowrap;justify-content:flex-start;gap:10px 16px!important;padding:12px 14px!important;overflow:auto}#rlqr{width:min(30vh,170px)!important;height:min(30vh,170px)!important}#rlt h3{font-size:18px!important}#rlt p{font-size:13px!important;margin:3px 0!important}#rlcode{font-size:clamp(28px,7vh,48px)!important}#rlst{font-size:15px!important;margin:4px 0!important}#rlt button{height:44px!important}</style>
-<script src="./nav-core.js"></script><script src="./loc-relay.js"></script>
+<script src="./nav-core.js?v=n11"></script><script src="./loc-relay.js"></script>
 </head><body>
 <div id="mapw"><div id="mi"></div><div id="carDom" class="carDom"></div></div>
 <div id="live" class="sr" aria-live="assertive" role="status"></div>
@@ -230,6 +230,15 @@ const HG=(()=>{const CHO='ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍ
 const C = window.NavCore, $ = id => document.getElementById(id);
 const W_API = 'https://dualpage-tmap.holhiholl.workers.dev';
 const QS = new URLSearchParams(location.search);
+// N11: 지도·경로 공급자 선택 (?prov=naver 또는 nav-naver.html). 기본은 TMAP 그대로.
+const PROV = (QS.get('prov') || window.NAV_PROV || '') === 'naver' ? 'naver' : 'tmap';
+const RLBL = PROV === 'naver' ? '네이버' : 'TMAP';
+// 네이버 버전 원칙: 실제 데이터로 되는 기능만. 제한속도·과속·단속카메라·데모 기능 없음. 모의주행은 ?test=1(검증용)에서만.
+const NV = PROV === 'naver', NV_TEST = NV && QS.get('test') === '1';
+const W_NAVER = 'https://dualpage-naver.holhiholl.workers.dev'; // 네이버 NCP 프록시(시크릿은 Worker에만)
+const NAVER_CLIENT_ID = 'pjnsybl1fs'; // NCP Maps Client ID (도메인 제한, 공개 가능 값)
+if (NV) { const st = document.createElement('style'); st.textContent = 'html.prov-naver #lim{display:none!important}' + (NV_TEST ? '' : 'html.prov-naver #bSim,html.prov-naver #bSimT,html.prov-naver #simp{display:none!important}'); document.head.appendChild(st); }
+if (PROV === 'naver') { document.title = 'N11 아이카 내비 · 네이버 지도'; document.documentElement.classList.add('prov-naver'); addEventListener('DOMContentLoaded', () => { const v = document.getElementById('ver'); if (v) v.textContent = 'N11 네이버'; }); }
 const LSK = 'n3nav';
 // ---------- 설정 저장 (GPS 궤적은 저장하지 않음) ----------
 const ST = Object.assign({ home: null, work: null, recent: [], voice: true, vol: 1, night: false, opt: '0', carType: '1', engine: 'auto', dirFree: 'north', dirGuide: 'heading', zoom: 16, tbCollapsed: false }, (() => { try { return JSON.parse(localStorage[LSK] || '{}'); } catch (e) { return {}; } })());
@@ -313,7 +322,7 @@ function audioCtx() { if (!CLIP.ctx) { const AC = window.AudioContext || window.
 function clipLoad() {
   if (CLIP.p) return CLIP.p;
   CLIP.p = (async () => {
-    if (!window.KO_VOICE) await new Promise(res => { const s = document.createElement('script'); s.src = './voice/ko-voice.js'; s.onload = res; s.onerror = res; document.head.appendChild(s); });
+    if (!window.KO_VOICE) await new Promise(res => { const s = document.createElement('script'); s.src = './voice/ko-voice.js?v=n11'; s.onload = res; s.onerror = res; document.head.appendChild(s); });
     if (!window.KO_VOICE) { CLIP.why = '음성파일 목록(voice/ko-voice.js)을 못 받음'; CLIP.p = null; return false; }
     const url = './' + KO_VOICE.src + '?v=' + KO_VOICE.v; const c = audioCtx();
     if (c) try {
@@ -446,6 +455,33 @@ const REAL = {
   async route(a, b, via, option, extra) { const body = { start: { lat: a.lat, lon: a.lon }, end: { lat: b.lat, lon: b.lon }, via: via.map(v => ({ lat: v.lat, lon: v.lon })), option, carType: ST.carType }; if (extra && C.isNum(extra.angle)) body.angle = extra.angle;
     const j = await call('route' + option + ((extra && extra.chan) || ''), '/route', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); return C.mapRoute(j.data, { option, source: 'tmap' }); }
 };
+async function ncall(chan, path) {
+  if (ctrls[chan]) ctrls[chan].abort(); const ac = new AbortController(); ctrls[chan] = ac; const to = setTimeout(() => ac.abort('timeout'), 9000);
+  let r; try { r = await fetch(W_NAVER + path, { signal: ac.signal, cache: 'no-store' }); }
+  catch (e) { clearTimeout(to); if (ac.signal.aborted) throw new C.ApiError(ac.signal.reason === 'timeout' ? 'TIMEOUT' : 'ABORTED'); throw new C.ApiError('NETWORK'); }
+  clearTimeout(to); if (ctrls[chan] === ac) delete ctrls[chan];
+  let j = null; try { j = await r.json(); } catch (e) { throw new C.ApiError('BAD_RESPONSE'); }
+  if (!r.ok && !(j && j.code !== undefined)) throw new C.ApiError(r.status === 429 ? 'RATE_LIMIT' : 'UPSTREAM');
+  return j;
+}
+// 네이버: 경로·주소·역지오코딩 = 네이버 NCP / 장소(키워드) 검색 = TMAP POI 프록시 재사용(네이버엔 키워드 POI API 없음)
+const NAVER = {
+  name: '네이버',
+  async search(q, near) { let out = [];
+    try { out = await REAL.search(q, near); } catch (e) { if (e.code === 'ABORTED') throw e; log('TMAP POI 실패 → 네이버 주소검색: ' + e.code); }
+    if (out.length < 3) { try { const j = await ncall('ngeo', '/geocode?query=' + encodeURIComponent(q) + (near ? '&coordinate=' + near.lon.toFixed(6) + ',' + near.lat.toFixed(6) : ''));
+      const add = (j.addresses || []).map((a, i) => ({ id: 'nv-' + i + '-' + a.x + a.y, name: a.roadAddress || a.jibunAddress || q, kind: 'addr', lat: +a.y, lon: +a.x, addrRoad: a.roadAddress || '', addrJibun: a.jibunAddress || '', src: 'naver' })).filter(a => C.isNum(a.lat) && C.isNum(a.lon));
+      out = add.concat(out); } catch (e) { if (e.code === 'ABORTED') throw e; if (!out.length) throw e; } }
+    return out; },
+  async around(cat, p) { return REAL.around(cat, p); },
+  async rev(p) { try { const j = await ncall('rev', '/reverse?coords=' + p.lon.toFixed(6) + ',' + p.lat.toFixed(6) + '&orders=roadaddr,addr&output=json');
+      const r = (j.results || [])[0]; if (!r) throw new C.ApiError('EMPTY'); const rg = r.region || {}, ld = r.land || {}; const area = [rg.area1, rg.area2, rg.area3].map(a => a && a.name).filter(Boolean).join(' ');
+      const tail = (ld.name ? ld.name + ' ' : '') + [ld.number1, ld.number2].filter(Boolean).join('-'); const full = (area + ' ' + tail).trim(); return { full: full || '현재 위치', short: (ld.name || (rg.area3 && rg.area3.name) || full || '현재 위치') }; }
+    catch (e) { if (e.code === 'ABORTED') throw e; return REAL.rev(p); } },
+  async route(a, b, via, option, extra) { const no = C.NAVER_OPT[String(option)] || C.NAVER_OPT['0'];
+    const q = 'start=' + a.lon.toFixed(7) + ',' + a.lat.toFixed(7) + '&goal=' + b.lon.toFixed(7) + ',' + b.lat.toFixed(7) + (via && via.length ? '&waypoints=' + via.slice(0, 5).map(v => v.lon.toFixed(7) + ',' + v.lat.toFixed(7)).join('|') : '') + '&option=' + no[0] + '&cartype=' + encodeURIComponent(ST.carType || '1');
+    const j = await ncall('route' + option + ((extra && extra.chan) || ''), '/driving?' + q); return C.mapNaverRoute(j, { option, nkey: no[0] }); }
+};
 const sleep = (ms, chan) => new Promise((res, rej) => { if (ctrls[chan]) ctrls[chan].abort(); const ac = new AbortController(); ctrls[chan] = ac; const t = setTimeout(res, ms); ac.signal.addEventListener('abort', () => { clearTimeout(t); rej(new C.ApiError('ABORTED')); }); });
 const DEMO = {
   name: '데모',
@@ -454,8 +490,8 @@ const DEMO = {
   async rev(p) { return { full: '데모 위치 (' + p.lat.toFixed(4) + ', ' + p.lon.toFixed(4) + ')', short: '데모 위치' }; },
   async route(a, b, via, option, extra) { await sleep(200, 'route' + option + ((extra && extra.chan) || '')); if (C.dist(a, b) < 20 && !via.length) throw new C.ApiError('EMPTY_ROUTE'); return C.mapRoute(C.demoRouteRaw(a, b, via, option), { option, source: 'demo', demo: true }); }
 };
-const API = () => S.src === 'real' ? REAL : DEMO;
-function srcUI() { const c = $('srcChip'); c.className = 'chip ' + (S.src === 'real' ? 'real' : 'demo'); c.textContent = S.src === 'real' ? '● TMAP 실데이터' : '● 데모 데이터'; c.title = S.srcReason || ''; }
+const API = () => S.src === 'real' ? (PROV === 'naver' ? NAVER : REAL) : DEMO;
+function srcUI() { const c = $('srcChip'); c.className = 'chip ' + (S.src === 'real' ? 'real' : 'demo'); c.textContent = S.src === 'real' ? '● ' + RLBL + ' 실데이터' : '● 데모 데이터'; c.title = S.srcReason || ''; }
 function useDemo(reason) { S.src = 'demo'; S.srcReason = reason; srcUI(); log('데모 모드: ' + reason, true); }
 // ---------- 지도 어댑터 ----------
 const SVG = {
@@ -517,6 +553,56 @@ class RasterMap extends BaseMap {
   setNight(on) { document.body.classList.toggle('night', on); }
   setMapType(t) { try { this.m.setMapType(t === 'hybrid' ? 5 : 1); return true; } catch (e) { return false; } }
   resize() { const b = rotBox(this.rot); try { this.m.resize(b.w, b.h); } catch (e) { } this.cssXform(); }
+}
+// N11: 네이버 지도(JS v3) — 래스터와 같은 CSS 회전 컨테이너 + 잔차 이동으로 부드럽게
+let naverSdkP = null;
+function loadNaverSdk() {
+  if (naverSdkP) return naverSdkP;
+  naverSdkP = new Promise((res, rej) => {
+    if (window.naver && window.naver.maps && window.naver.maps.Map) return res();
+    let done = false; const fail = m => { if (!done) { done = true; naverSdkP = null; rej(new Error(m)); } };
+    window.navermap_authFailure = () => { S.naverAuthFail = true; fail('naver auth failed'); if (S.map && S.map.engineKey === 'naver') toast('네이버 지도 인증 실패', '등록된 도메인(holhiholl-web.github.io)에서만 표시됩니다.', null, true); };
+    const s = document.createElement('script'); s.src = 'https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=' + encodeURIComponent(NAVER_CLIENT_ID);
+    const t = setTimeout(() => fail('naver sdk timeout'), 10000);
+    s.onload = () => { clearTimeout(t); if (window.naver && naver.maps && naver.maps.Map) { done = true; res(); } else fail('naver sdk missing'); };
+    s.onerror = () => { clearTimeout(t); fail('naver sdk load failed'); }; document.head.appendChild(s);
+  });
+  return naverSdkP;
+}
+class NaverMap extends BaseMap {
+  constructor() { super(); this.name = '네이버 지도(JS v3)'; this.real = true; this.caps = { bearing: 'css', pitch: 'css', satellite: true, night: 'css' }; this.lines = []; this.marks = new Map(); }
+  async init() {
+    await loadNaverSdk(); const box = rotBox(false); const mi = $('mi');
+    this.m = new naver.maps.Map(mi, { center: this.ll(this.center), zoom: this.zoom, size: new naver.maps.Size(box.w, box.h), zoomControl: false, mapDataControl: false, scaleControl: false, mapTypeControl: false, logoControlOptions: { position: naver.maps.Position.BOTTOM_RIGHT }, tileTransition: false, background: '#e9eef3' });
+    await new Promise(r => { let ok = false; const fin = () => { if (!ok) { ok = true; r(); } }; try { naver.maps.Event.once(this.m, 'init', fin); } catch (e) { } setTimeout(fin, 1500); });
+    if (S.naverAuthFail) throw new Error('naver auth failed');
+    document.body.classList.add('cssnight'); return this;
+  }
+  ll(p) { return new naver.maps.LatLng(p.lat, p.lon); }
+  size(b) { try { this.m.setSize(new naver.maps.Size(b.w, b.h)); } catch (e) { } }
+  residualPx(des) { // 네이버 투영으로 정확한 픽셀 차이 (줌 단위가 달라도 안전)
+    try { const pr = this.m.getProjection(); const a = pr.fromCoordToOffset(this.ll(this.center)), b = pr.fromCoordToOffset(this.ll(des)); return [a.x - b.x, a.y - b.y].map(v => -v); } catch (e) { return super.residualPx(des); } }
+  setView(v) { const needRot = !!(v.bearing || v.pitch); if (needRot !== this.rot) { this.rot = needRot; this.size(rotBox(needRot)); try { this.m.setCenter(this.ll(this.center)); } catch (e) { } } this.bearing = v.bearing || 0; this.pitch = v.pitch || 0;
+    if (C.isNum(v.zoom) && Math.round(v.zoom) !== Math.round(this.zoom)) { this.zoom = Math.round(v.zoom); try { this.m.setZoom(this.zoom, false); } catch (e) { } }
+    let dx = 0, dy = 0;
+    if (v.center) { if (this.softCenter(v.center, v.force)) { try { this.m.setCenter(this.ll(v.center)); } catch (e) { } } else { const r = this.residualPx(v.center); dx = -r[0]; dy = -r[1]; } }
+    this.cssXform(dx, dy); }
+  getCenter() { try { const c = this.m.getCenter(); return { lat: c.lat(), lon: c.lng() }; } catch (e) { return this.center; } }
+  getZoom() { try { return this.m.getZoom(); } catch (e) { return this.zoom; } }
+  zoomBy(d) { this.zoom = Math.max(7, Math.min(19, this.getZoom() + d)); try { this.m.setZoom(this.zoom, false); } catch (e) { } return this.zoom; }
+  setRoutes(list) { this.lines.forEach(l => l.setMap(null)); this.lines = []; for (const r of list) { if (!r.path || r.path.length < 2) continue; this.lines.push(new naver.maps.Polyline({ map: this.m, path: r.path.map(p => this.ll(p)), strokeColor: r.color, strokeWeight: r.width, strokeOpacity: r.opacity || 1, strokeLineCap: 'round', strokeLineJoin: 'round' })); } }
+  setMarkers(list) { const keep = new Set(); for (const k of list) { keep.add(k.id); const pin = PIN[k.kind] || PIN.poi; const ex = this.marks.get(k.id); if (ex && ex.k === k.kind + k.lat + k.lon) continue; if (ex) ex.m.setMap(null);
+      this.marks.set(k.id, { k: k.kind + k.lat + k.lon, m: new naver.maps.Marker({ map: this.m, position: this.ll(k), title: k.label || '', icon: { url: svgUrl(SVG.pin(pin[0], pin[1])), size: new naver.maps.Size(30, 39), scaledSize: new naver.maps.Size(30, 39), anchor: new naver.maps.Point(15, 39) } }) }); }
+    for (const [id, v] of this.marks) if (!keep.has(id)) { v.m.setMap(null); this.marks.delete(id); } }
+  setCar(c) { if (!c) { if (this.car) { this.car.setMap(null); this.car = null; } return; } const col = c.est ? '#8a93a3' : '#2a8cff';
+    if (!this.car) { this.carEl = document.createElement('div'); this.carEl.style.cssText = 'width:46px;height:46px;will-change:transform'; this.car = new naver.maps.Marker({ map: this.m, position: this.ll(c), zIndex: 1000, icon: { content: this.carEl, size: new naver.maps.Size(46, 46), anchor: new naver.maps.Point(23, 23) } }); }
+    else this.car.setPosition(this.ll(c));
+    if (this.carCol !== col) { this.carEl.innerHTML = SVG.car(col); this.carEl.firstChild.style.cssText = 'width:46px;height:46px;display:block'; this.carCol = col; }
+    this.carEl.style.transform = 'rotate(' + (c.heading || 0).toFixed(1) + 'deg)'; } // 연속 회전(10° 단계 없음)
+  fit(paths) { let b = null, n = 0; paths.forEach(p => p.forEach(q => { const l = this.ll(q); b = b ? b.extend(l) || b : new naver.maps.LatLngBounds(l, l); n++; })); if (n) { this.setView({ bearing: 0, pitch: 0 }); try { this.m.fitBounds(b, { top: 60, bottom: 60, left: Math.round(innerWidth * 0.46), right: 90 }); } catch (e) { try { this.m.fitBounds(b); } catch (x) { } } this.zoom = this.getZoom(); this.center = this.getCenter(); } }
+  setNight(on) { document.body.classList.toggle('night', on); }
+  setMapType(t) { try { this.m.setMapTypeId(t === 'hybrid' ? naver.maps.MapTypeId.HYBRID : naver.maps.MapTypeId.NORMAL); return true; } catch (e) { return false; } }
+  resize() { this.size(rotBox(this.rot)); this.cssXform(); }
 }
 class VectorMap extends BaseMap {
   constructor() { super(); this.name = 'TMAP 벡터(Vector JS)'; this.real = true; this.caps = { bearing: 'sdk', pitch: 'sdk', satellite: true, night: 'sdk' }; this.lines = []; this.marks = new Map(); }
@@ -602,6 +688,12 @@ async function switchEngine(k) {
   S.map = null; window.N3map = null; mapP = null; $('mi').innerHTML = ''; $('mi').style.transform = ''; document.body.classList.remove('cssnight');
   const m = await initMap(); restoreGuidanceView(true); toast('지도 엔진: ' + m.name, S.guide ? '길안내를 계속합니다.' : '', null, false, 2500); return m;
 }
+// N11: TMAP ↔ 네이버 전환. 지도 SDK·경로 공급자가 달라 페이지를 다시 연다(임베드면 media.html이 처리).
+function switchProv(p) { if (p === PROV) { closeAll(); return; }
+  const go = () => { try { localStorage.setItem('n3prov', p); } catch (e) { }
+    if (window.NAVEMBED && parent !== window) { parent.postMessage({ type: 'navProv', prov: p }, '*'); return; }
+    const q = new URLSearchParams(location.search); if (p === 'naver') q.set('prov', 'naver'); else q.delete('prov'); location.replace(location.pathname.replace(/nav-naver\.html$/, 'nav.html') + (q.toString() ? '?' + q : '')); };
+  closeAll(); if (S.guide) toast('지도를 ' + (p === 'naver' ? '네이버' : 'TMAP') + '로 바꾸면 길안내가 다시 시작됩니다.', '목적지는 유지됩니다.', [['바꾸기', go, 'pri'], ['취소', () => hideToast()]], true, 0); else go(); }
 function restoreGuidanceView(force = false) { if (!S.map) return; redraw(); if (S.guide && S.route) { try { tickGuide(S.est ? S.estPos : undefined); } catch (e) { } hud(); } ui(); zoomBtnState(); camera(force || !S.guide); }
 function initMap() {
   if (mapP) return mapP;
@@ -609,11 +701,14 @@ function initMap() {
     try { const c = await cfg(); S.jsKey = c.jsKey; S.src = 'real'; S.srcReason = 'TMAP 프록시 연결됨'; }
     catch (e) { useDemo(e.code === 'DEMO_FORCED' ? '?demo=1' : ('TMAP 연결 안 됨: ' + (C.errHelp(e.code).title))); }
     srcUI(); let m = null; const eng = QS.get('map') || ST.engine;
-    if (S.jsKey && eng !== 'demo') {
+    if (NV) {
+      if (S.src !== 'real') { S.src = 'real'; S.srcReason = '네이버 프록시 사용'; srcUI(); }
+      try { m = await new NaverMap().init(); m.engineKey = 'naver'; } catch (e) { log('네이버 지도 실패: ' + e.message); $('mi').innerHTML = ''; m = null; }
+    } else if (S.jsKey && eng !== 'demo') {
       const order = eng === 'raster' ? ['raster'] : ['vector', 'raster'];
       for (const k of order) { try { m = await (k === 'vector' ? new VectorMap() : new RasterMap()).init(); m.engineKey = k; break; } catch (e) { log('지도 엔진 실패: ' + k + ' (' + C.redact(e.message, [S.jsKey]) + ')'); $('mi').innerHTML = ''; m = null; } }
     }
-    if (!m) { m = await new DemoMap().init(); if (S.src === 'real') toast('TMAP 지도를 불러오지 못했습니다.', '데모 지도로 표시합니다. 검색·경로는 TMAP 실데이터입니다.', null, true); }
+    if (!m) { m = await new DemoMap().init(); if (NV) m.name = '네이버 지도 로드 실패(경로선만 표시)'; if (NV) toast('네이버 지도를 불러오지 못했습니다.', '등록된 주소(holhiholl-web.github.io)에서 열어 주세요. 경로·안내는 네이버 데이터로 계속됩니다.', null, true); else if (S.src === 'real') toast(RLBL + ' 지도를 불러오지 못했습니다.', '데모 지도로 표시합니다. 검색·경로는 ' + RLBL + ' 실데이터입니다.', null, true); }
     S.map = m; window.N3map = m; log('지도: ' + m.name); m.onGesture(onMapGesture); m.setNight(!!ST.night); scale(); redraw(); camera(true); ui();
     return m;
   })();
@@ -751,6 +846,7 @@ function hud() {
   if (S.laneFor && S.laneFor !== (n && n.at)) laneOff();
 }
 function currentLimit() {
+  if (NV) return null; // 네이버: 제한속도 데이터 없음 → 과속 안내 안 함
   if (!S.guide || !S.gu || S.gu.off > 32 || S.est) return null;
   const actual = C.routeLimit(S.route, S.gu.along); if (actual) return actual;
   // Explicit simulator event only; never invent a real speed limit.
@@ -878,22 +974,22 @@ async function findRoutes() {
   if (!S.to) return;
   if (!from) { if (S.src === 'demo') { S.from = Object.assign({}, C.demoSearch('서울역')[0]); spRender(); return findRoutes(); } toast('출발지를 정할 수 없습니다.', '휴대폰 GPS를 연결하거나 출발지를 직접 입력하세요.', [['출발지 입력', () => openSearch('from'), 'pri'], ['폰 GPS 연결', () => window.relayModal && relayModal(true)]], true, 0); return; }
   const dest = S.to.entrance || S.to; const tok = rg.next(); kbClose(); document.body.classList.remove('sp'); document.body.classList.add('rp'); forceNav('candidates');
-  $('rpT').textContent = placeName(S.from || curPlace()) + ' → ' + S.to.name; $('rpL').innerHTML = '<div class="msg">경로 탐색 중… (' + (S.src === 'real' ? 'TMAP' : '데모') + ')</div>'; rpOpts(); $('bStart').disabled = $('bSim').disabled = true;
-  const opts = [ST.opt].concat(['0', '1', '10'].filter(o => o !== ST.opt)).slice(0, 3);
+  $('rpT').textContent = placeName(S.from || curPlace()) + ' → ' + S.to.name; $('rpL').innerHTML = '<div class="msg">경로 탐색 중… (' + (S.src === 'real' ? RLBL : '데모') + ')</div>'; rpOpts(); $('bStart').disabled = $('bSim').disabled = true;
+  const opts = [ST.opt].concat((NV ? ['0', '2', '10'] : ['0', '1', '10']).filter(o => o !== ST.opt)).slice(0, 3);
   const res = await Promise.allSettled(opts.map(o => API().route(from, dest, S.via, o)));
   if (!rg.isLatest(tok)) return;
   const ok = C.dedupeRoutes(res.filter(x => x.status === 'fulfilled').map(x => x.value)); const errs = res.filter(x => x.status === 'rejected').map(x => x.reason);
   if (!ok.length) { const e = errs.find(x => x.code !== 'ABORTED') || errs[0] || { code: 'EMPTY_ROUTE' }; if (e.code === 'ABORTED') return; const h = C.errHelp(e.code); $('rpL').innerHTML = '<div class="msg"><b>' + esc(h.title) + '</b><br>' + esc(h.action) + (e.message && e.code === 'BAD_REQUEST' ? '<br><small>' + esc(e.message) + '</small>' : '') + '</div>'; $('rpL').appendChild(mk('다시 시도', '경로 다시 찾기', findRoutes, 'pri')); if (S.src === 'real') $('rpL').appendChild(mk('데모로 계속', '데모 모드로 전환', () => { useDemo('경로 오류 ' + e.code); findRoutes(); })); log('경로 실패 ' + e.code); forceNav('candidates'); return; }
-  S.routes = ok; S.sel = 0; log('경로 후보 ' + ok.length + '개' + (ok[0].demo ? ' (데모)' : ' (TMAP)'), ok[0].demo);
+  S.routes = ok; S.sel = 0; log('경로 후보 ' + ok.length + '개' + (ok[0].demo ? ' (데모)' : ' (' + RLBL + ')'), ok[0].demo);
   if (!ST.recent.some(p => p.name === S.to.name)) { ST.recent.unshift(slim(S.to)); ST.recent = ST.recent.slice(0, 8); save(); quick(); }
   rpRender(); redraw(); showAll(true); setNav('preview');
 }
 function rpOpts() { const o = $('rpO'); o.innerHTML = ''; const seg = document.createElement('div'); seg.className = 'seg'; seg.setAttribute('role', 'group'); seg.setAttribute('aria-label', '기본 경로 옵션');
-  Object.entries(C.OPTION_LABEL).forEach(([k, v]) => { const b = mk(v, '경로 옵션 ' + v, () => { ST.opt = k; save(); findRoutes(); }); b.classList.toggle('on', ST.opt === k); b.setAttribute('aria-pressed', ST.opt === k); seg.appendChild(b); }); o.appendChild(seg);
+  Object.entries(NV ? { '0': '실시간 최적', '2': '빠른길', '10': '편한길', '1': '무료 우선' } : C.OPTION_LABEL).forEach(([k, v]) => { const b = mk(v, '경로 옵션 ' + v, () => { ST.opt = k; save(); findRoutes(); }); b.classList.toggle('on', ST.opt === k); b.setAttribute('aria-pressed', ST.opt === k); seg.appendChild(b); }); o.appendChild(seg);
   const car = document.createElement('div'); car.className = 'seg'; car.setAttribute('aria-label', '차종(통행료 계산)'); [['1', '승용'], ['6', '경차'], ['2', '중형승합'], ['3', '대형승합'], ['4', '대형화물'], ['5', '특수화물']].forEach(([k, v]) => { const b = mk(v, '차종 ' + v, () => { ST.carType = k; save(); findRoutes(); }); b.classList.toggle('on', ST.carType === k); car.appendChild(b); }); o.appendChild(car); }
 function rpRender() { const L = $('rpL'); L.innerHTML = ''; const now = Date.now();
   S.routes.forEach((r, i) => { const b = document.createElement('button'); b.className = 'rc' + (i === S.sel ? ' sel' : ''); b.setAttribute('aria-pressed', i === S.sel);
-    b.innerHTML = '<div class="h"><span class="o">' + esc(r.optionLabel) + '</span>' + (r.demo ? '<span class="tag demo">데모</span>' : '<span class="tag real">TMAP</span>') + '</div><div class="h"><span class="tm">' + C.fmtDur(r.time) + '</span><span class="d">' + C.fmtDist(r.distance) + '</span></div><div class="s">도착 ' + C.fmtClock(C.eta(now, r.time)) + ' · 통행료 ' + C.fmtWon(r.fare) + ' · 유류비 미제공<br>' + (r.trafficAvailable ? '실시간 교통 반영' : '교통 구간 정보 없음(응답 미포함)') + ' · 기준 ' + C.fmtClock(r.fetchedAt) + '</div>';
+    b.innerHTML = '<div class="h"><span class="o">' + esc(r.optionLabel) + '</span>' + (r.demo ? '<span class="tag demo">데모</span>' : '<span class="tag real">' + RLBL + '</span>') + '</div><div class="h"><span class="tm">' + C.fmtDur(r.time) + '</span><span class="d">' + C.fmtDist(r.distance) + '</span></div><div class="s">도착 ' + C.fmtClock(C.eta(now, r.time)) + ' · 통행료 ' + C.fmtWon(r.fare) + ' · 유류비 ' + (C.isNum(r.fuel) ? C.fmtWon(r.fuel) : '미제공') + '<br>' + (r.trafficAvailable ? '실시간 교통 반영' : '교통 구간 정보 없음(응답 미포함)') + ' · 기준 ' + C.fmtClock(r.fetchedAt) + '</div>';
     b.onclick = () => { S.sel = i; rpRender(); redraw(); showAll(true); }; L.appendChild(b); });
   $('bStart').disabled = $('bSim').disabled = false; }
 // ---------- 안내 시작/종료 ----------
@@ -968,12 +1064,12 @@ function simEvent(id) {
   return true;
 }
 function simUI() { if (!S.sim) return; $('simPlay').textContent = S.sim.playing ? '⏸' : '▶'; $('simPlay').setAttribute('aria-label', S.sim.playing ? '모의 주행 일시정지' : '모의 주행 재생'); const sp = $('simSpd'); sp.innerHTML = ''; [1, 2, 4, 8].forEach(m => { const b = mk(m + 'x', '속도 ' + m + '배', () => { S.sim.mult = m; simUI(); log('모의 속도 ' + m + 'x', true); }); b.classList.toggle('on', S.sim.mult === m); sp.appendChild(b); });
-  const E = $('simEv'); if (!E.childElementCount) C.SIM_EVENTS.forEach(e => { const b = mk(e.label + (e.real ? '' : ' ·데모'), '이벤트 ' + e.label, () => simEvent(e.id)); b.dataset.ev = e.id; E.appendChild(b); }); }
+  const E = $('simEv'); if (NV) E.hidden = true; else if (!E.childElementCount) C.SIM_EVENTS.forEach(e => { const b = mk(e.label + (e.real ? '' : ' ·데모'), '이벤트 ' + e.label, () => simEvent(e.id)); b.dataset.ev = e.id; E.appendChild(b); }); }
 function simLog(e) { const T = $('simTl'); const d = document.createElement('div'); d.textContent = new Date(e.t).toTimeString().slice(0, 8) + ' ' + e.text + (e.demo ? ' [데모]' : ''); T.prepend(d); while (T.childElementCount > 60) T.lastChild.remove(); }
 // ---------- 메뉴 ----------
 function menu() {
   const B = $('menuB'); const m = S.map; const cap = m ? m.caps : {};
-  B.innerHTML = '<h4>음성 안내</h4><div class="grid" id="mV"></div><h4>지도</h4><div class="grid" id="mM"></div><h4>주변 찾기 (' + (S.src === 'real' ? 'TMAP POI' : '데모') + ')</h4><div class="grid" id="mA"></div><h4>제보</h4><div class="grid" id="mR"></div><h4>위치</h4><div class="grid" id="mG"></div><h4>즐겨찾기 · 테스트</h4><div class="grid" id="mF"></div><h4>기능 가용성 (실제 / 데모)</h4><div id="mT"></div>';
+  B.innerHTML = '<h4>음성 안내</h4><div class="grid" id="mV"></div><h4>지도</h4><div class="grid" id="mM"></div><h4>주변 찾기 (' + (S.src === 'real' ? 'TMAP POI' : '데모') + ')</h4><div class="grid" id="mA"></div><h4>제보</h4><div class="grid" id="mR"></div><h4>위치</h4><div class="grid" id="mG"></div><h4>즐겨찾기 · 테스트</h4><div class="grid" id="mF"></div><h4>' + (NV ? '기능 (네이버 데이터 기준)' : '기능 가용성 (실제 / 데모)') + '</h4><div id="mT"></div>';
   const add = (id, t, f, on, dis, why) => { const b = mk(t, t, f); if (on) b.classList.add('pri'); if (dis) { b.disabled = true; b.title = why || ''; } $(id).appendChild(b); if (dis && why) { const s = document.createElement('div'); s.style.cssText = 'width:100%;font-size:.75rem;color:var(--mu)'; s.textContent = '↳ ' + why; $(id).appendChild(s); } };
   add('mV', ST.voice ? '🔊 음성 켜짐' : '🔇 음성 꺼짐', () => { toggleVoice(); menu(); }, ST.voice); [['작게', .35], ['보통', .7], ['크게', 1]].forEach(([t, v]) => add('mV', '음량 ' + t, () => { ST.vol = v; save(); menu(); }, ST.vol === v));
   add('mV', '🔊 음성 테스트', () => voiceTest(), true);
@@ -983,15 +1079,22 @@ function menu() {
   if (!VOICE.ok) $('mV').insertAdjacentHTML('beforeend', '<div style="width:100%;font-size:.75rem;color:#ffb3ba">이 브라우저는 음성 합성을 지원하지 않아 내장 음성파일로 안내합니다.</div>');
   add('mM', '일반 지도', () => { m && m.setMapType('road'); restoreGuidanceView(); }, false, !m); add('mM', '하이브리드(위성)', () => { if (m && !m.setMapType('hybrid')) toast('이 지도에서는 위성 지도를 쓸 수 없습니다.'); restoreGuidanceView(); }, false, !m || !cap.satellite, m && !cap.satellite ? '데모 지도는 위성 지도 미지원' : '');
   add('mM', ST.night ? '☀ 주간' : '🌙 야간', () => { toggleNight(); menu(); });
-  [['auto', '엔진 자동'], ['vector', '벡터(3D)'], ['raster', '래스터']].forEach(([k, t]) => add('mM', t, () => { closeAll(); switchEngine(k); }, ST.engine === k, !S.jsKey, !S.jsKey && k === 'raster' ? 'TMAP 키가 연결되면 선택할 수 있습니다' : ''));
+  add('mM', '지도: TMAP', () => switchProv('tmap'), PROV === 'tmap'); add('mM', '지도: 네이버', () => switchProv('naver'), PROV === 'naver');
+  if (PROV === 'tmap') [['auto', '엔진 자동'], ['vector', '벡터(3D)'], ['raster', '래스터']].forEach(([k, t]) => add('mM', t, () => { closeAll(); switchEngine(k); }, ST.engine === k, !S.jsKey, !S.jsKey && k === 'raster' ? 'TMAP 키가 연결되면 선택할 수 있습니다' : ''));
   ['주유소', '전기차충전소', '주차장', '휴게소'].forEach(c => add('mA', c, () => aroundSearch(c), false, !m));
-  add('mR', '사고·공사·단속 제보 (데모)', () => { closeAll(); toast('제보 기능은 데모입니다.', 'TMAP 웹 상품에 제보 API가 없어 외부로 전송하지 않습니다.'); log('제보(데모) — 전송 안 함', true); });
+  if (!NV) add('mR', '사고·공사·단속 제보 (데모)', () => { closeAll(); toast('제보 기능은 데모입니다.', 'TMAP 웹 상품에 제보 API가 없어 외부로 전송하지 않습니다.'); log('제보(데모) — 전송 안 함', true); });
+  if (NV) { const r = $('mR'); if (r) { r.previousElementSibling && r.previousElementSibling.remove(); r.remove(); } }
   add('mG', '📱 폰 GPS 연결(QR)', () => { closeAll(); window.relayModal && relayModal(true); }); add('mG', '📍 이 기기 위치 사용', () => { requestNative(); closeAll(); });
   add('mF', ST.home ? '🏠 집 삭제' : '🏠 집 미설정', () => { ST.home = null; save(); quick(); menu(); }, false, !ST.home, ST.home ? '' : '검색 결과에서 [집] 버튼으로 저장'); add('mF', ST.work ? '🏢 회사 삭제' : '🏢 회사 미설정', () => { ST.work = null; save(); quick(); menu(); }, false, !ST.work, ST.work ? '' : '검색 결과에서 [회사] 버튼으로 저장');
-  add('mF', '🧪 모의 주행 패널', () => { if (S.sim) { $('simp').classList.toggle('on'); closeAll(); } else toast('경로 미리보기에서 [모의 주행]을 누르세요.'); });
+  if (!NV || NV_TEST) add('mF', '🧪 모의 주행 패널', () => { if (S.sim) { $('simp').classList.toggle('on'); closeAll(); } else toast('경로 미리보기에서 [모의 주행]을 누르세요.'); });
   $('mT').innerHTML = featTable(); $('menu').classList.add('on');
 }
-function featTable() { const m = S.map, real = S.src === 'real'; const rows = [
+function featTable() { const m = S.map, real = S.src === 'real';
+  if (NV) { const rows = [['지도', m ? (m.real ? '네이버 지도(JS v3)' : '네이버 지도 로드 실패 — 빈 배경에 경로만 표시') : '로딩 중'], ['장소 검색', 'TMAP POI(프록시) · 결과 적을 때 네이버 주소검색'], ['자동차 경로·후보', '네이버 Directions 5 (실시간 최적/무료/빠른길/편한길)'],
+      ['통행료·유류비', '네이버 응답 값'], ['실시간 교통 구간', '네이버 section(혼잡도)'], ['턴바이턴·음성 안내', '네이버 guide(분기점 코드)'], ['역지오코딩', '네이버 Reverse Geocoding'], ['재탐색', '이탈 판정 후 네이버 재요청'],
+      ['제한속도·과속·단속카메라', '없음 (네이버에 데이터 없음)'], ['GPS·속도', '휴대폰 중계(1순위) + 브라우저 위치']];
+    return '<table class="fa"><tr><th>기능</th><th>현재 상태</th></tr>' + rows.map(r => '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td></tr>').join('') + '</table>'; }
+  const rows = [
   ['지도 타일·확대·이동', m ? (m.real ? '실제 · ' + m.name : '데모 지도') : '로딩 중'], ['진행방향 회전·3D 기울기', m ? (m.caps.bearing === 'sdk' ? '실제 SDK(setBearing/setPitch)' : '화면 회전 효과(CSS)' + (m.real ? '' : ' · 데모')) : '-'],
   ['장소 검색·주소', real ? '실제 · TMAP POI/Geocoding(프록시)' : '데모 검색'], ['자동차 경로·후보', real ? '실제 · TMAP 경로 API(추천/무료/최단 등)' : '데모 경로'], ['통행료', real ? '실제 · totalFare' : '데모'], ['유류비', '미제공(API 응답 없음)'],
   ['실시간 교통 구간', real ? 'trafficInfo=Y 요청 · 응답에 있을 때만 표시' : '데모(정체 이벤트)'], ['턴바이턴 안내', real ? '실제 · turnType/description' : '데모 경로 기반'], ['터널 구간', real ? '실제 · facilityType=2' : '데모'],

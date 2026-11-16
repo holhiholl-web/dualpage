@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>M7 아이카 미디어 · 유튜브 / 노래방</title>
+<title>M8 아이카 미디어 · 유튜브 / 노래방</title>
 <style>
 :root{--bg:#0f0f0f;--pn:#0f0f0f;--pn2:#272727;--ln:rgba(255,255,255,.1);--tx:#f1f1f1;--mu:#aaa;--ac:#ff3d7f;--ac2:#7b5cff;--r:12px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font-family:Roboto,"Noto Sans KR","Apple SD Gothic Neo",system-ui,sans-serif;overflow:hidden;user-select:none}
@@ -39,6 +39,7 @@ body.rel-hid #watch{gap:8px}
 #mw{position:fixed;top:0;bottom:0;right:0;left:var(--nw,0px);transform:translateZ(0);overflow:hidden}
 #nv{position:fixed;top:0;bottom:0;left:0;width:var(--nw,0px);background:#000;overflow:hidden}#nv iframe{width:100%;height:100%;border:0;display:block}
 #dv{position:fixed;top:0;bottom:0;left:calc(var(--nw,0px) - 6px);width:12px;z-index:1500;cursor:col-resize;touch-action:none}#dv:after{content:'';position:absolute;left:5px;top:0;bottom:0;width:2px;background:#333}
+#nmap{position:fixed;z-index:1600;top:calc(50% + 56px);left:var(--nw,0px);width:30px;height:46px;border:1px solid #444;border-left:0;border-radius:0 12px 12px 0;background:rgba(30,30,36,.92);color:#fff;font:800 15px sans-serif;padding:0;box-shadow:2px 0 10px #0008}#nmap.nv{background:#03c75a;border-color:#03c75a}#nmap.tm{background:#2a6cf0;border-color:#2a6cf0}body.nh #nmap{display:none}
 #nt{position:fixed;z-index:1600;top:50%;left:var(--nw,0px);transform:translateY(-50%);width:30px;height:96px;border:1px solid #444;border-left:0;border-radius:0 14px 14px 0;background:rgba(30,30,36,.92);color:#fff;font-size:18px;padding:0;box-shadow:2px 0 10px #0008}
 body.nh #nv,body.nh #dv{display:none}body.dragging iframe{pointer-events:none}
 #ln{position:absolute;inset:0;z-index:60;background:radial-gradient(circle at 50% 40%,#1c1d26,#0b0b0f);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4vh}
@@ -51,7 +52,7 @@ body.yt-fs #top,body.yt-fs #wi,body.yt-fs #rel,body.yt-fs #relFold,body.yt-fs #c
 body.yt-fs #watch{top:0!important;padding:0;gap:0}body.yt-fs #pw{border-radius:0}
 body.yt-fs #ytFs{background:rgba(0,0,0,.7)}
 </style></head><body>
-<div id="nv"></div><div id="dv"></div><button id="nt" title="내비 숨김/보기">◀</button><div id="mw"><div id="top"><button id="logo" title="홈"><i></i><b>YouTube</b><sup>KR</sup></button><div id="sbx"><input id="sq" readonly inputmode="none" placeholder="검색"><button id="sgo" title="검색">🔍</button></div><button id="bk" title="노래방으로 전환"><img src="./icon_karaoke.png" alt="노래방"></button></div>
+<div id="nv"></div><div id="dv"></div><button id="nt" title="내비 숨김/보기">◀</button><button id="nmap" title="지도 선택: TMAP / 네이버" aria-label="지도 선택">T</button><div id="mw"><div id="top"><button id="logo" title="홈"><i></i><b>YouTube</b><sup>KR</sup></button><div id="sbx"><input id="sq" readonly inputmode="none" placeholder="검색"><button id="sgo" title="검색">🔍</button></div><button id="bk" title="노래방으로 전환"><img src="./icon_karaoke.png" alt="노래방"></button></div>
 <div id="home"><div id="chips"></div><div id="gs"><div id="gh"></div><div id="grid"></div><div id="gft"></div></div></div>
 <div id="watch" hidden><div id="wl"><div id="pw"><div id="yt"></div><button type="button" id="ytFs" aria-label="유튜브 영역 전체화면" aria-pressed="false" title="전체화면 (유튜브 영역)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div id="ytx" hidden>이 영상은 여기서 재생할 수 없어요<button id="wout">▶ YouTube에서 보기</button></div></div><div id="wi"><div class="tx"><b id="wt"></b><span class="ch" id="wc"></span><span class="vw" id="wv"></span></div><button id="wback">← 홈</button></div></div><button type="button" id="relFold" aria-label="영상 목록 숨기기" aria-expanded="true">▶</button><div id="rel"></div></div>
 <div id="kw"></div><div id="ln"><h2>무엇을 할까요?</h2><div class="lr"><button id="lnY"><img src="./icon_youtube.png" alt="">유튜브</button><button id="lnK"><img src="./icon_karaoke.png" alt="">노래방</button></div></div>
@@ -185,12 +186,18 @@ chips();st.mode='y';homeFeed();applyRelFold();
 $('lnY').onclick=()=>{$('ln').hidden=true;mode('y')};$('lnK').onclick=()=>{$('ln').hidden=true;mode('k')};
 </script><script>
 // ===== M3: 내비 사이드 패널 =====
-(function(){const LK='m3nav';let S={open:1,w:.45};try{Object.assign(S,JSON.parse(localStorage[LK]||'{}'))}catch(e){}
-const nv=document.getElementById('nv'),nt=document.getElementById('nt'),dv=document.getElementById('dv');let fr=null;
+(function(){const LK='m3nav';let S={open:1,w:.45,prov:'tmap'};try{Object.assign(S,JSON.parse(localStorage[LK]||'{}'))}catch(e){}
+if(/[?&]map=naver\b/.test(location.search))S.prov='naver';else if(/[?&]map=tmap\b/.test(location.search))S.prov='tmap';
+const nm=document.getElementById('nmap'),nv=document.getElementById('nv'),nt=document.getElementById('nt'),dv=document.getElementById('dv');let fr=null;
 const save=()=>{try{localStorage[LK]=JSON.stringify(S)}catch(e){}};
 const post=m=>{try{fr&&fr.contentWindow&&fr.contentWindow.postMessage(m,'*')}catch(e){}};
 function lay(){const W=innerWidth;const px=S.open?Math.round(Math.min(.75,Math.max(.25,S.w))*W):0;document.documentElement.style.setProperty('--nw',px+'px');document.body.classList.toggle('nh',!S.open);nt.textContent=S.open?'◀':'▶';nt.setAttribute('aria-label',S.open?'내비 숨기기':'내비 열기');window.dispatchEvent(new Event('m3resize'))}
-function ensure(){if(fr)return;fr=document.createElement('iframe');fr.allow='geolocation; autoplay; microphone';fr.src='nav.html?embed=1&v=n9'+(S.open?'':'&hidden=1');fr.onload=()=>post(S.open?{type:'navShown'}:{type:'navHidden'});nv.appendChild(fr)}
+function ensure(){if(fr)return;fr=document.createElement('iframe');fr.allow='geolocation; autoplay; microphone';fr.src='nav.html?embed=1&v=n11'+(S.prov==='naver'?'&prov=naver':'')+(S.open?'':'&hidden=1');fr.onload=()=>post(S.open?{type:'navShown'}:{type:'navHidden'});nv.appendChild(fr)}
+// N11: 지도 선택(TMAP/네이버). 기본 TMAP 유지, 선택은 localStorage m3nav.prov에 저장
+function provUI(){nm.textContent=S.prov==='naver'?'N':'T';nm.className=S.prov==='naver'?'nv':'tm';nm.setAttribute('aria-label','지도 선택: 현재 '+(S.prov==='naver'?'네이버':'TMAP'))}
+function setProv(p){p=p==='naver'?'naver':'tmap';if(p===S.prov&&fr)return;S.prov=p;save();provUI();if(fr){fr.remove();fr=null}if(S.open)ensure()}
+nm.onclick=()=>setProv(S.prov==='naver'?'tmap':'naver');provUI();
+addEventListener('message',e=>{const d=e.data;if(d&&d.type==='navProv'&&fr&&e.source===fr.contentWindow)setProv(d.prov)});
 function set(o){S.open=o?1:0;save();lay();if(o){ensure();post({type:'navShown'})}else post({type:'navHidden'})}
 nt.onclick=()=>set(!S.open);
 let drag=0;dv.addEventListener('pointerdown',e=>{drag=1;dv.setPointerCapture(e.pointerId);document.body.classList.add('dragging')});
@@ -199,5 +206,5 @@ const end=()=>{if(!drag)return;drag=0;document.body.classList.remove('dragging')
 addEventListener('resize',lay);lay();if(S.open)ensure();
 // N9: 미디어 화면 어디를 터치해도 내비(iframe) 음성 잠금 해제 — 유튜브 쪽만 터치해도 안내 음성이 나오도록
 let unT=0;['pointerdown','touchstart','keydown'].forEach(ev=>addEventListener(ev,()=>{const n=Date.now();if(n-unT<1500)return;unT=n;post({type:'navUnlock'})},{capture:true,passive:true}));
-window.M3={set,get state(){return Object.assign({},S)},get frame(){return fr}};})();
+window.M3={set,setProv,get state(){return Object.assign({},S)},get frame(){return fr}};})();
 </script></body></html>
