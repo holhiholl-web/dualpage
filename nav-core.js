@@ -200,7 +200,7 @@
         let tt = toNum(p.turnType); const bm = /^B(\d)$/.exec(p.pointType || ''); // 실제 TMAP: 경유지는 pointType B1~B5, turnType 0/없음
         if (bm && !(tt >= 184 && tt <= 189)) tt = 184 + Number(bm[1]);
         if (bm && guides.some(x => x.pointType === p.pointType)) continue; // 끝에 중복으로 오는 경유지 점 무시
-        guides.push({ lat, lon, at: cumNow(), turnType: tt, pointType: p.pointType || 'N', text: p.description || '', road: p.nextRoadName || '', name: p.name || '', limit: explicitLimit(p) || (tt === 191 ? textLimit(p.description) : null), camera: /과속.{0,8}단속|단속.{0,8}카메라|속도.{0,8}카메라/.test((p.description || '') + ' ' + (p.name || '')) });
+        guides.push({ lat, lon, at: cumNow(), turnType: tt, pointType: p.pointType || 'N', text: p.description || '', road: p.nextRoadName || '', name: p.name || '', limit: explicitLimit(p) || (tt === 191 ? textLimit(p.description) : null), camera: /단속|카메라/.test((p.description || '') + ' ' + (p.name || '') + ' ' + (p.nextRoadName || '')) });
       }
     }
     if (path.length < 2) throw new ApiError('EMPTY_ROUTE', '경로 좌표가 부족합니다.');

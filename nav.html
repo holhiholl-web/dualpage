@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>N8 아이카 내비</title>
+<title>N9 아이카 내비</title>
 <style>
 :root{--bg:#0b0d10;--pn:rgba(20,23,28,.94);--pn2:#1f242c;--ln:rgba(255,255,255,.1);--tx:#eef1f5;--mu:#97a0ae;--ac:#3d7bff;--ok:#16a865;--gr:#0f9d58;--rd:#ff4757;--or:#ff9f1a;--r:.8rem;--bbh:clamp(2.9rem,12vh,4.2rem);--spd:clamp(2.6rem,11vw,4.2rem)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -196,7 +196,7 @@ body.guiding #toast{top:auto;bottom:calc(var(--bbh) + .6rem)}
 <div id="toast" class="glass" role="alert"><div class="tx" id="toastT"></div><div id="toastB" style="display:flex;gap:.35rem"></div></div>
 <div id="cf" role="alertdialog" aria-modal="true"><div class="box glass"><p id="cfT"></p><button class="btn" id="cfN">취소</button><button class="btn dan" id="cfY">확인</button></div></div>
 <div id="arr" class="glass" role="alertdialog"><div style="font-size:2.6rem">🏁</div><h3 id="arrT">목적지에 도착했습니다</h3><button class="btn pri" id="arrOk">안내 종료</button></div>
-<div id="ver">N8</div>
+<div id="ver">N9</div>
 <script>
 const HG=(()=>{const CHO='ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ',JUNG='ㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ',JONG=' ㄱㄲㄳㄴㄵㄶㄷㄹㄺㄻㄼㄽㄾㄿㅀㅁㅂㅄㅅㅆㅇㅈㅊㅋㅌㅍㅎ';
  const VC={'ㅗㅏ':'ㅘ','ㅗㅐ':'ㅙ','ㅗㅣ':'ㅚ','ㅜㅓ':'ㅝ','ㅜㅔ':'ㅞ','ㅜㅣ':'ㅟ','ㅡㅣ':'ㅢ'};
@@ -269,33 +269,138 @@ function errToast(e, retry) {
 }
 function confirmBox(text, yes) { $('cfT').textContent = text; $('cf').classList.add('on'); $('cfY').focus(); $('cfY').onclick = () => { $('cf').classList.remove('on'); yes(); }; $('cfN').onclick = () => $('cf').classList.remove('on'); }
 function say(t) { $('live').textContent = t; }
-// ---------- N8: Korean speech. Never pause/change media-player audio. ----------
-const VOICE = { ok: 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined', failed: false, last: '', lastAt: 0, busyUntil: 0, priority: 0 };
-function voiceReady() { return ST.voice && S.voiceGest && VOICE.ok && !VOICE.failed; }
+// ---------- N9: 음성 안내 — 브라우저 TTS 우선, 안 되면 내장 한국어 음성파일(voice/ko-voice.mp3) ----------
+// 헤드유닛 WebView는 speechSynthesis가 있어도 소리가 안 나거나 한국어 음성이 없는 경우가 많다.
+// 1.5초 안에 onstart가 없으면 그 문장은 음성파일로 재생하고, 이후에도 음성파일을 쓴다(7일 기억, 음성 테스트로 재검사).
+const VOICE = { ok: 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined', ttsDead: false, ttsWhy: '', ttsOkAt: 0, last: '', lastAt: 0, busyUntil: 0, priority: 0, seq: 0, engine: '', result: '' };
+try { const d = JSON.parse(localStorage.n3voiceTts || 'null'); if (d && d.dead && Date.now() - d.at < 7 * 864e5) { VOICE.ttsDead = true; VOICE.ttsWhy = d.why || ''; } } catch (e) { }
+if (!VOICE.ok) { VOICE.ttsDead = true; VOICE.ttsWhy = '이 브라우저에 음성합성(TTS) 없음'; }
+function markTtsDead(why) { if (VOICE.ttsOkAt) return; VOICE.ttsDead = true; VOICE.ttsWhy = why; try { localStorage.n3voiceTts = JSON.stringify({ dead: true, why, at: Date.now() }); } catch (e) { } log('TTS 사용 불가 → 음성파일: ' + why); clipLoad(); }
+function koVoice() { try { const vs = speechSynthesis.getVoices() || []; return { n: vs.length, ko: vs.find(v => /^ko(?:[-_]|$)/i.test(v.lang)) || null }; } catch (e) { return { n: 0, ko: null }; } }
+if (VOICE.ok) try { const chk = () => { const k = koVoice(); if (k.n && !k.ko) markTtsDead('한국어 TTS 음성 없음 (음성 ' + k.n + '개)'); }; speechSynthesis.addEventListener ? speechSynthesis.addEventListener('voiceschanged', chk) : (speechSynthesis.onvoiceschanged = chk); setTimeout(chk, 1500); } catch (e) { }
+function gestureOK() { return S.voiceGest || !!(navigator.userActivation && navigator.userActivation.hasBeenActive); }
+function voiceReady() { return !!ST.voice && gestureOK(); }
 function speak(text, force, priority = 2) {
   say(text); if (!text || !voiceReady()) return false;
-  if (!force && text === VOICE.last && Date.now() - VOICE.lastAt < 4000) return false;
-  // Drop low-priority safety chatter during a turn. Turn prompts may replace an old prompt.
-  if (!force && speechSynthesis.speaking && Date.now() < VOICE.busyUntil && priority < VOICE.priority) return false;
+  const now = Date.now();
+  if (!force && text === VOICE.last && now - VOICE.lastAt < 4000) return false;
+  // 회전 안내 중에는 낮은 우선순위(과속·안전) 음성을 버림. 회전 안내는 이전 안내를 대체.
+  if (!force && now < VOICE.busyUntil && priority < VOICE.priority) return false;
+  const id = ++VOICE.seq; VOICE.last = text; VOICE.lastAt = now; VOICE.priority = priority; VOICE.busyUntil = now + 6000;
+  if (ST.voiceEngine !== 'clip' && !VOICE.ttsDead) ttsSpeak(text, id); else clipSpeak(text, id);
+  return true;
+}
+function ttsSpeak(text, id) {
+  let started = false, wd = 0; const me = { text, id, done: false }; VOICE.pend = (VOICE.pend || []).filter(x => !x.done && Date.now() - x.id_t < 4000).concat([me]); me.id_t = Date.now();
+  // 시작 못 한 안내(앞 문장 포함)를 순서대로 음성파일로 재생
+  const fallback = why => { if (started || me.done) return; clearTimeout(wd); if (VOICE.ttsOkAt && VOICE.seq !== id) { me.done = true; return; } try { speechSynthesis.cancel(); } catch (e) { } if (why) markTtsDead(why); const list = (VOICE.pend || []).filter(x => !x.done); VOICE.pend = []; list.forEach(x => { x.done = true; clipSpeak(x.text, x.id); }); };
   try {
     const u = new SpeechSynthesisUtterance(text); u.lang = 'ko-KR'; u.volume = ST.vol; u.rate = 1.08;
-    const v = speechSynthesis.getVoices().find(v => /^ko(?:-|_)/i.test(v.lang)); if (v) u.voice = v;
-    u.onerror = ev => { if (ev.error === 'not-allowed') { S.voiceGest = false; VOICE.busyUntil = 0; return; }
-      if (ev.error && !['interrupted', 'canceled'].includes(ev.error)) { VOICE.failed = true; toast('음성 안내를 재생할 수 없습니다.', '화면 안내로 계속합니다. 스피커를 다시 눌러 보세요.', null, true); } };
-    u.onend = () => { if (VOICE.last === text) VOICE.busyUntil = 0; };
-    speechSynthesis.cancel(); if (speechSynthesis.resume) speechSynthesis.resume(); speechSynthesis.speak(u);
-    VOICE.last = text; VOICE.lastAt = Date.now(); VOICE.priority = priority; VOICE.busyUntil = Date.now() + 7000; return true;
-  } catch (e) { VOICE.failed = true; return false; }
+    const k = koVoice(); if (k.ko) u.voice = k.ko;
+    u.onstart = () => { started = true; me.done = true; clearTimeout(wd); VOICE.ttsOkAt = Date.now(); VOICE.engine = 'tts'; VOICE.result = 'TTS(브라우저 음성) 정상' + (k.ko ? ' · ' + k.ko.name : ''); };
+    u.onend = () => { if (VOICE.seq === id) VOICE.busyUntil = 0; };
+    u.onerror = ev => { const e = ev && ev.error; if (e === 'interrupted' || e === 'canceled') return; fallback(e === 'not-allowed' ? '' : 'TTS 오류: ' + (e || '알 수 없음')); };
+    speechSynthesis.cancel(); if (speechSynthesis.paused && speechSynthesis.resume) speechSynthesis.resume();
+    speechSynthesis.speak(u); if (speechSynthesis.resume) speechSynthesis.resume();
+    wd = setTimeout(() => fallback('1.5초 안에 TTS 재생 시작 안 됨'), 1500);
+  } catch (e) { fallback('TTS 예외: ' + e.message); }
+}
+// 크롬/WebView TTS 멈춤 방지: 말하는 중 주기적으로 resume
+setInterval(() => { try { if (VOICE.ok && speechSynthesis.speaking && speechSynthesis.resume) speechSynthesis.resume(); } catch (e) { } }, 5000);
+// ----- 음성파일 엔진 (WebAudio 우선, 안 되면 <audio>) -----
+const CLIP = { ctx: null, buf: null, p: null, el: null, srcs: [], why: '', timer: 0 };
+function audioCtx() { if (!CLIP.ctx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) try { CLIP.ctx = new AC(); } catch (e) { } } return CLIP.ctx; }
+function clipLoad() {
+  if (CLIP.p) return CLIP.p;
+  CLIP.p = (async () => {
+    if (!window.KO_VOICE) await new Promise(res => { const s = document.createElement('script'); s.src = './voice/ko-voice.js'; s.onload = res; s.onerror = res; document.head.appendChild(s); });
+    if (!window.KO_VOICE) { CLIP.why = '음성파일 목록(voice/ko-voice.js)을 못 받음'; CLIP.p = null; return false; }
+    const url = './' + KO_VOICE.src + '?v=' + KO_VOICE.v; const c = audioCtx();
+    if (c) try {
+      const ab = await (await fetch(url)).arrayBuffer();
+      CLIP.buf = await new Promise((res, rej) => { const r = c.decodeAudioData(ab, res, rej); if (r && r.then) r.then(res, rej); });
+      return true;
+    } catch (e) { CLIP.why = 'WebAudio 디코딩 실패'; }
+    try { CLIP.el = new Audio(url); CLIP.el.preload = 'auto'; return true; } catch (e) { CLIP.why = '오디오 재생 불가'; CLIP.p = null; return false; }
+  })();
+  return CLIP.p;
+}
+function clipStop() { clearTimeout(CLIP.timer); if (CLIP.wait) { const w = CLIP.wait; CLIP.wait = null; w(); } CLIP.srcs.forEach(s => { try { s.stop(); } catch (e) { } }); CLIP.srcs = []; if (CLIP.el) try { CLIP.el.pause(); } catch (e) { } }
+let CLIP_KEYS = null;
+function textToClips(text) {
+  const K = window.KO_VOICE && KO_VOICE.clips; if (!K) return [];
+  if (!CLIP_KEYS) CLIP_KEYS = Object.keys(K).sort((a, b) => b.length - a.length);
+  let s = String(text).replace(/^데모[.,]?\s*/, '').replace(/\s+\S+\s방면으로/g, '').replace(/(?<!\d)\.|\.(?!\d)|[,!?·]/g, ' ').replace(/\s+/g, ' ').trim();
+  const out = [];
+  while (s) {
+    const k = CLIP_KEYS.find(k => s.startsWith(k) && (s.length === k.length || s[k.length] === ' '));
+    if (k) { out.push(k); s = s.slice(k.length).trim(); } else { const i = s.indexOf(' '); s = i < 0 ? '' : s.slice(i + 1); }
+  }
+  return out;
+}
+// 음성파일은 앞 안내가 끝난 뒤 이어서 재생(최대 2개 대기). 우선순위 3(테스트)·회전 '지금'은 즉시 대체.
+function clipSpeak(text, id) {
+  const urgent = /^지금 /.test(text) || VOICE.priority >= 3;
+  CLIP.q = (CLIP.q || []).filter(x => x[0] !== text);
+  if (urgent) { CLIP.q.unshift([text, id]); clipStop(); } else CLIP.q.push([text, id]);
+  if (CLIP.q.length > 3) CLIP.q = CLIP.q.slice(-3);
+  if (!CLIP.running) clipPump();
+  return true;
+}
+async function clipPump() {
+  CLIP.running = true;
+  while (CLIP.q && CLIP.q.length) { const [t, id] = CLIP.q.shift(); const ms = await clipPlay(t, id); if (ms > 0) await new Promise(r => { CLIP.wait = r; setTimeout(r, ms + 80); }); }
+  CLIP.running = false;
+}
+async function clipPlay(text, id) {
+  const ok = await clipLoad();
+  if (!ok) { VOICE.result = '실패: ' + (CLIP.why || '음성파일 없음'); return 0; }
+  const list = ['띵'].concat(textToClips(text)); const K = KO_VOICE.clips;
+  (window.__clipLog = window.__clipLog || []).push(list.slice(1).join('+') || '띵');
+  const why = VOICE.ttsWhy ? ' (TTS: ' + VOICE.ttsWhy + ')' : '';
+  const c = CLIP.ctx;
+  if (CLIP.buf && c) {
+    if (c.state !== 'running') { try { await c.resume(); } catch (e) { } }
+    if (c.state !== 'running') { VOICE.result = '실패: 오디오가 잠김 — 화면을 한 번 터치하세요'; return 0; }
+    let t = c.currentTime + 0.03;
+    for (const k of list) { const [st, du] = K[k]; const s = c.createBufferSource(); s.buffer = CLIP.buf; const g = c.createGain(); g.gain.value = Math.max(0.05, ST.vol); s.connect(g); g.connect(c.destination); s.start(t, st, du); CLIP.srcs.push(s); t += du + 0.05; }
+    const ms = (t - c.currentTime) * 1000; VOICE.busyUntil = Date.now() + ms; VOICE.engine = 'clip'; VOICE.result = '음성파일 재생(WebAudio)' + why; return ms;
+  }
+  const el = CLIP.el; if (!el) { VOICE.result = '실패: 오디오 없음'; return 0; }
+  el.volume = Math.max(0.05, ST.vol); let i = 0;
+  let total = 0; list.forEach(k => total += K[k][1] * 1000 + 60);
+  const next = () => { if (i >= list.length) { el.pause(); VOICE.busyUntil = 0; return; } const [st, du] = K[list[i++]]; try { el.currentTime = st; } catch (e) { } const p = el.play(); if (p && p.catch) p.catch(e => { VOICE.result = '실패: 자동재생 차단 — 화면을 한 번 터치하세요'; }); CLIP.timer = setTimeout(next, du * 1000 + 60); };
+  next(); VOICE.engine = 'clip'; VOICE.result = '음성파일 재생(audio)' + why; return total;
+}
+function unlockAudio() {
+  const c = audioCtx();
+  if (c) { if (c.state !== 'running') { try { const p = c.resume(); if (p && p.catch) p.catch(() => { }); } catch (e) { } } try { const b = c.createBuffer(1, 1, 22050), s = c.createBufferSource(); s.buffer = b; s.connect(c.destination); s.start(0); } catch (e) { } }
+  if (CLIP.el && CLIP.el.paused && !CLIP.elPrimed) { CLIP.elPrimed = 1; try { CLIP.el.muted = true; const p = CLIP.el.play(); const done = () => { try { CLIP.el.pause(); } catch (e) { } CLIP.el.muted = false; }; p && p.then ? p.then(done, done) : done(); } catch (e) { } }
 }
 function unlockSpeech() {
-  if (S.voiceGest) return; S.voiceGest = true; VOICE.failed = false;
-  if (ST.voice && VOICE.ok) try {
-    // Must invoke speak *inside* the first touch, not merely remember a flag.
+  unlockAudio(); if (VOICE.ttsDead || ST.voiceEngine === 'clip') clipLoad();
+  if (S.voiceGest) return; S.voiceGest = true;
+  if (ST.voice && VOICE.ok && !VOICE.ttsDead) try {
+    // 첫 터치 안에서 실제 speak를 한 번 호출해야 WebView가 이후 음성을 허용
     const u = new SpeechSynthesisUtterance(' '); u.lang = 'ko-KR'; u.volume = 0;
     if (speechSynthesis.resume) speechSynthesis.resume(); speechSynthesis.speak(u);
   } catch (e) { }
 }
 ['pointerdown', 'touchstart', 'keydown'].forEach(ev => addEventListener(ev, unlockSpeech, { capture: true, passive: true }));
+// 🔊 음성 테스트: TTS를 다시 검사하고 어떤 엔진으로 나왔는지 표시
+function voiceTest() {
+  unlockSpeech(); if (!ST.voice) { ST.voice = true; save(); voiceUI(); }
+  if (ST.voiceEngine !== 'clip' && VOICE.ok) { VOICE.ttsDead = false; VOICE.ttsWhy = ''; VOICE.ttsOkAt = 0; try { localStorage.removeItem('n3voiceTts'); } catch (e) { } }
+  VOICE.result = ''; const el = $('vtRes'); if (el) el.textContent = '🔊 테스트 중…';
+  const k = VOICE.ok ? koVoice() : { n: 0, ko: null };
+  speak('음성 안내 테스트입니다. 300미터 앞에서 우회전입니다.', true, 3);
+  setTimeout(() => {
+    const r = VOICE.result || (gestureOK() ? '실패: 재생 결과 없음' : '실패: 화면 터치 전');
+    const info = 'TTS ' + (VOICE.ok ? '있음 · 음성 ' + k.n + '개 · 한국어 ' + (k.ko ? k.ko.name : '없음') : '없음');
+    const t = (/^실패/.test(r) ? '❌ ' : '✅ ') + r; const e2 = $('vtRes'); if (e2) e2.textContent = t + ' — ' + info;
+    toast(t, info, null, /^실패/.test(r), 8000); log('음성 테스트: ' + r + ' / ' + info);
+  }, 2600);
+}
 // Recognition is optional; a failed/unsupported mic leaves the Korean keypad usable.
 let recognition = null, micTimer = null;
 function micUI(on) { $('kbMic').classList.toggle('on', on); $('kbMic').textContent = on ? '⏹' : '🎤'; $('kbMic').setAttribute('aria-pressed', String(on)); $('kbMic').setAttribute('aria-label', on ? '음성검색 중지' : '목적지 음성검색'); }
@@ -317,7 +422,7 @@ function voiceSearch() {
       toast(ev.error === 'not-allowed' || ev.error === 'service-not-allowed' ? '마이크 권한을 허용해 주세요.' : ev.error === 'no-speech' ? '음성을 듣지 못했습니다.' : '음성검색을 사용할 수 없습니다.', '키패드로도 입력할 수 있습니다.'); };
     r.onend = () => { if (recognition === r) { recognition = null; clearTimeout(micTimer); micUI(false); } };
     // Stop only our TTS while listening; do not touch YouTube/karaoke playback.
-    if (VOICE.ok) speechSynthesis.cancel(); r.start(); micUI(true); say('목적지를 말씀하세요.'); micTimer = setTimeout(stopRecognition, 12000);
+    try { if (VOICE.ok) speechSynthesis.cancel(); clipStop(); } catch (e) { } r.start(); micUI(true); say('목적지를 말씀하세요.'); micTimer = setTimeout(stopRecognition, 12000);
   } catch (e) { stopRecognition(); toast('음성검색을 사용할 수 없습니다.', '키패드로 입력하세요.'); }
 }
 $('kbMic').onclick = voiceSearch;
@@ -800,6 +905,7 @@ function startGuide(sim) {
   S.route = r; S.guide = new C.Guidance(r); S.off.reset(); if (S.smoother) S.smoother.reset(); S.alerts.clear(); S.jam = null; S.demoTunnel = null; S.rerouteAt = 0; laneOff(); hideToast();
   document.body.classList.remove('rp', 'sp', 'kb'); S.follow = true; document.body.classList.remove('free'); setOverview(false);
   setNav('driving'); redraw(); log('안내 시작' + (sim ? ' (모의 주행)' : '') + ' · ' + C.fmtDist(r.distance), sim || r.demo);
+  if (VOICE.ttsDead || ST.voiceEngine === 'clip') clipLoad();
   speak((sim ? '모의 주행을 시작합니다. ' : '') + '경로 안내를 시작합니다. 총 ' + C.fmtDistSpeech(r.distance) + ', ' + C.fmtDur(r.time) + ' 걸립니다.');
   ui(); if (sim) simStart(); else { tickGuide(); camera(true); }
   hud();
@@ -851,7 +957,7 @@ function simEvent(id) {
   switch (id) {
     case 'left': case 'right': { const x = g(id === 'left' ? ['left', 'sharpleft', 'slightleft', 'keepleft'] : ['right', 'sharpright', 'slightright', 'keepright']); if (!x) { toast('이 경로에 ' + ev.label + ' 지점이 없습니다.'); return false; } simJump(x.at - 270); break; }
     case 'lane': { const x = g([...C.TURN_KINDS]); if (x) simJump(x.at - 450); laneOn(S.gu && S.gu.next); speak('차로 안내는 데모입니다.'); break; }
-    case 'camera': { const at = s.along + 600; S.alerts.set('cam', { ic: '📷', t: '과속단속 {d} 앞 · 제한 60', from: at, at, limit: 60, demo: true, cls: 'red', src: '데모 카메라 이벤트 · 실제 단속정보 아님' }); speak('600미터 앞 과속단속 구간입니다. 데모 안내입니다.'); hud(); break; }
+    case 'camera': { const at = s.along + 600; S.alerts.set('cam', { ic: '📷', t: '과속단속 {d} 앞 · 제한 60', from: at, at, limit: 60, demo: true, cls: 'red', src: '데모 카메라 이벤트 · 실제 단속정보 아님' }); speak('600미터 앞 과속단속 카메라, 제한속도 60입니다. 데모 안내입니다.'); hud(); break; }
     case 'jam': { S.jam = { from: s.along + 250, to: Math.min(r.length, s.along + 1600), extra: 240 }; S.alerts.set('jam', { ic: '🚗', t: '전방 정체 {d} 앞 · +4분', from: S.jam.from, at: S.jam.to, demo: true, src: '데모 교통' }); speak('전방에 정체 구간이 있습니다. 데모 안내입니다.'); redraw(); hud(); break; }
     case 'tunnel': { const t = r.tunnels.find(t => t.to > s.along + 50) || r.tunnels[0]; if (t) simJump(t.from - 120); else { S.demoTunnel = { from: s.along + 120, to: Math.min(r.length - 50, s.along + 720) }; S.alerts.set('dtun', { ic: '🚇', t: '터널 {d} 앞', from: S.demoTunnel.from, at: S.demoTunnel.to, demo: true, cls: 'gray' }); hud(); } break; }
     case 'offroute': s.lat = 95; s.latStart = Date.now(); s.latBear = null; s.latUntil = Date.now() + 10000; S.rerouteAt = 0; break;
@@ -870,8 +976,11 @@ function menu() {
   B.innerHTML = '<h4>음성 안내</h4><div class="grid" id="mV"></div><h4>지도</h4><div class="grid" id="mM"></div><h4>주변 찾기 (' + (S.src === 'real' ? 'TMAP POI' : '데모') + ')</h4><div class="grid" id="mA"></div><h4>제보</h4><div class="grid" id="mR"></div><h4>위치</h4><div class="grid" id="mG"></div><h4>즐겨찾기 · 테스트</h4><div class="grid" id="mF"></div><h4>기능 가용성 (실제 / 데모)</h4><div id="mT"></div>';
   const add = (id, t, f, on, dis, why) => { const b = mk(t, t, f); if (on) b.classList.add('pri'); if (dis) { b.disabled = true; b.title = why || ''; } $(id).appendChild(b); if (dis && why) { const s = document.createElement('div'); s.style.cssText = 'width:100%;font-size:.75rem;color:var(--mu)'; s.textContent = '↳ ' + why; $(id).appendChild(s); } };
   add('mV', ST.voice ? '🔊 음성 켜짐' : '🔇 음성 꺼짐', () => { toggleVoice(); menu(); }, ST.voice); [['작게', .35], ['보통', .7], ['크게', 1]].forEach(([t, v]) => add('mV', '음량 ' + t, () => { ST.vol = v; save(); menu(); }, ST.vol === v));
+  add('mV', '🔊 음성 테스트', () => voiceTest(), true);
+  [['auto', '엔진 자동'], ['clip', '음성파일 고정']].forEach(([k, t]) => add('mV', '음성: ' + t, () => { ST.voiceEngine = k; save(); if (k === 'clip') clipLoad(); menu(); }, (ST.voiceEngine || 'auto') === k));
+  $('mV').insertAdjacentHTML('beforeend', '<div id="vtRes" style="width:100%;font-size:.78rem;color:var(--mu)">' + esc(VOICE.result ? '최근: ' + VOICE.result : (VOICE.ttsDead ? '음성파일 사용 중 · ' + VOICE.ttsWhy : '음성 테스트를 눌러 확인하세요')) + '</div>');
   add('mV', '▶ 다음 안내 듣기', () => { const u = S.gu; const t = u && u.next ? C.phrase(u.next, u.dNext, u.stage) : '음성 안내 테스트입니다. 300미터 앞에서 우회전입니다.'; if (!ST.voice) { ST.voice = true; save(); voiceUI(); } speak(t, true); });
-  if (!VOICE.ok) $('mV').insertAdjacentHTML('beforeend', '<div style="width:100%;font-size:.75rem;color:#ffb3ba">이 브라우저는 음성 합성을 지원하지 않아 텍스트로만 안내합니다.</div>');
+  if (!VOICE.ok) $('mV').insertAdjacentHTML('beforeend', '<div style="width:100%;font-size:.75rem;color:#ffb3ba">이 브라우저는 음성 합성을 지원하지 않아 내장 음성파일로 안내합니다.</div>');
   add('mM', '일반 지도', () => { m && m.setMapType('road'); restoreGuidanceView(); }, false, !m); add('mM', '하이브리드(위성)', () => { if (m && !m.setMapType('hybrid')) toast('이 지도에서는 위성 지도를 쓸 수 없습니다.'); restoreGuidanceView(); }, false, !m || !cap.satellite, m && !cap.satellite ? '데모 지도는 위성 지도 미지원' : '');
   add('mM', ST.night ? '☀ 주간' : '🌙 야간', () => { toggleNight(); menu(); });
   [['auto', '엔진 자동'], ['vector', '벡터(3D)'], ['raster', '래스터']].forEach(([k, t]) => add('mM', t, () => { closeAll(); switchEngine(k); }, ST.engine === k, !S.jsKey, !S.jsKey && k === 'raster' ? 'TMAP 키가 연결되면 선택할 수 있습니다' : ''));
@@ -887,13 +996,13 @@ function featTable() { const m = S.map, real = S.src === 'real'; const rows = [
   ['장소 검색·주소', real ? '실제 · TMAP POI/Geocoding(프록시)' : '데모 검색'], ['자동차 경로·후보', real ? '실제 · TMAP 경로 API(추천/무료/최단 등)' : '데모 경로'], ['통행료', real ? '실제 · totalFare' : '데모'], ['유류비', '미제공(API 응답 없음)'],
   ['실시간 교통 구간', real ? 'trafficInfo=Y 요청 · 응답에 있을 때만 표시' : '데모(정체 이벤트)'], ['턴바이턴 안내', real ? '실제 · turnType/description' : '데모 경로 기반'], ['터널 구간', real ? '실제 · facilityType=2' : '데모'],
   ['제한속도·사고다발·급커브', real ? '실제 · turnType 191~194 (있을 때만)' : '-'], ['차로 안내', '데모만 (웹 API 미제공)'], ['과속단속 카메라', '응답에 명시된 경우만 안내 · 그 외 데모 이벤트'], ['사고/공사 제보', '데모만 (전송 안 함)'],
-  ['GPS·속도', '휴대폰 중계(1순위) + 브라우저 위치(사용자 요청 시)'], ['맵매칭', '경로 위 투영(웹 자체 구현)'], ['재탐색', real ? '실제 · 이탈 2회·2초 판정 후 TMAP 재요청' : '데모 경로 재생성'], ['음성 안내', VOICE.ok ? '브라우저 한국어 음성 합성' : '미지원 → 텍스트'], ['백그라운드 추적', '미지원 (화면이 켜져 있어야 함)']];
+  ['GPS·속도', '휴대폰 중계(1순위) + 브라우저 위치(사용자 요청 시)'], ['맵매칭', '경로 위 투영(웹 자체 구현)'], ['재탐색', real ? '실제 · 이탈 2회·2초 판정 후 TMAP 재요청' : '데모 경로 재생성'], ['음성 안내', (VOICE.ok && !VOICE.ttsDead ? '브라우저 TTS, 안 되면 내장 음성파일' : '내장 음성파일') + (VOICE.result ? ' · 최근: ' + VOICE.result : '')], ['백그라운드 추적', '미지원 (화면이 켜져 있어야 함)']];
   return '<table class="fa"><tr><th>기능</th><th>현재 상태</th></tr>' + rows.map(r => '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td></tr>').join('') + '</table>'; }
 async function aroundSearch(cat) { closeAll(); const p = S.fix || (S.map && S.map.getCenter()); if (!p) return; try { const res = await API().around(cat, p); S.poiMarks = res; redraw(); if (!res.length) return toast(cat + ' 검색 결과가 없습니다.'); openSearch('to'); kbClose(); const R = $('spR'); R.innerHTML = '<div class="msg" style="padding:.4rem .3rem">' + (S.src === 'demo' ? '<span class="tag demo">데모</span> ' : '<span class="tag real">TMAP</span> ') + '주변 ' + esc(cat) + ' ' + res.length + '건</div>'; res.forEach(x => R.appendChild(resRow(x))); } catch (e) { errToast(e, () => aroundSearch(cat)); } }
 function closeAll() { document.querySelectorAll('.sheet').forEach(x => x.classList.remove('on')); }
 document.querySelectorAll('[data-close]').forEach(b => b.onclick = () => $(b.dataset.close).classList.remove('on'));
 // ---------- 버튼 ----------
-function toggleVoice() { unlockSpeech(); VOICE.failed = false; ST.voice = !ST.voice; save(); voiceUI(); if (ST.voice) speak('음성 안내를 켰습니다.', true); else { try { speechSynthesis.cancel(); } catch (e) { } say('음성 안내 꺼짐'); } }
+function toggleVoice() { unlockSpeech(); ST.voice = !ST.voice; save(); voiceUI(); if (ST.voice) speak('음성 안내를 켰습니다.', true); else { try { speechSynthesis.cancel(); } catch (e) { } say('음성 안내 꺼짐'); } }
 function voiceUI() { $('bVoice').textContent = ST.voice ? '🔊' : '🔇'; $('bVoice').classList.toggle('on', ST.voice); $('bVoice').setAttribute('aria-pressed', ST.voice); $('bVoice').setAttribute('aria-label', ST.voice ? '음성 안내 끄기' : '음성 안내 켜기'); }
 function toggleNight() { ST.night = !ST.night; save(); S.map && S.map.setNight(ST.night); document.body.classList.toggle('night', ST.night); $('bNight').textContent = ST.night ? '☀' : '🌙'; restoreGuidanceView(); }
 function quick() { const q = $('quick'); q.innerHTML = ''; const go = p => { S.to = p; S.editing = 'to'; findRoutes(); };
@@ -925,7 +1034,7 @@ addEventListener('keydown', e => { if (e.key === 'Escape') { if ($('cf').classLi
 function ui() { const g = !!S.guide; document.body.classList.toggle('guiding', g); $('home').style.display = g || document.body.classList.contains('sp') || document.body.classList.contains('rp') ? 'none' : 'flex'; $('bDir').setAttribute('aria-label', '지도 방향: ' + ((g ? ST.dirGuide : ST.dirFree) === 'heading' ? '진행방향 위' : '북쪽 위')); }
 // ---------- 임베드(media.html) API: ?embed=1&hidden=1, 메시지 navShown / navHidden / resize ----------
 function shown() { document.body.classList.remove('hiddenNav'); initMap().then(() => { scale(); camera(true); redraw(); }); }
-if (window.NAVEMBED) addEventListener('message', e => { const d = e.data || {}; if (d.type === 'navHidden') { window.NAVHIDDEN = 1; document.body.classList.add('hiddenNav'); try { stopCamLoop(); } catch (x) { } try { relayModal(false); } catch (x) { } hideToast(); gpsBanner(); }
+if (window.NAVEMBED) addEventListener('message', e => { const d = e.data || {}; if (d.type === 'navUnlock') { unlockSpeech(); return; } if (d.type === 'navHidden') { window.NAVHIDDEN = 1; document.body.classList.add('hiddenNav'); try { stopCamLoop(); } catch (x) { } try { relayModal(false); } catch (x) { } hideToast(); gpsBanner(); }
   else if (d.type === 'navShown') { window.NAVHIDDEN = 0; shown(); clearTimeout(window.__qrT); window.__qrT = setTimeout(() => { const R = window.RELAY; const ok = R && R.last && Date.now() - R.lastRx < 20000; if (!window.NAVHIDDEN && !ok && !S.sim) relayModal(true); }, d.wait == null ? 2500 : d.wait); gpsBanner(); }
   else if (d.type === 'resize') { scale(); camera(true); } });
 window.addEventListener('error', e => { LOG.push({ t: Date.now(), text: 'JS오류: ' + C.redact(e.message, [S.jsKey]) }); });

@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>M6 아이카 미디어 · 유튜브 / 노래방</title>
+<title>M7 아이카 미디어 · 유튜브 / 노래방</title>
 <style>
 :root{--bg:#0f0f0f;--pn:#0f0f0f;--pn2:#272727;--ln:rgba(255,255,255,.1);--tx:#f1f1f1;--mu:#aaa;--ac:#ff3d7f;--ac2:#7b5cff;--r:12px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font-family:Roboto,"Noto Sans KR","Apple SD Gothic Neo",system-ui,sans-serif;overflow:hidden;user-select:none}
@@ -190,12 +190,14 @@ const nv=document.getElementById('nv'),nt=document.getElementById('nt'),dv=docum
 const save=()=>{try{localStorage[LK]=JSON.stringify(S)}catch(e){}};
 const post=m=>{try{fr&&fr.contentWindow&&fr.contentWindow.postMessage(m,'*')}catch(e){}};
 function lay(){const W=innerWidth;const px=S.open?Math.round(Math.min(.75,Math.max(.25,S.w))*W):0;document.documentElement.style.setProperty('--nw',px+'px');document.body.classList.toggle('nh',!S.open);nt.textContent=S.open?'◀':'▶';nt.setAttribute('aria-label',S.open?'내비 숨기기':'내비 열기');window.dispatchEvent(new Event('m3resize'))}
-function ensure(){if(fr)return;fr=document.createElement('iframe');fr.allow='geolocation; autoplay; microphone';fr.src='nav.html?embed=1&v=n8'+(S.open?'':'&hidden=1');fr.onload=()=>post(S.open?{type:'navShown'}:{type:'navHidden'});nv.appendChild(fr)}
+function ensure(){if(fr)return;fr=document.createElement('iframe');fr.allow='geolocation; autoplay; microphone';fr.src='nav.html?embed=1&v=n9'+(S.open?'':'&hidden=1');fr.onload=()=>post(S.open?{type:'navShown'}:{type:'navHidden'});nv.appendChild(fr)}
 function set(o){S.open=o?1:0;save();lay();if(o){ensure();post({type:'navShown'})}else post({type:'navHidden'})}
 nt.onclick=()=>set(!S.open);
 let drag=0;dv.addEventListener('pointerdown',e=>{drag=1;dv.setPointerCapture(e.pointerId);document.body.classList.add('dragging')});
 dv.addEventListener('pointermove',e=>{if(!drag)return;S.w=Math.min(.75,Math.max(.25,e.clientX/innerWidth));lay()});
 const end=()=>{if(!drag)return;drag=0;document.body.classList.remove('dragging');save();post({type:'resize'})};dv.addEventListener('pointerup',end);dv.addEventListener('pointercancel',end);
 addEventListener('resize',lay);lay();if(S.open)ensure();
+// N9: 미디어 화면 어디를 터치해도 내비(iframe) 음성 잠금 해제 — 유튜브 쪽만 터치해도 안내 음성이 나오도록
+let unT=0;['pointerdown','touchstart','keydown'].forEach(ev=>addEventListener(ev,()=>{const n=Date.now();if(n-unT<1500)return;unT=n;post({type:'navUnlock'})},{capture:true,passive:true}));
 window.M3={set,get state(){return Object.assign({},S)},get frame(){return fr}};})();
 </script></body></html>
